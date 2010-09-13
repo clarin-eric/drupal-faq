@@ -218,7 +218,7 @@ function faq_form(&$node, &$param) {
   );
 
   // Detailed question.
-  if (variable_get('faq_question_long_form', 1)) {
+  if (variable_get('faq_question_long_form', 1) || variable_get('faq_question_length', 'short') == 'long') {
     $form['detailed_question'] = array(
       '#type' => 'textarea',
       '#title' => t('Question details (optional)'),
