@@ -1461,7 +1461,7 @@ function theme_faq_page($content = '', $answers = '', $description = NULL) {
  */
 function theme_faq_draggable_question_order_table($form) {
   drupal_add_tabledrag('question-sort', 'order', 'sibling', 'sort');
-  $header = array('', 'Question', '', 'Sort');
+  $header = array('', t('Question'), '', t('Sort'));
   foreach (element_children($form) as $key) {
     // Add class to group weight fields for drag and drop.
     $form[$key]['sort']['#attributes']['class'] = 'sort';
