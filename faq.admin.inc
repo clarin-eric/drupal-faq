@@ -117,6 +117,12 @@ function faq_questions_settings_form() {
     '#default_value' => variable_get('faq_question_length', 'short'),
   );
 
+  $form['faq_questions_misc']['faq_question_long_form'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Allow long question text to be configured'),
+    '#default_value' => variable_get('faq_question_long_form', 1),
+  );
+
   $form['faq_questions_misc']['faq_hide_qa_accordion'] = array(
     '#type' => 'checkbox',
     '#title' => t('Use accordion effect for "opens/hides answer under question" layout'),

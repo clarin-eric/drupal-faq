@@ -218,14 +218,16 @@ function faq_form(&$node, &$param) {
   );
 
   // Detailed question.
-  $form['detailed_question'] = array(
-    '#type' => 'textarea',
-    '#title' => t('Question details (optional)'),
-    '#default_value' => $node->detailed_question,
-    '#weight' => -1,
-    '#rows' => 3,
-    '#description' => t('Longer question text.  This will be displayed in all layouts where the answer appears, in addition to the shorter question text.'),
-  );
+  if (variable_get('faq_question_long_form', 1)) {
+    $form['detailed_question'] = array(
+      '#type' => 'textarea',
+      '#title' => t('Question details (optional)'),
+      '#default_value' => $node->detailed_question,
+      '#weight' => -1,
+      '#rows' => 3,
+      '#description' => t('Longer question text.  This will be displayed in all layouts where the answer appears, in addition to the shorter question text.'),
+    );
+  }
 
   // Answer.
   if (!empty($type->body_label)) {
