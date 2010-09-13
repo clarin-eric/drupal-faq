@@ -1232,6 +1232,9 @@ function faq_get_child_categories_faqs($term, $theme_function, $default_weight, 
 
   $list = taxonomy_get_children($term->tid);
 
+  if (!is_array($list)) {
+    return '';
+  }
   foreach ($list as $tid => $child_term) {
     $child_term->depth = $term->depth + 1;
 
