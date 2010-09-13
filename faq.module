@@ -352,7 +352,7 @@ function faq_view($node, $teaser = FALSE, $page = FALSE) {
  */
 function faq_page($tid = 0, $faq_display = '', $category_display = '') {
   if (module_exists('pathauto')) {
-    _pathauto_include();
+    module_load_include('inc', 'pathauto');
   }
 
   // Things to provide translations for.
@@ -880,7 +880,7 @@ function faq_random_highlights_block($num = 5) {
  */
 function _get_indented_faq_terms($vid, $tid) {
   if (module_exists('pathauto')) {
-    _pathauto_include();
+    module_load_include('inc', 'pathauto');
   }
 
   $display_faq_count = variable_get('faq_count', FALSE);
