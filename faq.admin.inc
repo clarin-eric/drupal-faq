@@ -290,7 +290,7 @@ function faq_categories_settings_form() {
         '#type' => 'checkboxes',
         '#title' => t('Omit vocabulary'),
         '#description' => t('Terms from these vocabularies will be <em>excluded</em> from the FAQ pages.'),
-        '#default_value' => variable_get('faq_omit_vocabulary', 0),
+        '#default_value' => variable_get('faq_omit_vocabulary', array()),
         '#options' => $vocab_options,
         '#multiple' => TRUE,
       );
