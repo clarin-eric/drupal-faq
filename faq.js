@@ -142,10 +142,8 @@ function categories_handler(event) {
 Drupal.behaviors.initFaqModule = function (context) {
   // Hide/show answer for a question.
   var faq_hide_qa_accordion = Drupal.settings.faq.faq_hide_qa_accordion;
-  if (faq_hide_qa_accordion) {
-    $('div.faq-dd-hide-answer', context).addClass("collapsible collapsed");
-  }
-  else {
+  $('div.faq-dd-hide-answer', context).addClass("collapsible collapsed");
+  if (!faq_hide_qa_accordion) {
     $('div.faq-dd-hide-answer', context).hide();
   }
   $('div.faq-dt-hide-answer', context).click(function() {
@@ -153,11 +151,9 @@ Drupal.behaviors.initFaqModule = function (context) {
       $('div.faq-dt-hide-answer').not($(this)).removeClass('faq-qa-visible');
     }
     $(this).toggleClass('faq-qa-visible');
-    if (faq_hide_qa_accordion) {
-      $('div.faq-dd-hide-answer').not($(this).next('div.faq-dd-hide-answer')).addClass("collapsed");
-      $(this).next('div.faq-dd-hide-answer').toggleClass("collapsed");
-    }
-    else {
+    $('div.faq-dd-hide-answer').not($(this).next('div.faq-dd-hide-answer')).addClass("collapsed");
+    $(this).next('div.faq-dd-hide-answer').toggleClass("collapsed");
+    if (!faq_hide_qa_accordion) {
       $(this).next('div.faq-dd-hide-answer').slideToggle('fast', function() {
         $(this).parent().toggleClass('expanded');
       });
@@ -168,10 +164,8 @@ Drupal.behaviors.initFaqModule = function (context) {
 
   // Hide/show q/a for a category.
   var faq_category_hide_qa_accordion = Drupal.settings.faq.faq_category_hide_qa_accordion;
-  if (faq_category_hide_qa_accordion) {
-    $('div.faq-qa-hide', context).addClass("collapsible collapsed");
-  }
-  else {
+  $('div.faq-qa-hide', context).addClass("collapsible collapsed");
+  if (!faq_category_hide_qa_accordion) {
     $('div.faq-qa-hide', context).hide();
   }
   $('div.faq-qa-header .faq-header', context).click(function() {
@@ -179,11 +173,9 @@ Drupal.behaviors.initFaqModule = function (context) {
       $('div.faq-qa-header .faq-header').not($(this)).removeClass('faq-category-qa-visible');
     }
     $(this).toggleClass('faq-category-qa-visible');
-    if (faq_category_hide_qa_accordion) {
-      $('div.faq-qa-hide').not($(this).parent().next('div.faq-qa-hide')).addClass("collapsed");
-      $(this).parent().next('div.faq-qa-hide').toggleClass("collapsed");
-    }
-    else {
+    $('div.faq-qa-hide').not($(this).parent().next('div.faq-qa-hide')).addClass("collapsed");
+    $(this).parent().next('div.faq-qa-hide').toggleClass("collapsed");
+    if (!faq_category_hide_qa_accordion) {
       $(this).parent().next('div.faq-qa-hide').slideToggle('fast', function() {
         $(this).parent().toggleClass('expanded');
       });
