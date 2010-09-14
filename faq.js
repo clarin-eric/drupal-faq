@@ -149,6 +149,7 @@ Drupal.behaviors.initFaqModule = function (context) {
     $('div.faq-dd-hide-answer', context).hide();
   }
   $('div.faq-dt-hide-answer', context).click(function() {
+    $('div.faq-dt-hide-answer').not($(this)).removeClass('faq-qa-visible');
     $(this).toggleClass('faq-qa-visible');
     if (faq_hide_qa_accordion) {
       $('div.faq-dd-hide-answer').not($(this).next('div.faq-dd-hide-answer')).addClass("collapsed");
@@ -172,6 +173,7 @@ Drupal.behaviors.initFaqModule = function (context) {
     $('div.faq-qa-hide', context).hide();
   }
   $('div.faq-qa-header .faq-header', context).click(function() {
+    $('div.faq-qa-header .faq-header').not($(this)).removeClass('faq-category-qa-visible');
     $(this).toggleClass('faq-category-qa-visible');
     if (faq_category_hide_qa_accordion) {
       $('div.faq-qa-hide').not($(this).parent().next('div.faq-qa-hide')).addClass("collapsed");
