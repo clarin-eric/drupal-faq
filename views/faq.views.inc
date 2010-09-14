@@ -2,7 +2,7 @@
 // $Id$
 
 /**
- * Implementation of hook_views_data().
+ * Implements hook_views_data().
  */
 function faq_views_data() {
   // faq_questions table.

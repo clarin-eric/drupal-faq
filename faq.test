@@ -3,8 +3,7 @@
 
 /**
  * @file
- *
- * Test Faq functionality Base test class. All tests inherits this one
+ * Test FAQ functionality Base test class. All tests inherits this one.
  * Hugely based on code from the test file block.test by boombatower
  */
 
