@@ -143,12 +143,12 @@ Drupal.behaviors.initFaqModule = function (context) {
   // Hide/show answer for a question.
   var faq_hide_qa_accordion = Drupal.settings.faq.faq_hide_qa_accordion;
   if (faq_hide_qa_accordion) {
-    $('div.faq-dd-hide-answer').addClass("collapsible collapsed");
+    $('div.faq-dd-hide-answer', context).addClass("collapsible collapsed");
   }
   else {
-    $('div.faq-dd-hide-answer').hide();
+    $('div.faq-dd-hide-answer', context).hide();
   }
-  $('div.faq-dt-hide-answer').click(function() {
+  $('div.faq-dt-hide-answer', context).click(function() {
     $(this).toggleClass('faq-qa-visible');
     if (faq_hide_qa_accordion) {
       $('div.faq-dd-hide-answer').not($(this).next('div.faq-dd-hide-answer')).addClass("collapsed");
@@ -166,12 +166,12 @@ Drupal.behaviors.initFaqModule = function (context) {
   // Hide/show q/a for a category.
   var faq_category_hide_qa_accordion = Drupal.settings.faq.faq_category_hide_qa_accordion;
   if (faq_category_hide_qa_accordion) {
-    $('div.faq-qa-hide').addClass("collapsible collapsed");
+    $('div.faq-qa-hide', context).addClass("collapsible collapsed");
   }
   else {
-    $('div.faq-qa-hide').hide();
+    $('div.faq-qa-hide', context).hide();
   }
-  $('div.faq-qa-header .faq-header').click(function() {
+  $('div.faq-qa-header .faq-header', context).click(function() {
     $(this).toggleClass('faq-category-qa-visible');
     if (faq_category_hide_qa_accordion) {
       $('div.faq-qa-hide').not($(this).parent().next('div.faq-qa-hide')).addClass("collapsed");
@@ -188,11 +188,11 @@ Drupal.behaviors.initFaqModule = function (context) {
 
   // Show expand all link. 
   if (!faq_hide_qa_accordion && !faq_category_hide_qa_accordion) {
-    $('#faq-expand-all').show();
-    $('#faq-expand-all a.faq-expand-all-link').show();
+    $('#faq-expand-all', context).show();
+    $('#faq-expand-all a.faq-expand-all-link', context).show();
 
     // Add collapse link click event.
-    $('#faq-expand-all a.faq-collapse-all-link').click(function () {
+    $('#faq-expand-all a.faq-collapse-all-link', context).click(function () {
       $(this).hide();
       $('#faq-expand-all a.faq-expand-all-link').show();
       $('div.faq-qa-hide').slideUp('slow', function() {
@@ -204,7 +204,7 @@ Drupal.behaviors.initFaqModule = function (context) {
     });
 
     // Add expand link click event.
-    $('#faq-expand-all a.faq-expand-all-link').click(function () {
+    $('#faq-expand-all a.faq-expand-all-link', context).click(function () {
       $(this).hide();
       $('#faq-expand-all a.faq-collapse-all-link').show();
       $('div.faq-qa-hide').slideDown('slow', function() {
@@ -223,11 +223,11 @@ Drupal.behaviors.initFaqModule = function (context) {
   questions_top_handler();
   categories_handler();
   teaser_handler();
-  $("input[name=faq_display]").bind("click", faq_display_handler);
-  $("input[name=faq_qa_mark]").bind("click", qa_mark_handler);
-  $("input[name=faq_use_teaser]").bind("click", teaser_handler);
-  $("input[name=faq_category_display]").bind("click", categories_handler);
-  $("input[name=faq_hide_child_terms]").bind("click", child_term_handler);
+  $("input[name=faq_display]", context).bind("click", faq_display_handler);
+  $("input[name=faq_qa_mark]", context).bind("click", qa_mark_handler);
+  $("input[name=faq_use_teaser]", context).bind("click", teaser_handler);
+  $("input[name=faq_category_display]", context).bind("click", categories_handler);
+  $("input[name=faq_hide_child_terms]", context).bind("click", child_term_handler);
 
 }
 
