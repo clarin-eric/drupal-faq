@@ -8,7 +8,7 @@
  */
 
 /**
- * Implementation of hook_help().
+ * Implements hook_help().
  */
 function faq_help($path, $arg) {
 
@@ -30,7 +30,7 @@ function faq_help($path, $arg) {
 }
 
 /**
- * Implementation of hook_perm().
+ * Implements hook_perm().
  */
 function faq_perm() {
   return array('administer faq', 'view faq page', 'edit own faq', 'edit faq', 'create faq', 'administer faq order');
@@ -38,7 +38,7 @@ function faq_perm() {
 
 
 /**
- * Implementation of hook_access().
+ * Implements hook_access().
  */
 function faq_access($op, $node, $account = NULL) {
   global $user;
@@ -65,7 +65,7 @@ function faq_access($op, $node, $account = NULL) {
 }
 
 /**
- * Implementation of hook_menu().
+ * Implements hook_menu().
  */
 function faq_menu() {
   $items = array();
@@ -175,7 +175,7 @@ function faq_menu() {
 }
 
 /**
- * Implementation of hook_node_info().
+ * Implements hook_node_info().
  *
  * Defines the FAQ node/content type.
  * @return
@@ -279,7 +279,7 @@ function faq_delete(&$node) {
 }
 
 /**
- * Implementation of hook_load().
+ * Implements hook_load().
  *
  * Initialises $node->question using the value in the 'faq_questions' table.
  *
@@ -301,7 +301,7 @@ function faq_load($node) {
 }
 
 /**
- * Implementation of hook_nodeapi().
+ * Implements hook_nodeapi().
  */
 function faq_nodeapi(&$node, $op, $teaser, $page) {
   switch ($op) {
@@ -313,7 +313,7 @@ function faq_nodeapi(&$node, $op, $teaser, $page) {
 
 
 /**
- * Implementation of hook_view().
+ * Implements hook_view().
  *
  * @param $node
  *   Which node to show.
@@ -336,6 +336,16 @@ function faq_view($node, $teaser = FALSE, $page = FALSE) {
   }
 
   return $node;
+}
+
+/**
+ * Implements hook_views_api().
+ */
+function faq_views_api() {
+  return array(
+    'api' => 2,
+    'path' => drupal_get_path('module', 'faq') . '/views',
+  );
 }
 
 /**
@@ -623,7 +633,7 @@ function _display_faq_by_category($faq_display, $category_display, $term, $displ
 }
 
 /**
- * Implementation of hook_theme().
+ * Implements hook_theme().
  */
 function faq_theme() {
   $path = drupal_get_path('module', 'faq') .'/includes';
@@ -692,7 +702,7 @@ function faq_theme() {
 }
 
 /**
- * Implementation of hook_block().
+ * Implements hook_block().
  *
  * Create the code of the FAQ page providing three block types: FAQ Categories,
  * Recent FAQs and Random FAQs.
@@ -1005,7 +1015,7 @@ function faq_get_faq_list() {
 }
 
 /**
- * Implementation of hook_site_map().
+ * Implements hook_site_map().
  *
  * Not needed by the latest site_map module as it implements a _site_map_faq()
  * function itself.  Leaving this code here for now in case things change again.
@@ -1025,7 +1035,7 @@ function faq_site_map() {
  */
 
 /**
- * Implementation of hook_link_alter().
+ * Implements hook_link_alter().
  *
  * Change the term links on a node to point at the appropriate faq page.
  */
@@ -1073,7 +1083,7 @@ if (!function_exists('array_diff_key')) {
 }
 
 /**
- * Implementation of hook_term_path().
+ * Implements hook_term_path().
  */
 function faq_term_path($term) {
   return 'faq/'. $term->tid;
@@ -1295,7 +1305,7 @@ function faq_view_child_category_headers($term) {
 }
 
 /**
- * Implementation of hook_pathauto().
+ * Implements hook_pathauto().
  */
 function faq_pathauto($op) {
   switch ($op) {
@@ -1344,7 +1354,7 @@ function faq_set_breadcrumb($term = NULL) {
 }
 
 /**
- * Implementation of template_preprocess_page().
+ * Implements template_preprocess_page().
  *
  * Override the breadcrumbs for faq nodes.
  */
@@ -1370,7 +1380,7 @@ function faq_tt($string_id, $default, $language = NULL) {
 }
 
 /**
- * Implementation of hook_filter().
+ * Implements hook_filter().
  */
 function faq_filter($op, $delta = 0, $format = -1, $text = '', $cache_id = 0) {
   switch ($op) {
@@ -1407,7 +1417,7 @@ function faq_filter($op, $delta = 0, $format = -1, $text = '', $cache_id = 0) {
 }
 
 /**
- * Implementation of hook_filter_tips().
+ * Implements hook_filter_tips().
  */
 function faq_filter_tips($delta, $format, $long = FALSE) {
   switch ($delta) {
@@ -1481,3 +1491,4 @@ function theme_faq_draggable_question_order_table($form) {
   $output .= drupal_render($form);
   return $output;
 }
+
