@@ -97,7 +97,7 @@ function faq_questions_settings_form() {
   $form['faq_questions_misc']['faq_qa_mark'] = array(
     '#type' => 'checkbox',
     '#title' => t('Label questions and answers'),
-    '#description' => t('This option is only valid for the "Questions Inline" layout.  It labels all questions on the faq page with the "question label" setting and all answers with the "answer label" setting.  For example these could be set to "Q:" and "A:".'),
+    '#description' => t('This option is only valid for the "Questions Inline" and "Clicking on question takes user to answer further down the page" layouts.  It labels all questions on the faq page with the "question label" setting and all answers with the "answer label" setting.  For example these could be set to "Q:" and "A:".'),
     '#default_value' => variable_get('faq_qa_mark', FALSE),
   );
 
