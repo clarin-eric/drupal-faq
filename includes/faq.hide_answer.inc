@@ -24,7 +24,7 @@ function template_preprocess_faq_hide_answer(&$variables) {
   $nodes = array();
   $count = 0;
   foreach ($data as $node) {
-    faq_view_question($nodes[$count], $node, $this_page);
+    faq_view_question($nodes[$count], $node, $this_page, 'n'. $node->nid);
     faq_view_answer($nodes[$count], $node, array(), $teaser, $links);
     $count++;
   }

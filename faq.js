@@ -156,6 +156,10 @@ Drupal.behaviors.initFaqModule = function (context) {
     return false;
   });
 
+  // Show any question identified by a fragment
+  if (/^#\w+$/.test(document.location.hash)) {
+    $('div.faq-dt-hide-answer > ' + document.location.hash).parent().triggerHandler('click');
+  }
 
   // Hide/show q/a for a category.
   var faq_category_hide_qa_accordion = Drupal.settings.faq.faq_category_hide_qa_accordion;

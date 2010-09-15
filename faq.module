@@ -845,7 +845,7 @@ function faq_highlights_block($num = 5) {
     $node = node_prepare($node);
     if (node_access("view", $node)) {
       if ($disable_node_links) {
-        $items[] = check_plain($node->question);
+        $items[] = l($node->question, 'faq', array('fragment' => 'n'. $node->nid));
       }
       else {
         $items[] = l($node->question, 'node/'. $node->nid);
@@ -878,7 +878,7 @@ function faq_random_highlights_block($num = 5) {
     $node = node_prepare($node);
     if (node_access("view", $node)) {
       if ($disable_node_links) {
-        $items[] = check_plain($node->question);
+        $items[] = l($node->question, 'faq', array('fragment' => 'n'. $node->nid));
       }
       else {
         $items[] = l($node->question, 'node/'. $node->nid);
@@ -1111,7 +1111,7 @@ function faq_term_path($term) {
  * @param $path
  *   The path/url which the question should link to if links are disabled.
  * @param $anchor
- *   Link anchor to use in question links; for "questions top" layout.
+ *   Link anchor to use in question links.
  */
 function faq_view_question(&$data, $node, $path = NULL, $anchor = NULL) {
   $disable_node_links = variable_get('faq_disable_node_links', FALSE);
@@ -1128,7 +1128,11 @@ function faq_view_question(&$data, $node, $path = NULL, $anchor = NULL) {
       $question = '<a name="' . $anchor . '" id="' . $anchor . '">' . check_plain($node->title) .'</a>';
     }
     else {
-      $question = l($node->title, $path);
+      $options = array();
+      if ($anchor) {
+        $options['attributes'] = array('id' => $anchor);
+      }
+      $question = l($node->title, $path, $options);
     }
   }
 
