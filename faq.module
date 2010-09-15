@@ -445,7 +445,7 @@ function faq_page($tid = 0, $faq_display = '', $category_display = '') {
     $data = array();
     while ($row = db_fetch_object($result)) {
       $node = node_load($row->nid);
-      if (node_access("view", $node)) {
+      if (node_access('view', $node)) {
         $data[] = $node;
       }
     }
@@ -582,7 +582,7 @@ function _display_faq_by_category($faq_display, $category_display, $term, $displ
   $data = array();
   while ($row = db_fetch_object($result)) {
     $node = node_load($row->nid);
-    if (node_access("view", $node)) {
+    if (node_access('view', $node)) {
       $data[] = $node;
     }
   }
@@ -843,7 +843,7 @@ function faq_highlights_block($num = 5) {
   while ($row = db_fetch_object($result)) {
     $node = node_load(array('nid' => $row->nid));
     $node = node_prepare($node);
-    if (node_access("view", $node)) {
+    if (node_access('view', $node)) {
       if ($disable_node_links) {
         $items[] = l($node->question, 'faq', array('fragment' => 'n'. $node->nid));
       }
@@ -876,7 +876,7 @@ function faq_random_highlights_block($num = 5) {
   while ($row = db_fetch_object($result)) {
     $node = node_load(array('nid' => $row->nid));
     $node = node_prepare($node);
-    if (node_access("view", $node)) {
+    if (node_access('view', $node)) {
       if ($disable_node_links) {
         $items[] = l($node->question, 'faq', array('fragment' => 'n'. $node->nid));
       }
@@ -1018,7 +1018,7 @@ function faq_get_faq_list() {
   }
   while ($row = db_fetch_object($result)) {
     $node = node_load($row->nid);
-    if (node_access("view", $node)) {
+    if (node_access('view', $node)) {
       $items[] = l($node->question, "node/$node->nid");
     }
   }
@@ -1275,7 +1275,7 @@ function faq_get_child_categories_faqs($term, $theme_function, $default_weight, 
       $data = array();
       while ($row = db_fetch_object($result)) {
         $node = node_load($row->nid);
-        if (node_access("view", $node)) {
+        if (node_access('view', $node)) {
           $data[] = $node;
         }
       }
