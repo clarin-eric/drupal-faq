@@ -1364,7 +1364,7 @@ function faq_set_breadcrumb($term = NULL) {
       }
     }
     $breadcrumb[] = l(variable_get('faq_title', 'Frequently Asked Questions'), 'faq');
-    $breadcrumb[] = l(t('Home'), NULL);
+    $breadcrumb[] = l(t('Home'), NULL, array('attributes' => array('title' => variable_get('site_name', ''))));
     $breadcrumb = array_reverse($breadcrumb);
     return drupal_set_breadcrumb($breadcrumb);
   }
