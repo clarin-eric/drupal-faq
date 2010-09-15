@@ -15,9 +15,22 @@ function faq_display_handler(event) {
   // Enable / disable "questions_inline" and "questions_top" only settings.
   if ($("input[name=faq_display]:checked").val() == "questions_inline" || $("input[name=faq_display]:checked").val() == "questions_top") {
     $("input[name=faq_back_to_top]").removeAttr("disabled");
+    $("input[name=faq_qa_mark]").removeAttr("disabled");
+    // Enable / disable label settings according to "qa_mark" setting.
+    if ($("input[name=faq_qa_mark]:checked").val() == 1) {
+      $("input[name=faq_question_label]").removeAttr("disabled");
+      $("input[name=faq_answer_label]").removeAttr("disabled");
+    }
+    else {
+      $("input[name=faq_question_label]").attr("disabled", "disabled");
+      $("input[name=faq_answer_label]").attr("disabled", "disabled");
+    }
   }
   else {
     $("input[name=faq_back_to_top]").attr("disabled", "disabled");
+    $("input[name=faq_qa_mark]").attr("disabled", "disabled");
+    $("input[name=faq_question_label]").attr("disabled", "disabled");
+    $("input[name=faq_answer_label]").attr("disabled", "disabled");
   }
 
   // Enable / disable "hide_answer" only settings.
@@ -50,24 +63,6 @@ function faq_display_handler(event) {
     $("select[name=faq_question_listing]").attr("disabled", "disabled");
   }
 
-  // Enable / disable "questions_inline" only settings.
-  if ($("input[name=faq_display]:checked").val() == "questions_inline") {
-    $("input[name=faq_qa_mark]").removeAttr("disabled");
-    // Enable / disable label settings according to "qa_mark" setting.
-    if ($("input[name=faq_qa_mark]:checked").val() == 1) {
-      $("input[name=faq_question_label]").removeAttr("disabled");
-      $("input[name=faq_answer_label]").removeAttr("disabled");
-    }
-    else {
-      $("input[name=faq_question_label]").attr("disabled", "disabled");
-      $("input[name=faq_answer_label]").attr("disabled", "disabled");
-    }
-  }
-  else {
-    $("input[name=faq_qa_mark]").attr("disabled", "disabled");
-    $("input[name=faq_question_label]").attr("disabled", "disabled");
-    $("input[name=faq_answer_label]").attr("disabled", "disabled");
-  }
 }
 
 function qa_mark_handler(event) {
