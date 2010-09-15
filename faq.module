@@ -1461,8 +1461,8 @@ function theme_faq_page($content = '', $answers = '', $description = NULL) {
   }
   if (variable_get('faq_show_expand_all', FALSE)) {
     $output .= '<div id="faq-expand-all">';
-    $output .= '<a class="faq-expand-all-link" href="#faq-expand-all">[' . t('expand all') . ']</a>';
-    $output .= '<a class="faq-collapse-all-link" href="#faq-collapse-all">[' . t('collapse all') . ']</a>';
+    $output .= '<a class="faq-expand-all-link" href="#faq-expand-all-link">[' . t('expand all') . ']</a>';
+    $output .= '<a class="faq-collapse-all-link" href="#faq-collapse-all-link">[' . t('collapse all') . ']</a>';
     $output .= "</div>\n";
   }
 
