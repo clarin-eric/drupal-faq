@@ -45,6 +45,12 @@ function faq_general_settings_form() {
     '#rows' => 5,
   );
   $form['body_filter']['faq_description_format'] = filter_form(variable_get('faq_description_format', ''), NULL, array('faq_description_format'));
+  $form['faq_custom_breadcrumbs'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Create custom breadcrumbs for the FAQ'),
+    '#description' => t('This option set the breadcrumb path to "%home > %faqtitle > category trail".', array('%home' => t('Home'), '%faqtitle' => variable_get('faq_title', 'Frequently Asked Questions'))),
+    '#default_value' => variable_get('faq_custom_breadcrumbs', TRUE),
+  );
 
   return system_settings_form($form);
 }

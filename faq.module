@@ -1339,18 +1339,22 @@ function faq_pathauto($op) {
  */
 function faq_set_breadcrumb($term = NULL) {
   $breadcrumb = array();
-
-  if (module_exists("taxonomy") && $term) {
-    $breadcrumb[] = l(faq_tt("taxonomy:term:$term->tid:name", $term->name), 'faq/'. $term->tid);
-    while ($parents = taxonomy_get_parents($term->tid)) {
-      $term = array_shift($parents);
+  if (variable_get('faq_custom_breadcrumbs', TRUE)) {
+    if (module_exists("taxonomy") && $term) {
       $breadcrumb[] = l(faq_tt("taxonomy:term:$term->tid:name", $term->name), 'faq/'. $term->tid);
+      while ($parents = taxonomy_get_parents($term->tid)) {
+        $term = array_shift($parents);
+        $breadcrumb[] = l(faq_tt("taxonomy:term:$term->tid:name", $term->name), 'faq/'. $term->tid);
+      }
     }
+    $breadcrumb[] = l(variable_get('faq_title', 'Frequently Asked Questions'), 'faq');
+    $breadcrumb[] = l(t('Home'), NULL);
+    $breadcrumb = array_reverse($breadcrumb);
+    return drupal_set_breadcrumb($breadcrumb);
   }
-  $breadcrumb[] = l(variable_get('faq_title', 'Frequently Asked Questions'), 'faq');
-  $breadcrumb[] = l(t('Home'), NULL);
-  $breadcrumb = array_reverse($breadcrumb);
-  return drupal_set_breadcrumb($breadcrumb);
+  // This is also used to set the breadcrumbs in the faq_preprocess_page()
+  // so we need to return a valid trail.
+  return drupal_get_breadcrumb();
 }
 
 /**
