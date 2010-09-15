@@ -11,9 +11,7 @@
  * Implements hook_help().
  */
 function faq_help($path, $arg) {
-
   $output = '';
-
   switch ($path) {
     case "admin/help#faq":
       $output .= '<p>'. t("This module allows users with the 'administer faq' permission to create question and answer pairs which will be displayed on the 'faq' page.  The 'faq' page is automatically generated from the FAQ nodes configured and the layout of this page can be modified on the settings page.  Users will need the 'view faq page' permission in order to view the 'faq' page.") .'</p>'.
@@ -26,7 +24,6 @@ function faq_help($path, $arg) {
     case "node/add/faq":
       return t("Add a question and answer to a FAQ list.");
   }
-
 }
 
 /**
@@ -223,7 +220,7 @@ function faq_form(&$node, &$param) {
       '#type' => 'textarea',
       '#title' => t('Question details (optional)'),
       '#default_value' => $node->detailed_question,
-      '#weight' => -1,
+      '#weight' => module_exists('content') ? content_extra_field_weight($node->type, 'detailed_question') : -1,
       '#rows' => 3,
       '#description' => t('Longer question text.  This will be displayed in all layouts where the answer appears, in addition to the shorter question text.'),
     );
@@ -346,6 +343,21 @@ function faq_views_api() {
     'api' => 2,
     'path' => drupal_get_path('module', 'faq') . '/views',
   );
+}
+
+/**
+ * Implements hook_content_extra_fields().
+ */
+function faq_content_extra_fields($type_name) {
+  $extras = array();
+
+  $extras['detailed_question'] = array(
+    'label' => t('Detailed question'),
+    'description' => t('FAQ detailed question field'),
+    'weight' => 10,
+  );
+
+  return $extras;
 }
 
 /**
