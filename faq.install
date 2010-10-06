@@ -16,9 +16,27 @@ function faq_schema() {
   $schema['faq_weights'] = array(
     'description' => 'A table containing the weight of each faq node by category.',
     'fields' => array(
-      'tid' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0, 'description' => 'The primary identifier for a term or category.  This will be 0 for non-categorized nodes.'),
-      'nid' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0, 'description' => 'The primary identifier for a node.'),
-      'weight' => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0, 'description' => 'A number representing the weight of a node.  Nodes with lower weight values will appear above those with higher weight values.'),
+      'tid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The primary identifier for a term or category.  This will be 0 for non-categorized nodes.',
+      ),
+      'nid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The primary identifier for a node.',
+      ),
+      'weight' => array(
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'A number representing the weight of a node.  Nodes with lower weight values will appear above those with higher weight values.',
+      ),
     ),
     'primary key' => array('nid', 'tid'),
   );
@@ -26,10 +44,32 @@ function faq_schema() {
   $schema['faq_questions'] = array(
     'description' => 'A table containing the long question text of each faq node revision.',
     'fields' => array(
-      'nid' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0, 'description' => 'The primary identifier for a node.'),
-      'vid' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0, 'description' => 'The primary identifier for a node revision.'),
-      'question' => array('type' => 'text', 'size' => 'normal', 'not null' => TRUE, 'description' => 'The faq short question text.'),
-      'detailed_question' => array('type' => 'text', 'size' => 'normal', 'not null' => TRUE, 'description' => 'The faq long question text.'),
+      'nid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The primary identifier for a node.',
+      ),
+      'vid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The primary identifier for a node revision.',
+      ),
+      'question' => array(
+        'type' => 'text',
+        'size' => 'normal',
+        'not null' => TRUE,
+        'description' => 'The faq short question text.',
+      ),
+      'detailed_question' => array(
+        'type' => 'text',
+        'size' => 'normal',
+        'not null' => TRUE,
+        'description' => 'The faq long question text.',
+      ),
     ),
     'primary key' => array('nid', 'vid'),
   );
@@ -39,17 +79,18 @@ function faq_schema() {
 }
 
 /**
- * Implementation of hook_install().
+ * Implements hook_install().
  *
  * Inserts the FAQ module's schema in the SQL database.
  */
 function faq_install() {
-  drupal_install_schema('faq');
+  // TODO The drupal_(un)install_schema functions are called automatically in D7.
+  // drupal_install_schema('faq')
   variable_set('node_type_faq', array('status'));
 }
 
 /**
- * Implementation of hook_uninstall().
+ * Implements hook_uninstall().
  *
  * Remove the variables, nodes and schema corresponding to the FAQ module.
  */
@@ -90,11 +131,12 @@ function faq_uninstall() {
   variable_del('faq_block_random_faq_count');
   // Custom breadcrumbs control
   variable_del('faq_custom_breadcrumbs');
-  
+
   // Deprecated.
   variable_del('faq_more_link');
 
-  drupal_uninstall_schema('faq');
+  // TODO The drupal_(un)install_schema functions are called automatically in D7.
+  // drupal_uninstall_schema('faq')
 
   // Clear the cache tables.
   cache_clear_all('*', 'cache', TRUE);
@@ -116,17 +158,35 @@ function faq_update_1() {
   $schema['faq_weights'] = array(
     'description' => 'A table containing the weight of each faq node by category.',
     'fields' => array(
-      'tid' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0),
-      'nid' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0),
-      'weight' => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0),
+      'tid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'nid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'weight' => array(
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
     ),
     'primary key' => array('nid', 'tid'),
   );
 
   $ret = array();
-  db_create_table($ret, 'faq_weights', $schema['faq_weights']);
+  db_create_table('faq_weights', $schema['faq_weights']);
 
-  return $ret;
+  // hook_update_N() no longer returns a $ret array. Instead, return
+  // nothing or a translated string indicating the update ran successfully.
+  // See http://drupal.org/node/224333#update_sql.
+  return t('TODO Add a descriptive string here to show in the UI.') /* $ret */;
 }
 
 /**
@@ -142,19 +202,40 @@ function faq_update_2() {
   $schema['faq_questions'] = array(
     'description' => 'A table containing the long question text of each faq node revision.',
     'fields' => array(
-      'nid' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0, 'description' => 'The primary identifier for a node.'),
-      'vid' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0, 'description' => 'The primary identifier for a node revision.'),
-      'question' => array('type' => 'text', 'size' => 'normal', 'not null' => TRUE, 'description' => 'The faq long question text.'),
+      'nid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The primary identifier for a node.',
+      ),
+      'vid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The primary identifier for a node revision.',
+      ),
+      'question' => array(
+        'type' => 'text',
+        'size' => 'normal',
+        'not null' => TRUE,
+        'description' => 'The faq long question text.',
+      ),
     ),
     'primary key' => array('nid', 'vid'),
   );
 
   $ret = array();
-  db_create_table($ret, 'faq_questions', $schema['faq_questions']);
+  db_create_table('faq_questions', $schema['faq_questions']);
 
-  $ret[] = update_sql("INSERT INTO {faq_questions} (nid, vid, question) SELECT r.nid, r.vid, r.title FROM {node_revisions} r, {node} n WHERE n.nid = r.nid AND n.type = 'faq'");
+  // TODO update_sql has been removed. Use the database API for any schema or data changes.
+  $ret[] = array() /* update_sql("INSERT INTO {faq_questions} (nid, vid, question) SELECT r.nid, r.vid, r.title FROM {node_revisions} r, {node} n WHERE n.nid = r.nid AND n.type = 'faq'") */;
 
-  return $ret;
+  // hook_update_N() no longer returns a $ret array. Instead, return
+  // nothing or a translated string indicating the update ran successfully.
+  // See http://drupal.org/node/224333#update_sql.
+  return t('TODO Add a descriptive string here to show in the UI.') /* $ret */;
 }
 
 /**
@@ -165,7 +246,11 @@ function faq_update_2() {
  */
 function faq_update_6003() {
   $ret = array();
-  db_add_field($ret, 'faq_questions', 'detailed_question', array('type' => 'text', 'size' => 'normal', 'not null' => TRUE));
-  $ret[] = update_sql("UPDATE {faq_questions} SET detailed_question = question");
-  return $ret;
+  db_add_field('faq_questions', 'detailed_question', array('type' => 'text', 'size' => 'normal', 'not null' => TRUE));
+  // TODO update_sql has been removed. Use the database API for any schema or data changes.
+  $ret[] = array() /* update_sql("UPDATE {faq_questions} SET detailed_question = question") */;
+  // hook_update_N() no longer returns a $ret array. Instead, return
+  // nothing or a translated string indicating the update ran successfully.
+  // See http://drupal.org/node/224333#update_sql.
+  return t('TODO Add a descriptive string here to show in the UI.') /* $ret */;
 }

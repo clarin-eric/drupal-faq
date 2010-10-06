@@ -50,7 +50,7 @@ function faq_views_data() {
       'left_field' => 'nid',
       'field' => 'nid',
     ),
-    'term_data' => array(
+    'taxonomy_term_data' => array(
       'left_field' => 'tid',
       'field' => 'tid',
     ),

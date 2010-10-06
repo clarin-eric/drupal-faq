@@ -30,7 +30,7 @@ function faq_settings_page($op = NULL) {
  *   The general settings form code stored in the $form variable, before
  *   converted to HTML.
  */
-function faq_general_settings_form() {
+function faq_general_settings_form($form) {
   $form['faq_title'] = array(
     '#type' => 'textfield',
     '#title' => t('Title'),
@@ -61,11 +61,11 @@ function faq_general_settings_form() {
  * @return
  *   The form code inside the $form array.
  */
-function faq_questions_settings_form() {
+function faq_questions_settings_form($form, &$form_state) {
 
-  drupal_add_js(array('faq' => array('faq_hide_qa_accordion' => variable_get('faq_hide_qa_accordion', FALSE))), 'setting');
-  drupal_add_js(array('faq' => array('faq_category_hide_qa_accordion' => variable_get('faq_category_hide_qa_accordion', FALSE))), 'setting');
-  drupal_add_js(drupal_get_path('module', 'faq') .'/faq.js', 'module');
+  drupal_add_js(array('faq' => array('faq_hide_qa_accordion' => variable_get('faq_hide_qa_accordion', FALSE))), array('type' => 'setting', 'scope' => JS_DEFAULT));
+  drupal_add_js(array('faq' => array('faq_category_hide_qa_accordion' => variable_get('faq_category_hide_qa_accordion', FALSE))), array('type' => 'setting', 'scope' => JS_DEFAULT));
+  drupal_add_js(drupal_get_path('module', 'faq') . '/faq.js');
 
   $display_options['questions_inline'] = t('Questions inline');
   $display_options['questions_top'] = t('Clicking on question takes user to answer further down the page');
@@ -88,7 +88,10 @@ function faq_questions_settings_form() {
 
   $form['faq_questions_misc']['faq_question_listing'] = array(
     '#type' => 'select',
-    '#options' => array('ol' => t('Ordered list'), 'ul' => t('Unordered list')),
+    '#options' => array(
+      'ol' => t('Ordered list'),
+      'ul' => t('Unordered list'),
+    ),
     '#title' => t('Questions listing style'),
     '#description' => t("This allows to select how the questions listing is presented.  It only applies to the layouts: 'Clicking on question takes user to answer further down the page' and 'Clicking on question opens the answer in a new page'.  An ordered listing would number the questions, whereas an unordered list will have a bullet to the left of each question."),
     '#default_value' => variable_get('faq_question_listing', 'ul'),
@@ -118,7 +121,11 @@ function faq_questions_settings_form() {
   $form['faq_questions_misc']['faq_question_length'] = array(
     '#type' => 'radios',
     '#title' => t('Question length'),
-    '#options' => array('long' => t('Display longer text'), 'short' => t('Display short text'), 'both' => t('Display both short and long questions')),
+    '#options' => array(
+      'long' => t('Display longer text'),
+      'short' => t('Display short text'),
+      'both' => t('Display both short and long questions'),
+    ),
     '#description' => t("The length of question text to display on the FAQ page.  The short question will always be displayed in the FAQ blocks."),
     '#default_value' => variable_get('faq_question_length', 'short'),
   );
@@ -174,7 +181,10 @@ function faq_questions_settings_form() {
   $form['faq_questions_misc']['faq_default_sorting'] = array(
     '#type' => 'select',
     '#title' => t('Default sorting for unordered FAQs'),
-    '#options' => array('DESC' => t('Date Descending'), 'ASC' => t('Date Ascending')),
+    '#options' => array(
+      'DESC' => t('Date Descending'),
+      'ASC' => t('Date Ascending'),
+    ),
     '#description' => t("This controls the default ordering behaviour for new FAQ nodes which haven't been assigned a position."),
     '#default_value' => variable_get('faq_default_sorting', 'DESC'),
   );
@@ -188,13 +198,13 @@ function faq_questions_settings_form() {
  * @return
  *   The form code inside the $form array.
  */
-function faq_categories_settings_form() {
+function faq_categories_settings_form($form, &$form_state) {
   if (!module_exists("taxonomy")) {
     drupal_set_message(t('Categorization of questions will not work without the "taxonomy" module being enabled.'), 'error');
   }
-  drupal_add_js(array('faq' => array('faq_hide_qa_accordion' => variable_get('faq_hide_qa_accordion', FALSE))), 'setting');
-  drupal_add_js(array('faq' => array('faq_category_hide_qa_accordion' => variable_get('faq_category_hide_qa_accordion', FALSE))), 'setting');
-  drupal_add_js(drupal_get_path('module', 'faq') .'/faq.js', 'module');
+  drupal_add_js(array('faq' => array('faq_hide_qa_accordion' => variable_get('faq_hide_qa_accordion', FALSE))), array('type' => 'setting', 'scope' => JS_DEFAULT));
+  drupal_add_js(array('faq' => array('faq_category_hide_qa_accordion' => variable_get('faq_category_hide_qa_accordion', FALSE))), array('type' => 'setting', 'scope' => JS_DEFAULT));
+  drupal_add_js(drupal_get_path('module', 'faq') . '/faq.js');
 
   // Set up a hidden variable.
   $form['faq_display'] = array(
@@ -230,7 +240,10 @@ function faq_categories_settings_form() {
 
   $form['faq_category_misc']['faq_category_listing'] = array(
     '#type' => 'select',
-    '#options' => array('ol' => t('Ordered list'), 'ul' => t('Unordered list')),
+    '#options' => array(
+      'ol' => t('Ordered list'),
+      'ul' => t('Unordered list'),
+    ),
     '#title' => t('Categories listing style'),
     '#description' => t("This allows to select how the categories listing is presented.  It only applies to the 'Clicking on category opens the questions/answers in a new page' layout.  An ordered listing would number the categories, whereas an unordered list will have a bullet to the left of each category."),
     '#default_value' => variable_get('faq_category_listing', 'ul'),
@@ -321,13 +334,13 @@ function faq_categories_settings_form() {
  * @return
  *   The form code, before being converted to HTML format.
  */
-function faq_order_settings_form($form_state, $category = NULL) {
+function faq_order_settings_form($form, $form_state, $category = NULL) {
   $order = $date_order = '';
 
-  drupal_add_js(array('faq' => array('faq_hide_qa_accordion' => variable_get('faq_hide_qa_accordion', FALSE))), 'setting');
-  drupal_add_js(array('faq' => array('faq_category_hide_qa_accordion' => variable_get('faq_category_hide_qa_accordion', FALSE))), 'setting');
-  drupal_add_js(drupal_get_path('module', 'faq') .'/faq.js', 'module');
-  drupal_add_css(drupal_get_path('module', 'faq') .'/faq.css');
+  drupal_add_js(array('faq' => array('faq_hide_qa_accordion' => variable_get('faq_hide_qa_accordion', FALSE))), array('type' => 'setting', 'scope' => JS_DEFAULT));
+  drupal_add_js(array('faq' => array('faq_category_hide_qa_accordion' => variable_get('faq_category_hide_qa_accordion', FALSE))), array('type' => 'setting', 'scope' => JS_DEFAULT));
+  drupal_add_js(drupal_get_path('module', 'faq') . '/faq.js');
+  drupal_add_css(drupal_get_path('module', 'faq') . '/faq.css');
 
   $use_categories = variable_get('faq_use_categories', FALSE);
   if (!$use_categories) {
@@ -392,10 +405,12 @@ function faq_order_settings_form($form_state, $category = NULL) {
       $category = 0;
       // Descending.
       if ($default_sorting == 'DESC') {
+        // TODO Please convert this statement to the D7 database API syntax.
         $result = db_query(db_rewrite_sql("SELECT n.nid, n.title, if((w.weight IS NULL), %d, w.weight) as weight, n.sticky, n.created FROM {node} n LEFT JOIN {faq_weights} w ON n.nid = w.nid AND w.tid = '%d' WHERE n.type='faq' AND n.status = 1 ORDER BY weight ASC, n.sticky DESC, n.created DESC", "n", "nid"), $default_weight, $category);
       }
       // Ascending.
       else {
+        // TODO Please convert this statement to the D7 database API syntax.
         $result = db_query(db_rewrite_sql("SELECT n.nid, n.title, if((w.weight IS NULL), %d, w.weight) as weight, n.sticky, n.created FROM {node} n LEFT JOIN {faq_weights} w ON n.nid = w.nid AND w.tid = '%d' WHERE n.type='faq' AND n.status = 1 ORDER BY weight ASC, n.sticky DESC, n.created ASC", "n", "nid"), $default_weight, $category);
       }
     }
@@ -403,11 +418,13 @@ function faq_order_settings_form($form_state, $category = NULL) {
     else {
       // Descending.
       if ($default_sorting == 'DESC') {
-        $result = db_query(db_rewrite_sql("SELECT n.nid, n.title, if((w.weight IS NULL), %d, w.weight) as weight, n.sticky, n.created FROM {node} n INNER JOIN {term_node} tn ON (n.nid = tn.nid AND n.vid = tn.vid) LEFT JOIN {faq_weights} w ON n.nid = w.nid AND w.tid = '%d' WHERE n.type='faq' AND n.status = 1 AND tn.tid = '%d' ORDER BY weight ASC, n.sticky DESC, n.created DESC", "n", "nid"), $default_weight, $category, $category);
+        // TODO Please convert this statement to the D7 database API syntax.
+        $result = db_query(db_rewrite_sql("SELECT n.nid, n.title, if((w.weight IS NULL), %d, w.weight) as weight, n.sticky, n.created FROM {node} n INNER JOIN {taxonomy_term_node} tn ON (n.nid = tn.nid AND n.vid = tn.vid) LEFT JOIN {faq_weights} w ON n.nid = w.nid AND w.tid = '%d' WHERE n.type='faq' AND n.status = 1 AND tn.tid = '%d' ORDER BY weight ASC, n.sticky DESC, n.created DESC", "n", "nid"), $default_weight, $category, $category);
       }
       // Ascending.
       else {
-        $result = db_query(db_rewrite_sql("SELECT n.nid, n.title, if((w.weight IS NULL), %d, w.weight) as weight, n.sticky, n.created FROM {node} n INNER JOIN {term_node} tn ON (n.nid = tn.nid AND n.vid = tn.vid) LEFT JOIN {faq_weights} w ON n.nid = w.nid AND w.tid = '%d' WHERE n.type='faq' AND n.status = 1 AND tn.tid = '%d' ORDER BY weight ASC, n.sticky DESC, n.created ASC", "n", "nid"), $default_weight, $category, $category);
+        // TODO Please convert this statement to the D7 database API syntax.
+        $result = db_query(db_rewrite_sql("SELECT n.nid, n.title, if((w.weight IS NULL), %d, w.weight) as weight, n.sticky, n.created FROM {node} n INNER JOIN {taxonomy_term_node} tn ON (n.nid = tn.nid AND n.vid = tn.vid) LEFT JOIN {faq_weights} w ON n.nid = w.nid AND w.tid = '%d' WHERE n.type='faq' AND n.status = 1 AND tn.tid = '%d' ORDER BY weight ASC, n.sticky DESC, n.created ASC", "n", "nid"), $default_weight, $category, $category);
       }
     }
 
@@ -427,9 +444,16 @@ function faq_order_settings_form($form_state, $category = NULL) {
 
     $i = 0;
     foreach ($options as $nid => $title) {
-      $form['order_no_cats'][$i]['nid'] = array('#type' => 'hidden', '#value' => $nid);
+      $form['order_no_cats'][$i]['nid'] = array(
+        '#type' => 'hidden',
+        '#value' => $nid,
+      );
       $form['order_no_cats'][$i]['title'] = array('#value' => $title);
-      $form['order_no_cats'][$i]['sort'] = array('#type' => 'weight', '#delta' => count($options), '#default_value' => $i);
+      $form['order_no_cats'][$i]['sort'] = array(
+        '#type' => 'weight',
+        '#delta' => count($options),
+        '#default_value' => $i,
+      );
       $i++;
     }
 
@@ -474,8 +498,15 @@ function faq_order_settings_reorder_form_submit($form, &$form_state) {
     foreach ($form_state['values']['order_no_cats'] as $i => $faq) {
       $nid = $faq['nid'];
       $index = $faq['sort'];
-      $result = db_query("DELETE FROM {faq_weights} WHERE tid = %d AND nid = %d", $form_state['values']['faq_category'], $nid);
-      $result = db_query("INSERT INTO {faq_weights} (tid, nid, weight) VALUES(%d, %d, %d)", $form_state['values']['faq_category'], $nid, $index);
+      // TODO Please review the conversion of this statement to the D7 database API syntax.
+      /* db_query("DELETE FROM {faq_weights} WHERE tid = %d AND nid = %d", $form_state['values']['faq_category'], $nid) */
+      $result = db_delete('faq_weights')
+  ->condition('tid', $form_state['values']['faq_category'])
+  ->condition('nid', $nid)
+  ->execute();
+      // TODO Please convert this statement to the D7 database API syntax.
+      /* db_query("INSERT INTO {faq_weights} (tid, nid, weight) VALUES(%d, %d, %d)", $form_state['values']['faq_category'], $nid, $index) */
+      $result = NULL;
 
       // If node translation module enabled, update order of the translation
       // node counterparts.
@@ -485,8 +516,15 @@ function faq_order_settings_reorder_form_submit($form, &$form_state) {
           $translations = translation_node_get_translations($node->tnid);
           if (!empty($translations)) {
             foreach ($translations as $language => $tnode) {
-              $result = db_query("DELETE FROM {faq_weights} WHERE tid = %d AND nid = %d", $form_state['values']['faq_category'], $tnode->nid);
-              $result = db_query("INSERT INTO {faq_weights} (tid, nid, weight) VALUES(%d, %d, %d)", $form_state['values']['faq_category'], $tnode->nid, $index);
+              // TODO Please review the conversion of this statement to the D7 database API syntax.
+              /* db_query("DELETE FROM {faq_weights} WHERE tid = %d AND nid = %d", $form_state['values']['faq_category'], $tnode->nid) */
+              $result = db_delete('faq_weights')
+  ->condition('tid', $form_state['values']['faq_category'])
+  ->condition('nid', $tnode->nid)
+  ->execute();
+              // TODO Please convert this statement to the D7 database API syntax.
+              /* db_query("INSERT INTO {faq_weights} (tid, nid, weight) VALUES(%d, %d, %d)", $form_state['values']['faq_category'], $tnode->nid, $index) */
+              $result = NULL;
             }
           }
         }

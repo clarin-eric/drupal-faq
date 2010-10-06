@@ -24,7 +24,7 @@ function template_preprocess_faq_new_page(&$variables) {
   $variables['list_style'] = $list_style;
   $variables['list_items'] = $items;
 
-  $variables['list'] = theme('item_list', $items, NULL, $list_style, array("class" => "faq-question-listing"));
+  $variables['list'] = theme('item_list', array('items' => $items, 'title' => NULL, 'type' => $list_style, 'attributes' => array("class" => "faq-question-listing")));
 }
 
 /**

@@ -35,7 +35,7 @@ function template_preprocess_faq_questions_inline(&$variables) {
   $nodes = array();
   $count = 0;
   foreach ($data as $node) {
-    faq_view_question($nodes[$count], $node, NULL, 'n'. $node->nid);
+    faq_view_question($nodes[$count], $node, NULL, 'n' . $node->nid);
     faq_view_answer($nodes[$count], $node, $back_to_top, $teaser, $links);
     $count++;
   }

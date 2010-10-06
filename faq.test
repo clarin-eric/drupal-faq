@@ -46,11 +46,11 @@ class FaqTestCase extends DrupalWebTestCase {
     $this->setupTaxonomy();
 
     // Categorize questions.
-    $this->drupalPost('admin/settings/faq/categories', array('faq_use_categories' => '1'), t('Save configuration'));
+    $this->drupalPost('admin/config/faq/categories', array('faq_use_categories' => '1'), t('Save configuration'));
 
     // Set answer_user as default expert.
     $roles = $this->faq_user->roles;
-    end($roles);  // Set to last role (the unique one)
+    end($roles); // Set to last role (the unique one)
 
     // Start all tests logged out.
     $this->drupalLogout();
@@ -66,7 +66,7 @@ class FaqTestCase extends DrupalWebTestCase {
     parent::tearDown();
   }
 
- /**
+  /**
    * Generates a random string of ASCII numeric characters (values 48 to 57).
    *
    * @param $length
@@ -82,7 +82,7 @@ class FaqTestCase extends DrupalWebTestCase {
     return $str;
   }
 
- /**
+  /**
    * Verify that current user has no access to page.
    *
    * @param $url
@@ -102,13 +102,13 @@ class FaqTestCase extends DrupalWebTestCase {
 
     // Create vocabulary.
     $this->taxonomy = array();
-    $this->taxonomy['name'] = $this->randomName(8);  // Create taxonomy vocabulary name
+    $this->taxonomy['name'] = $this->randomName(8); // Create taxonomy vocabulary name
     $this->taxonomy['description'] = $this->randomName(64);
-    $this->taxonomy['nodes[faq]'] = '1';  // Assign vocab to FAQ node types
-    $this->taxonomy['tags'] = '1';  // Users may create tags
-    $this->taxonomy['multiple'] = '1';  // may have more than one tag
-    $this->taxonomy['required'] = '1';  // but minimum 1 tag
-    $this->drupalPost('admin/content/taxonomy/add/vocabulary', $this->taxonomy, t('Save'));
+    $this->taxonomy['nodes[faq]'] = '1'; // Assign vocab to FAQ node types
+    $this->taxonomy['tags'] = '1'; // Users may create tags
+    $this->taxonomy['multiple'] = '1'; // may have more than one tag
+    $this->taxonomy['required'] = '1'; // but minimum 1 tag
+    $this->drupalPost('admin/structure/taxonomy/add/vocabulary', $this->taxonomy, t('Save'));
     $this->assertText(t('Created new vocabulary @name', array('@name' => $this->taxonomy['name'])));
 
     $this->assertText(t('FAQ'));
@@ -131,7 +131,7 @@ class FaqTestCase extends DrupalWebTestCase {
 
     $url = $this->getUrl();
     $this->term = array();
-    $this->term['name'] = $this->randomName(8);  // Create taxonomy vocabulary name
+    $this->term['name'] = $this->randomName(8); // Create taxonomy vocabulary name
     $this->term['description'] = $this->randomName(64);
     $this->drupalPost($url, $this->term, t('Save'));
     $this->assertText(t('Created new term @name', array('@name' => $this->term['name'])));
@@ -159,22 +159,22 @@ class FaqAccessTestClass extends FaqTestCase {
 
   function testFaqAccess() {
 
-  // Verify that anonymous user has no access to the faq page
-  $this->faqVerifyNoAccess('faq');
+    // Verify that anonymous user has no access to the faq page
+    $this->faqVerifyNoAccess('faq');
 
     // Create and login user
     $normal_user = $this->drupalCreateUser();
     $this->drupalLogin($normal_user);
-  // Verify that logged in user has no access to the faq page
-  $this->faqVerifyNoAccess('faq');
+    // Verify that logged in user has no access to the faq page
+    $this->faqVerifyNoAccess('faq');
     $this->drupalLogout();
 
     $view_faq_user = $this->drupalCreateUser(array('view faq page'));
     $this->drupalLogin($view_faq_user);
 
-  // Verify that the faq page is visible and available but empty
+    // Verify that the faq page is visible and available but empty
     $this->drupalGet('faq');
-  $this->assertText(t('Frequently Asked Questions'), t('FAQ page is available for view faq page permissions.'));
+    $this->assertText(t('Frequently Asked Questions'), t('FAQ page is available for view faq page permissions.'));
 
   }
 }
@@ -190,7 +190,6 @@ class CreateFaqTestCase extends FaqTestCase {
       'name' => t('Create FAQ node'),
       'description' => t('Add, Edit and delete FAQ nodes when FAQ module is enabled.'),
       'group' => t('Frequently Asked Questions'),
-
     );
   }
 
@@ -210,7 +209,7 @@ class CreateFaqTestCase extends FaqTestCase {
     // Fill in the Create FAQ node 1 form and post it
     $this->faq1 = array();
     $this->faq1['title'] = $this->randomName(8);
-    $this->faq1['taxonomy[tags][1]'] = $this->term['name'];  // Add existing term
+    $this->faq1['taxonomy[tags][1]'] = $this->term['name']; // Add existing term
     $this->faq1['detailed_question'] = $this->randomName(16);
     $this->faq1['body'] = $this->randomName(16);
     $this->drupalPost('node/add/faq', $this->faq1, t('Save'));
@@ -221,7 +220,7 @@ class CreateFaqTestCase extends FaqTestCase {
     // Fill in the Create FAQ node 2 form and post it
     $this->faq2 = array();
     $this->faq2['title'] = $this->randomName(8);
-    $this->faq2['taxonomy[tags][1]'] = $this->randomName(8);  // Add new term
+    $this->faq2['taxonomy[tags][1]'] = $this->randomName(8); // Add new term
     $this->faq2['detailed_question'] = $this->randomName(16);
     $this->faq2['body'] = $this->randomName(16);
     $this->drupalPost('node/add/faq', $this->faq2, t('Save'));
@@ -258,8 +257,8 @@ class CreateFaqTestCase extends FaqTestCase {
 
     // faq_use_categories
     $faqcfg = array();
-    $faqcfg['faq_use_categories'] = '1';  // Enable categorised FAQs
-    $this->drupalPost('admin/settings/faq/categories', $faqcfg, t('Save configuration'));
+    $faqcfg['faq_use_categories'] = '1'; // Enable categorised FAQs
+    $this->drupalPost('admin/config/faq/categories', $faqcfg, t('Save configuration'));
     $this->drupalLogout();
 
     $this->drupalLogin($view_faq_user);
@@ -317,18 +316,18 @@ class CRAUDFaqTestCase extends FaqTestCase {
     $this->drupalLogout();
 
     // Verify that anonymous user has no access to the unanswered node display
-//    $this->faqVerifyNoAccess('node/' . $node->nid);
-    $this->drupalGet('node/' . $node->nid . '/edit');  // Open edit page with node
-//    $this->assertResponse(200);
+    //    $this->faqVerifyNoAccess('node/' . $node->nid);
+    $this->drupalGet('node/' . $node->nid . '/edit'); // Open edit page with node
+    //    $this->assertResponse(200);
 
     // Create and log in user with view FAQ permissions
     $faq_view_user = $this->drupalCreateUser(array('view faq page'));
     $this->drupalLogin($faq_view_user);
 
     // Verify visibility on faq page
-    $this->drupalGet('faq');  // Load faq page
-    $this->assertText($edit['title']);  // Node should be listed here
-    $this->drupalGet('node/' . $node->nid);  // It should also be possible to open the node directly
+    $this->drupalGet('faq'); // Load faq page
+    $this->assertText($edit['title']); // Node should be listed here
+    $this->drupalGet('node/' . $node->nid); // It should also be possible to open the node directly
 
     // Update FAQ
     // Log in user with answer question. Must also have edit faq and view faq page permission
@@ -336,8 +335,10 @@ class CRAUDFaqTestCase extends FaqTestCase {
     $edit2['title'] = 'title-' . $this->randomName(8);
     $edit2['body']  = 'body-' . $this->randomName(64);
     $this->drupalPost( 'node/' . $node->nid . '/edit',
-              array( 'title' => $edit2['title'],
-                'body' => $edit2['body']),
+              array(
+      'title' => $edit2['title'],
+      'body' => $edit2['body'],
+    ),
               t('Save'));
     $this->assertText(t('FAQ @title has been updated.', array('@title' => $edit2['title'])));
     $this->assertText($edit2['title'], 'Title has changed');

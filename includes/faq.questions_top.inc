@@ -52,7 +52,7 @@ function template_preprocess_faq_questions_top(&$variables) {
   $variables['use_teaser'] = $teaser;
   $variables['questions'] = $questions;
   $variables['answers'] = $answers;
-  $variables['questions_list'] = theme('item_list', $questions, NULL, $list_style, array("class" => "faq-ul-questions-top"));
+  $variables['questions_list'] = theme('item_list', array('items' => $questions, 'title' => NULL, 'type' => $list_style, 'attributes' => array("class" => "faq-ul-questions-top")));
 }
 
 /**
@@ -249,7 +249,7 @@ function template_preprocess_faq_category_questions_top_answers(&$variables) {
   // Configure "back to top" link.
   $back_to_top = faq_init_back_to_top($this_page);
 
-   // Get taxonomy image.
+  // Get taxonomy image.
   $variables['term_image'] = '';
   if (module_exists('taxonomy_image')) {
     $variables['term_image'] = taxonomy_image_display($term->tid, array('class' => 'faq-tax-image'));

@@ -24,7 +24,7 @@ function template_preprocess_faq_hide_answer(&$variables) {
   $nodes = array();
   $count = 0;
   foreach ($data as $node) {
-    faq_view_question($nodes[$count], $node, $this_page, 'n'. $node->nid);
+    faq_view_question($nodes[$count], $node, $this_page, 'n' . $node->nid);
     faq_view_answer($nodes[$count], $node, array(), $teaser, $links);
     $count++;
   }
@@ -83,7 +83,7 @@ function template_preprocess_faq_category_hide_answer(&$variables) {
   }
   $variables['display_faq_count'] = $display_faq_count;
 
-   // Get taxonomy image.
+  // Get taxonomy image.
   $variables['term_image'] = '';
   if (module_exists('taxonomy_image')) {
     $variables['term_image'] = taxonomy_image_display($term->tid, array('class' => 'faq-tax-image'));
