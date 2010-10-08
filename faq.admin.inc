@@ -401,37 +401,28 @@ function faq_order_settings_form($form, $form_state, $category = NULL) {
     }
 
     // Uncategorized ordering.
+    $query = db_select('node', 'n')
+      ->fields('n', array('nid', 'title'))
+      ->addTag('node_access')
+      ->condition('n.type', 'faq')
+      ->condition('n.status', 1)
+      ->orderBy('weight', 'ASC')
+      ->orderBy('n.sticky', 'DESC')
+      ->orderBy('n.created', $default_sorting == 'DESC' ? 'DESC' : 'ASC');
+
+    $query->addExpression('if((w.weight IS NULL), :default_weight, w.weight)', 'weight', array(':default_weight' => $default_weight));
+
     if (empty($category)) {
       $category = 0;
-      // Descending.
-      if ($default_sorting == 'DESC') {
-        // TODO Please convert this statement to the D7 database API syntax.
-        $result = db_query(db_rewrite_sql("SELECT n.nid, n.title, if((w.weight IS NULL), %d, w.weight) as weight, n.sticky, n.created FROM {node} n LEFT JOIN {faq_weights} w ON n.nid = w.nid AND w.tid = '%d' WHERE n.type='faq' AND n.status = 1 ORDER BY weight ASC, n.sticky DESC, n.created DESC", "n", "nid"), $default_weight, $category);
-      }
-      // Ascending.
-      else {
-        // TODO Please convert this statement to the D7 database API syntax.
-        $result = db_query(db_rewrite_sql("SELECT n.nid, n.title, if((w.weight IS NULL), %d, w.weight) as weight, n.sticky, n.created FROM {node} n LEFT JOIN {faq_weights} w ON n.nid = w.nid AND w.tid = '%d' WHERE n.type='faq' AND n.status = 1 ORDER BY weight ASC, n.sticky DESC, n.created ASC", "n", "nid"), $default_weight, $category);
-      }
+      $w_alias = $query->leftJoin('faq_weights', 'w', 'n.nid = %alias.nid AND %alias.tid = :category', array(':category' => $category));
     }
     // Categorized ordering.
     else {
-      // Descending.
-      if ($default_sorting == 'DESC') {
-        // TODO Please convert this statement to the D7 database API syntax.
-        $result = db_query(db_rewrite_sql("SELECT n.nid, n.title, if((w.weight IS NULL), %d, w.weight) as weight, n.sticky, n.created FROM {node} n INNER JOIN {taxonomy_term_node} tn ON (n.nid = tn.nid AND n.vid = tn.vid) LEFT JOIN {faq_weights} w ON n.nid = w.nid AND w.tid = '%d' WHERE n.type='faq' AND n.status = 1 AND tn.tid = '%d' ORDER BY weight ASC, n.sticky DESC, n.created DESC", "n", "nid"), $default_weight, $category, $category);
-      }
-      // Ascending.
-      else {
-        // TODO Please convert this statement to the D7 database API syntax.
-        $result = db_query(db_rewrite_sql("SELECT n.nid, n.title, if((w.weight IS NULL), %d, w.weight) as weight, n.sticky, n.created FROM {node} n INNER JOIN {taxonomy_term_node} tn ON (n.nid = tn.nid AND n.vid = tn.vid) LEFT JOIN {faq_weights} w ON n.nid = w.nid AND w.tid = '%d' WHERE n.type='faq' AND n.status = 1 AND tn.tid = '%d' ORDER BY weight ASC, n.sticky DESC, n.created ASC", "n", "nid"), $default_weight, $category, $category);
-      }
+      $tn_alias = $query->innerJoin('taxonomy_term_node', 'tn', '(n.nid = %alias.nid AND n.vid = %alias.vid)');
+      $w_alias = $query->leftJoin('faq_weights', 'w', 'n.nid = %alias.nid AND %alias.tid = :category', array(':category' => $category));
     }
 
-
-    while ($node = db_fetch_object($result)) {
-      $options[$node->nid] = $node->title;
-    }
+    $options = $query->execute()->fetchAllKeyed();
 
     $form['weight']['faq_category'] = array(
       '#type' => 'value',
@@ -498,14 +489,15 @@ function faq_order_settings_reorder_form_submit($form, &$form_state) {
     foreach ($form_state['values']['order_no_cats'] as $i => $faq) {
       $nid = $faq['nid'];
       $index = $faq['sort'];
-      // TODO Please review the conversion of this statement to the D7 database API syntax.
-      /* db_query("DELETE FROM {faq_weights} WHERE tid = %d AND nid = %d", $form_state['values']['faq_category'], $nid) */
-      $result = db_delete('faq_weights')
-  ->condition('tid', $form_state['values']['faq_category'])
-  ->condition('nid', $nid)
-  ->execute();
-      // TODO Please convert this statement to the D7 database API syntax.
-      /* db_query("INSERT INTO {faq_weights} (tid, nid, weight) VALUES(%d, %d, %d)", $form_state['values']['faq_category'], $nid, $index) */
+      db_merge('faq_weights')
+        ->fields(array(
+          'weight' => $index,
+        ))
+        ->key(array(
+          'tid' => $form_state['values']['faq_category'],
+          'nid' => $nid,
+        ))
+        ->execute();
       $result = NULL;
 
       // If node translation module enabled, update order of the translation
@@ -516,15 +508,15 @@ function faq_order_settings_reorder_form_submit($form, &$form_state) {
           $translations = translation_node_get_translations($node->tnid);
           if (!empty($translations)) {
             foreach ($translations as $language => $tnode) {
-              // TODO Please review the conversion of this statement to the D7 database API syntax.
-              /* db_query("DELETE FROM {faq_weights} WHERE tid = %d AND nid = %d", $form_state['values']['faq_category'], $tnode->nid) */
-              $result = db_delete('faq_weights')
-  ->condition('tid', $form_state['values']['faq_category'])
-  ->condition('nid', $tnode->nid)
-  ->execute();
-              // TODO Please convert this statement to the D7 database API syntax.
-              /* db_query("INSERT INTO {faq_weights} (tid, nid, weight) VALUES(%d, %d, %d)", $form_state['values']['faq_category'], $tnode->nid, $index) */
-              $result = NULL;
+              db_merge('faq_weights')
+                ->fields(array(
+                  'weight' => $index,
+                ))
+                ->key(array(
+                  'tid' => $form_state['values']['faq_category'],
+                  'nid' => $tnode->nid,
+                ))
+                ->execute();
             }
           }
         }
