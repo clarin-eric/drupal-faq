@@ -84,8 +84,6 @@ function faq_schema() {
  * Inserts the FAQ module's schema in the SQL database.
  */
 function faq_install() {
-  // TODO The drupal_(un)install_schema functions are called automatically in D7.
-  // drupal_install_schema('faq')
   variable_set('node_type_faq', array('status'));
 }
 
@@ -135,9 +133,6 @@ function faq_uninstall() {
   // Deprecated.
   variable_del('faq_more_link');
 
-  // TODO The drupal_(un)install_schema functions are called automatically in D7.
-  // drupal_uninstall_schema('faq')
-
   // Clear the cache tables.
   cache_clear_all('*', 'cache', TRUE);
   cache_clear_all('*', 'cache_filter', TRUE);
@@ -147,12 +142,6 @@ function faq_uninstall() {
 
 /**
  * Create 'faq_weights' table in order to upgrade from older installations.
- *
- * Should have been created with faq_update_600x() naming convention, but too
- * late now.
- *
- * @return
- *   An array containing the structure of the SQL schema.
  */
 function faq_update_1() {
   $schema['faq_weights'] = array(
@@ -183,20 +172,11 @@ function faq_update_1() {
   $ret = array();
   db_create_table('faq_weights', $schema['faq_weights']);
 
-  // hook_update_N() no longer returns a $ret array. Instead, return
-  // nothing or a translated string indicating the update ran successfully.
-  // See http://drupal.org/node/224333#update_sql.
-  return t('TODO Add a descriptive string here to show in the UI.') /* $ret */;
+  return t('FAQ weighting table created.');
 }
 
 /**
  * Create 'faq_questions' table in order to upgrade from older installations.
- *
- * Should have been created with faq_update_600x() naming convention, but too
- * late now.
- *
- * @return
- *   An array containing the results of the update.
  */
 function faq_update_2() {
   $schema['faq_questions'] = array(
@@ -226,31 +206,33 @@ function faq_update_2() {
     'primary key' => array('nid', 'vid'),
   );
 
-  $ret = array();
   db_create_table('faq_questions', $schema['faq_questions']);
 
-  // TODO update_sql has been removed. Use the database API for any schema or data changes.
-  $ret[] = array() /* update_sql("INSERT INTO {faq_questions} (nid, vid, question) SELECT r.nid, r.vid, r.title FROM {node_revisions} r, {node} n WHERE n.nid = r.nid AND n.type = 'faq'") */;
+  // Pre-populate the questions table from the existing nodes.
+  $select = db_select('node', 'n');
+  $select->innerJoin('node_revisions', 'r', 'n.nid = %alias.nid');
+  $select
+    ->fields('r', array('nid', 'vid', 'title'))
+    ->condition('n.type', 'faq');
 
-  // hook_update_N() no longer returns a $ret array. Instead, return
-  // nothing or a translated string indicating the update ran successfully.
-  // See http://drupal.org/node/224333#update_sql.
-  return t('TODO Add a descriptive string here to show in the UI.') /* $ret */;
+  db_insert('faq_questions')
+    ->fields(array('nid', 'vid', 'question'))
+    ->from($select)
+    ->execute();
+
+  return t('FAQ Questions table created.');
 }
 
 /**
  * Add the 'detailed_question' column to the 'faq_questions' table.
- *
- * @return
- *   An array containing the results of the update.
  */
 function faq_update_6003() {
   $ret = array();
   db_add_field('faq_questions', 'detailed_question', array('type' => 'text', 'size' => 'normal', 'not null' => TRUE));
-  // TODO update_sql has been removed. Use the database API for any schema or data changes.
-  $ret[] = array() /* update_sql("UPDATE {faq_questions} SET detailed_question = question") */;
-  // hook_update_N() no longer returns a $ret array. Instead, return
-  // nothing or a translated string indicating the update ran successfully.
-  // See http://drupal.org/node/224333#update_sql.
-  return t('TODO Add a descriptive string here to show in the UI.') /* $ret */;
+
+  db_update('faq_questions')
+    ->expression('detailed_question', 'question')
+    ->execute();
+
+  return t('Detailed question column added.  Existing nodes have been given the same detailed question as current question.');
 }
