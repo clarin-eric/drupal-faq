@@ -32,28 +32,22 @@ function faq_help($path, $arg) {
 function faq_permission() {
   return array(
     'administer faq' => array(
-      'title' => t('administer faq'),
-      'description' => t('TODO Add a description for \'administer faq\''),
-    ),
-    'view faq page' => array(
-      'title' => t('view faq page'),
-      'description' => t('TODO Add a description for \'view faq page\''),
-    ),
-    'edit own faq' => array(
-      'title' => t('edit own faq'),
-      'description' => t('TODO Add a description for \'edit own faq\''),
-    ),
-    'edit faq' => array(
-      'title' => t('edit faq'),
-      'description' => t('TODO Add a description for \'edit faq\''),
-    ),
-    'create faq' => array(
-      'title' => t('create faq'),
-      'description' => t('TODO Add a description for \'create faq\''),
+      'title' => t('Administer FAQ module'),
     ),
     'administer faq order' => array(
-      'title' => t('administer faq order'),
-      'description' => t('TODO Add a description for \'administer faq order\''),
+      'title' => t('Administer FAQ order'),
+    ),
+    'view faq page' => array(
+      'title' => t('View FAQ pages'),
+    ),
+    'edit own faq' => array(
+      'title' => t('Edit own FAQ nodes'),
+    ),
+    'edit faq' => array(
+      'title' => t('Edit own FAQ nodes'),
+    ),
+    'create faq' => array(
+      'title' => t('Create FAQ nodes'),
     ),
   );
 }
@@ -268,9 +262,14 @@ function faq_form(&$node, &$param) {
  *   The node object.
  */
 function faq_insert($node) {
-  // TODO Please convert this statement to the D7 database API syntax.
-  /* db_query("INSERT INTO {faq_questions} (nid, vid, question, detailed_question) VALUES(%d, %d, '%s', '%s')", $node->nid, $node->vid, $node->title, $node->detailed_question) */
-  $ret = NULL;
+  db_insert('faq_questions')
+    ->fields(array(
+      'nid' => $node->nid,
+      'vid' => $node->vid,
+      'question' => $node->title,
+      'detailed_question' => $node->detailed_question,
+    ))
+    ->execute();
 }
 
 /**
@@ -284,19 +283,17 @@ function faq_update($node) {
     faq_insert($node);
   }
   else {
-    // TODO Please review the conversion of this statement to the D7 database API syntax.
-    /* db_query("UPDATE {faq_questions} SET question = '%s', detailed_question = '%s' WHERE nid = %d AND vid = %d", $node->title, $node->detailed_question, $node->nid, $node->vid) */
-    db_update('faq_questions')
-  ->fields(array(
-      'question' => $node->title,
-      'detailed_question' => $node->detailed_question,
-    ))
-  ->condition('nid', $node->nid)
-  ->condition('vid', $node->vid)
-  ->execute();
-    if (!db_affected_rows()) {
-      faq_insert($node);
-    }
+    // Just to be safe, we do a merge query instead of an update query.
+    db_merge('faq_questions')
+      ->fields(array(
+        'question' => $node->title,
+        'detailed_question' => $node->detailed_question,
+      ))
+      ->key(array(
+        'nid' => $node->nid,
+        'vid' => $node->vid,
+      ))
+      ->execute();
   }
 }
 
@@ -306,14 +303,10 @@ function faq_update($node) {
  * @param &$node
  *   Which node to delete.
  */
-function faq_delete(&$node) {
-  // TODO Please review the conversion of this statement to the D7 database API syntax.
-  /* db_query("DELETE FROM {faq_weights} WHERE nid = '%d'", $node->nid) */
+function faq_delete($node) {
   db_delete('faq_weights')
   ->condition('nid', $node->nid)
   ->execute();
-  // TODO Please review the conversion of this statement to the D7 database API syntax.
-  /* db_query("DELETE FROM {faq_questions} WHERE nid = '%d'", $node->nid) */
   db_delete('faq_questions')
   ->condition('nid', $node->nid)
   ->execute();
@@ -329,7 +322,10 @@ function faq_delete(&$node) {
  */
 function faq_load($nodes) {
   foreach ($nodes as $nid => &$node) {
-    $result = db_fetch_object(db_query('SELECT question, detailed_question FROM {faq_questions} WHERE nid = :nid AND vid = :vid', array(':nid' => $node->nid, ':vid' => $node->vid)));
+    $result = db_query('SELECT question, detailed_question FROM {faq_questions} WHERE nid = :nid AND vid = :vid', array(
+      ':nid' => $node->nid,
+      ':vid' => $node->vid,
+    ))->fetchObject();
     if ($result && !drupal_match_path($_GET['q'], 'node/' . $node->nid . '/edit')) {
       $question_length = variable_get('faq_question_length', 'short');
       if ($question_length == 'long' && !empty($result->detailed_question)) {
@@ -349,12 +345,10 @@ function faq_load($nodes) {
  * Implements hook_node_revision_delete().
  */
 function faq_node_revision_delete($node) {
-  // TODO Please review the conversion of this statement to the D7 database API syntax.
-  /* db_query('DELETE FROM {faq_questions} WHERE nid = %d AND vid = %d', $node->nid, $node->vid) */
   db_delete('faq_questions')
-  ->condition('nid', $node->nid)
-  ->condition('vid', $node->vid)
-  ->execute();
+    ->condition('nid', $node->nid)
+    ->condition('vid', $node->vid)
+    ->execute();
 }
 
 /**
@@ -379,7 +373,7 @@ function faq_nodeapi_OLD(&$node, $op, $teaser, $page) { }
 function faq_view($node, $teaser = FALSE, $page = FALSE) {
   drupal_add_css(drupal_get_path('module', 'faq') . '/faq.css');
   $node = node_prepare($node, $teaser);
-  $node->detailed_question = check_markup($node->detailed_question, $node->format, $langcode = '' /* TODO Set this variable. */, FALSE);
+  $node->detailed_question = check_markup($node->detailed_question, $node->format);
   $content = $node->content['body']['#value'];
 
   if (!empty($node->detailed_question) && variable_get('faq_question_length', 'short') == 'both' && (variable_get('faq_display', 'questions_top') == 'hide_answer' || drupal_match_path($_GET['q'], 'node/' . $node->nid))) {
@@ -394,7 +388,7 @@ function faq_view($node, $teaser = FALSE, $page = FALSE) {
  */
 function faq_views_api() {
   return array(
-    'api' => 2,
+    'api' => 3,
     'path' => drupal_get_path('module', 'faq') . '/views',
   );
 }
@@ -488,23 +482,35 @@ function faq_page($tid = 0, $faq_display = '', $category_display = '') {
       return;
     }
     $default_sorting = variable_get('faq_default_sorting', 'DESC');
-    $default_weight = 0;
-    if ($default_sorting != 'DESC') {
-      $default_weight = 1000000;
-      // TODO Please convert this statement to the D7 database API syntax.
-      $result = db_query(db_rewrite_sql("SELECT n.nid, if((w.weight IS NULL), %d, w.weight) as weight, n.sticky, n.created FROM {node} n LEFT JOIN {faq_weights} w ON w.nid = n.nid WHERE n.type='faq' AND n.status = 1 AND (w.tid = 0 OR w.tid IS NULL) ORDER BY weight, n.sticky DESC, n.created ASC", "n", "nid"), $default_weight);
+
+    $query = db_select('node', 'n');
+    $weight_alias = $query->leftJoin('faq_weights', 'w', '%alias.nid=n.nid');
+    $query
+      ->addTag('node_access')
+      ->fields('n', array('nid'))
+      ->condition('n.type', 'faq')
+      ->condition('n.status', 1)
+      ->condition(db_or()->condition("$weight_alias.tid", 0)->isNull("$weight_alias.tid"))
+      ->orderBy('n.sticky', 'DESC')
+      ->orderBy('n.created');
+
+    if ($default_sorting == 'DESC') {
+      $query->orderBy('n.created', 'DESC');
+      $default_weight = 0;
     }
     else {
-      // TODO Please convert this statement to the D7 database API syntax.
-      $result = db_query(db_rewrite_sql("SELECT n.nid, if((w.weight IS NULL), %d, w.weight) as weight, n.sticky, n.created FROM {node} n LEFT JOIN {faq_weights} w ON w.nid = n.nid WHERE n.type='faq' AND n.status = 1 AND (w.tid = 0 OR w.tid IS NULL) ORDER BY weight, n.sticky DESC, n.created DESC", "n", "nid"), $default_weight);
+      $default_weight = 1000000;
+      $query->orderBy('n.created');
     }
-    $data = array();
-    while ($row = db_fetch_object($result)) {
-      $node = node_load($row->nid);
-      if (node_access('view', $node)) {
-        $data[] = $node;
-      }
-    }
+
+    $query->addExpression('if((w.weight IS NULL), :default_weight, w.weight)', 'weight', array(':default_weight' => $default_weight));
+    $query->orderBy('weight');
+
+
+    // We only want the first column, which is nid, so that we can load all
+    // related nodes.
+    $nids = $query->execute()->fetchCol();
+    $data = node_load_multiple($nids);
 
     switch ($faq_display) {
       case 'questions_top':
@@ -601,7 +607,7 @@ function faq_page($tid = 0, $faq_display = '', $category_display = '') {
   $faq_description = variable_get('faq_description', '');
   $format = variable_get('faq_description_format', 0);
   if ($format) {
-    $faq_description = check_markup($faq_description, $format, $langcode = '' /* TODO Set this variable. */, FALSE);
+    $faq_description = check_markup($faq_description, $format);
   }
   return theme('faq_page', array('content' => $output, 'answers' => $output_answers, 'description' => $faq_description));
 }
@@ -627,24 +633,35 @@ function faq_page($tid = 0, $faq_display = '', $category_display = '') {
 function _display_faq_by_category($faq_display, $category_display, $term, $display_header, &$output, &$output_answers) {
 
   $default_sorting = variable_get('faq_default_sorting', 'DESC');
-  $default_weight = 0;
-  if ($default_sorting != 'DESC') {
-    $default_weight = 1000000;
-    // TODO Please convert this statement to the D7 database API syntax.
-    $result = db_query(db_rewrite_sql("SELECT n.nid, if((w.weight IS NULL), %d, w.weight) as weight, n.sticky, n.created FROM {node} n INNER JOIN {taxonomy_term_node} tn ON (n.nid = tn.nid AND n.vid = tn.vid) LEFT JOIN {faq_weights} w ON w.tid = tn.tid AND n.nid = w.nid WHERE n.type='faq' AND n.status = 1 AND tn.tid = '%d' ORDER BY weight, n.sticky DESC, n.created ASC", "n", "nid"), $default_weight, $term->tid);
+
+  $query = db_select('node', 'n');
+  $tn_alias = $query->innerJoin('taxonomy_term_node', 'tn', '(n.nid = %alias.nid AND n.vid = %alias.vid)');
+  $w_alias = $query->leftJoin('faq_weights', 'w', "%alias.tid = {$tn_alias}.tid AND n.nid = %alias.nid");
+  $query
+    ->fields('n', array('nid'))
+    ->condition('n.type', 'faq')
+    ->condition('n.status', 1)
+    ->condition("{$tn_alias}.tid", $term->tid)
+    ->orderBy('weight')
+    ->orderBy('n.sticky', 'DESC')
+    ->addTag('node_access');
+
+  if ($default_sorting == 'DESC') {
+    $query->orderBy('n.created', 'DESC');
+    $default_weight = 0;
   }
   else {
-    // TODO Please convert this statement to the D7 database API syntax.
-    $result = db_query(db_rewrite_sql("SELECT n.nid, if((w.weight IS NULL), %d, w.weight) as weight, n.sticky, n.created FROM {node} n INNER JOIN {taxonomy_term_node} tn ON (n.nid = tn.nid AND n.vid = tn.vid) LEFT JOIN {faq_weights} w ON w.tid = tn.tid AND n.nid = w.nid WHERE n.type='faq' AND n.status = 1 AND tn.tid = '%d' ORDER BY weight, n.sticky DESC, n.created DESC", "n", "nid"), $default_weight, $term->tid);
-  }
-  $data = array();
-  while ($row = db_fetch_object($result)) {
-    $node = node_load($row->nid);
-    if (node_access('view', $node)) {
-      $data[] = $node;
-    }
+    $default_weight = 1000000;
+    $query->orderBy('n.created');
   }
 
+  $query->addExpression('if((w.weight IS NULL), :default_weight, w.weight)', 'weight', array(':default_weight' => $default_weight));
+  $query->orderBy('weight');
+
+  // We only want the first column, which is nid, so that we can load all
+  // related nodes.
+  $nids = $query->execute()->fetchCol();
+  $data = node_load_multiple($nids);
 
   // Handle indenting of categories.
   $depth = 0;
@@ -777,10 +794,9 @@ function faq_theme() {
  * Implements hook_block_info().
  */
 function faq_block_info() {
-  // TODO Rename block deltas (e.g. delta-0) to readable strings.
-  $blocks['delta-0']['info'] = t('FAQ Categories');
-  $blocks['delta-1']['info'] = t('Recent FAQs');
-  $blocks['delta-2']['info'] = t('Random FAQs');
+  $blocks['faq_categories']['info'] = t('FAQ Categories');
+  $blocks['faq_recent']['info'] = t('Recent FAQs');
+  $blocks['faq_random']['info'] = t('Random FAQs');
   return $blocks;
 }
 
@@ -788,11 +804,11 @@ function faq_block_info() {
  * Implements hook_block_view().
  */
 function faq_block_view($delta) {
-  // TODO Rename block deltas (e.g. delta-0) to readable strings.
+  static $vocabularies, $terms;
+
   $block = array();
   switch ($delta) {
-    case 'delta-0':
-      // FAQ Categories.
+    case 'faq_categories':
       if (module_exists('taxonomy')) {
         if (!isset($terms)) {
           $terms = array();
@@ -819,15 +835,12 @@ function faq_block_view($delta) {
       }
       break;
 
-
-    case 'delta-1':
-      // Recent FAQs.
+    case 'faq_recent':
       $block['subject'] = t('Recent FAQs');
       $block['content'] = faq_highlights_block(variable_get('faq_block_recent_faq_count', 5));
       break;
 
-    case 'delta-2':
-      // Random FAQs.
+    case 'faq_random':
       $block['subject'] = t('Random FAQs');
       $block['content'] = faq_random_highlights_block(variable_get('faq_block_random_faq_count', 5));
       break;
@@ -841,13 +854,11 @@ function faq_block_view($delta) {
  * Implements hook_block_configure().
  */
 function faq_block_configure($delta) {
-  // TODO Rename block deltas (e.g. delta-0) to readable strings.
   switch ($delta) {
-    case 'delta-0':
+    case 'faq_categories':
       return;
 
-    case 'delta-1':
-      // Recent FAQs.
+    case 'faq_recent':
       $form['faq_block_recent_faq_count'] = array(
         '#type' => 'textfield',
         '#title' => t('Number of FAQs to show'),
@@ -856,8 +867,7 @@ function faq_block_configure($delta) {
       );
       break;
 
-    case 'delta-2':
-      // Random FAQs.
+    case 'faq_random':
       $form['faq_block_random_faq_count'] = array(
         '#type' => 'textfield',
         '#title' => t('Number of FAQs to show'),
@@ -874,31 +884,19 @@ function faq_block_configure($delta) {
  * Implements hook_block_save().
  */
 function faq_block_save($delta, $edit) {
-  // TODO Rename block deltas (e.g. delta-0) to readable strings.
   switch ($delta) {
-    case 'delta-0':
+    case 'faq_categories':
       break;
 
-    case 'delta-1':
+    case 'faq_recent':
       variable_set('faq_block_recent_faq_count', $edit['faq_block_recent_faq_count']);
       break;
 
-    case 'delta-2':
+    case 'faq_random':
       variable_set('faq_block_random_faq_count', $edit['faq_block_random_faq_count']);
       break;
   } // End switch($delta).
   return;
-}
-
-/**
- * Implements hook_block().
- *
- * Create the code of the FAQ page providing three block types: FAQ Categories,
- * Recent FAQs and Random FAQs.
- */
-function faq_block_OLD($op = 'list', $delta = 0, $edit = array()) {
-  // TODO Remaining code in this function needs to be moved to the appropriate new hook function.
-  static $vocabularies, $terms; // End switch($op).
 }
 
 /**
@@ -912,12 +910,19 @@ function faq_block_OLD($op = 'list', $delta = 0, $edit = array()) {
 function faq_highlights_block($num = 5) {
   $disable_node_links = variable_get('faq_disable_node_links', FALSE);
 
-  // TODO Please convert this statement to the D7 database API syntax.
-  $result = db_query_range(db_rewrite_sql("SELECT n.nid, n.created FROM {node} n WHERE n.type='faq' AND n.status = 1 ORDER BY n.created DESC", "n", "nid"));
+  $nids = db_select('node', 'n')
+    ->fields('n', array('nid'))
+    ->condition('n.type', 'faq')
+    ->condition('n.status', 1)
+    ->addTag('node_access')
+    ->orderBy('n.created', 'DESC')
+    ->execute()
+    ->fetchCol();
+
+  $nodes = node_load_multiple($nids);
 
   $items = array();
-  while ($row = db_fetch_object($result)) {
-    $node = node_load($row->nid);
+  foreach ($nodes as $node) {
     $node = node_prepare($node);
     if (node_access('view', $node)) {
       if ($disable_node_links) {
@@ -928,8 +933,11 @@ function faq_highlights_block($num = 5) {
       }
     }
   }
+
   $list_style = variable_get('faq_question_listing', 'ul');
   $output = theme('item_list', array('items' => $items, 'title' => NULL, 'type' => $list_style));
+
+  // @todo: This is wrong. Fix it at some point. --LG
   $output .= '<div class="faq-all-faqs-link">' . l(t('All FAQs'), 'faq') . '</div>';
 
   return $output;
@@ -946,12 +954,19 @@ function faq_highlights_block($num = 5) {
 function faq_random_highlights_block($num = 5) {
   $disable_node_links = variable_get('faq_disable_node_links', FALSE);
 
-  // TODO Please convert this statement to the D7 database API syntax.
-  $result = db_query_range(db_rewrite_sql("SELECT n.nid FROM {node} n WHERE n.type='faq' AND n.status = 1 ORDER BY RAND()", "n", "nid"));
+  $nids = db_select('node', 'n')
+    ->fields('n', array('nid'))
+    ->condition('n.type', 'faq')
+    ->condition('n.status', 1)
+    ->addTag('node_access')
+    ->orderRandom()
+    ->execute()
+    ->fetchCol();
+
+  $nodes = node_load_multiple($nids);
 
   $items = array();
-  while ($row = db_fetch_object($result)) {
-    $node = node_load($row->nid);
+  foreach ($nodes as $node) {
     $node = node_prepare($node);
     if (node_access('view', $node)) {
       if ($disable_node_links) {
@@ -962,8 +977,11 @@ function faq_random_highlights_block($num = 5) {
       }
     }
   }
+
   $list_style = variable_get('faq_question_listing', 'ul');
   $output = theme('item_list', array('items' => $items, 'title' => NULL, 'type' => $list_style));
+
+  // @todo: This is wrong. Fix it at some point. --LG
   $output .= '<div class="faq-all-faqs-link">' . l(t('All FAQs'), 'faq') . '</div>';
 
   return $output;
@@ -1010,10 +1028,25 @@ function _get_indented_faq_terms($vid, $tid) {
 
       // See if this term has any nodes itself, should it be a link?
       // TODO Please convert this statement to the D7 database API syntax.
-      $result = db_query(db_rewrite_sql("SELECT COUNT(n.nid) AS c FROM {taxonomy_term_node} tn INNER JOIN {node} n ON (n.nid = tn.nid AND n.vid = tn.vid) WHERE n.status = 1 AND n.type = 'faq' AND tn.tid = '%d' ", "n", "nid"), $term->tid);
+      $result = db_query(db_rewrite_sql("SELECT COUNT(n.nid) AS c 
+        FROM {taxonomy_term_node} tn
+        INNER JOIN {node} n ON (n.nid = tn.nid AND n.vid = tn.vid)
+        WHERE n.status = 1 AND n.type = 'faq'
+          AND tn.tid = '%d' ", "n", "nid"), $term->tid);
       $term_node_count = db_fetch_object($result);
 
-      if ($term_node_count->c > 0) {
+      $query = db_select('node', 'n');
+      $tn_alias = $query->innerJoin('taxonomy_term_node', 'tn', '(n.nid = %alias.nid AND n.vid = %alias.vid)');
+      $term_node_count = $query
+        ->condition('n.status', 1)
+        ->condition('n.type', 'faq')
+        ->condition("{$tn_alias}.tid", $term->tid)
+        ->addTag('node_access')
+        ->countQuery()
+        ->execute()
+        ->fetchField();
+
+      if ($term_node_count > 0) {
         $path = "faq/$term->tid";
 
         if (!drupal_lookup_path('alias', arg(0) . '/' . $term->tid) && module_exists('pathauto')) {
@@ -1022,7 +1055,7 @@ function _get_indented_faq_terms($vid, $tid) {
         }
 
         if ($display_faq_count) {
-          $count = $term_node_count->c;
+          $count = $term_node_count;
           if ($hide_child_terms) {
             $count = $tree_count;
           }
@@ -1047,7 +1080,6 @@ function _get_indented_faq_terms($vid, $tid) {
         "data" => $cur_item,
         "children" => $term_items,
       );
-
     }
   }
 
@@ -1089,18 +1121,36 @@ function faq_get_faq_list() {
   // Otherwise return list of weighted FAQ nodes.
   $items = array();
   $default_sorting = variable_get('faq_default_sorting', 'DESC');
-  $default_weight = 0;
-  if ($default_sorting != 'DESC') {
-    $default_weight = 1000000;
-    // TODO Please convert this statement to the D7 database API syntax.
-    $result = db_query(db_rewrite_sql("SELECT n.nid, if((w.weight IS NULL), %d, w.weight) as weight, n.sticky, n.created FROM {node} n LEFT JOIN {faq_weights} w ON w.nid = n.nid WHERE n.type='faq' AND n.status = 1 AND (w.tid = 0 OR w.tid IS NULL) ORDER BY weight, n.sticky DESC, n.created ASC", "n", "nid"), $default_weight);
+
+  $query = db_select('node', 'n');
+  $w_alias = $query->leftJoin('faq_weights', 'w', "%alias.nid = n.nid");
+  $query
+    ->fields('n', array('nid'))
+    ->condition('n.type', 'faq')
+    ->condition('n.status', 1)
+    ->condition(db_or()->condition("{$w_alias}.tid", 0)->isNull("{$w_alias}.tid"))
+    ->orderBy('weight')
+    ->orderBy('n.sticky', 'DESC')
+    ->addTag('node_access');
+
+  if ($default_sorting == 'DESC') {
+    $query->orderBy('n.created', 'DESC');
+    $default_weight = 0;
   }
   else {
-    // TODO Please convert this statement to the D7 database API syntax.
-    $result = db_query(db_rewrite_sql("SELECT n.nid, if((w.weight IS NULL), %d, w.weight) as weight, n.sticky, n.created FROM {node} n LEFT JOIN {faq_weights} w ON w.nid = n.nid WHERE n.type='faq' AND n.status = 1 AND (w.tid = 0 OR w.tid IS NULL) ORDER BY weight, n.sticky DESC, n.created DESC", "n", "nid"), $default_weight);
+    $default_weight = 1000000;
+    $query->orderBy('n.created');
   }
-  while ($row = db_fetch_object($result)) {
-    $node = node_load($row->nid);
+
+  $query->addExpression('if((w.weight IS NULL), :default_weight, w.weight)', 'weight', array(':default_weight' => $default_weight));
+  $query->orderBy('weight');
+
+  // We only want the first column, which is nid, so that we can load all
+  // related nodes.
+  $nids = $query->execute()->fetchCol();
+  $nodes = node_load_multiple($nids);
+
+  foreach ($nodes as $node) {
     if (node_access('view', $node)) {
       $items[] = l($node->question, "node/$node->nid");
     }
@@ -1350,22 +1400,35 @@ function faq_get_child_categories_faqs($term, $theme_function, $default_weight, 
     $child_term->depth = $term->depth + 1;
 
     if (taxonomy_term_count_nodes($child_term->tid, 'faq')) {
+      $query = db_select('node', 'n');
+      $tn_alias = $query->innerJoin('taxonomy_term_node', 'tn', '(n.nid = %alias.nid AND n.vid = %alias.vid)');
+      $w_alias = $query->leftJoin('faq_weights', 'w', "%alias.tid = {$tn_alias}.tid AND n.nid = %alias.nid");
+      $query
+        ->fields('n', array('nid'))
+        ->condition('n.type', 'faq')
+        ->condition('n.status', 1)
+        ->condition("{$tn_alias}.tid", $child_term->tid)
+        ->orderBy('weight')
+        ->orderBy('n.sticky', 'DESC')
+        ->addTag('node_access');
+
       if ($default_sorting == 'DESC') {
-        // TODO Please convert this statement to the D7 database API syntax.
-        $result = db_query(db_rewrite_sql("SELECT n.nid, if((w.weight IS NULL), %d, w.weight) as weight, n.sticky, n.created FROM {node} n INNER JOIN {taxonomy_term_node} tn ON (n.nid = tn.nid AND n.vid = tn.vid) LEFT JOIN {faq_weights} w ON w.tid = tn.tid AND n.nid = w.nid WHERE n.type='faq' AND n.status = 1 AND tn.tid = '%d' ORDER BY weight, n.sticky DESC, n.created DESC", "n", "nid"), $default_weight, $child_term->tid);
+        $query->orderBy('n.created', 'DESC');
+        $default_weight = 0;
       }
       else {
-        // TODO Please convert this statement to the D7 database API syntax.
-        $result = db_query(db_rewrite_sql("SELECT n.nid, if((w.weight IS NULL), %d, w.weight) as weight, n.sticky, n.created FROM {node} n INNER JOIN {taxonomy_term_node} tn ON (n.nid = tn.nid AND n.vid = tn.vid) LEFT JOIN {faq_weights} w ON w.tid = tn.tid AND n.nid = w.nid WHERE n.type='faq' AND n.status = 1 AND tn.tid = '%d' ORDER BY weight, n.sticky DESC, n.created ASC", "n", "nid"), $default_weight, $child_term->tid);
+        $default_weight = 1000000;
+        $query->orderBy('n.created');
       }
 
-      $data = array();
-      while ($row = db_fetch_object($result)) {
-        $node = node_load($row->nid);
-        if (node_access('view', $node)) {
-          $data[] = $node;
-        }
-      }
+      $query->addExpression('if((w.weight IS NULL), :default_weight, w.weight)', 'weight', array(':default_weight' => $default_weight));
+      $query->orderBy('weight');
+
+      // We only want the first column, which is nid, so that we can load all
+      // related nodes.
+      $nids = $query->execute()->fetchCol();
+      $data = node_load_multiple($nids);
+
       // TODO Please change this theme call to use an associative array for the $variables parameter.
       $output[] = theme($theme_function, $data, 1, $category_display, $child_term, $class, $parent_term);
     }
@@ -1491,31 +1554,29 @@ function faq_tt($string_id, $default, $language = NULL) {
  * Implements hook_filter_info().
  */
 function faq_filter_info() {
-  $filters[0] = array(
-	'name' => t('Embed FAQ page'),
-	'no cache' => TRUE,
-	'description' => t('Embed FAQ page using [faq] type tags.  Disables filter caching so not recommended for all input formats.'),
-	'tips callback' => 'faq_filter_tips_0',
-);
+  $filters['faq_embed'] = array(
+    'name' => t('Embed FAQ page'),
+    'no cache' => TRUE,
+    'description' => t('Embed FAQ page using [faq] type tags.  Disables filter caching so not recommended for all input formats.'),
+    'tips callback' => 'faq_filter_tips_faq_embed',
+    'process callback' => '_faq_filter_process',
+  );
   return $filters;
 }
 
-/**
- * Implements hook_filter().
- */
-function faq_filter_XXX($op, $delta = 0, $format = -1, $text = '', $cache_id = 0) { }
+function _faq_filter_process($text) {
+  $text = preg_replace_callback('/\[faq:?([^\]]*)\]/', '_faq_faq_page_filter_replacer', $text);
+  // Remove comments, as they're not supported by all input formats.
+  $text = preg_replace('/<!--.*?-->/', '', $text);
+  return $text;
+}
 
 /**
  * Filter tips callback function for $filters[0] in hook_filter_info().
  */
-function faq_filter_tips_0($format, $long = FALSE) {
+function faq_filter_tips_faq_embed($format, $long = FALSE) {
   return t('[faq] or [faq:123,questions_inline,categories_inline] - insert FAQ content based on the optional category, question style and category style.');
 }
-
-/**
- * Implements hook_filter_tips().
- */
-function faq_filter_tips_XXX($format, $long = FALSE) { }
 
 /**
  * Helper function for faq input filter.
