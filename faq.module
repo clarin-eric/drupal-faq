@@ -220,21 +220,21 @@ function faq_node_info() {
  * @return
  *   The form elements in the $form array.
  */
-function faq_form(&$node, &$param) {
+function faq_form($node, $form_state) {
   $type = node_type_get_type($node);
 
-  // Short question.
-  $form['title'] = array(
-    '#type' => 'textfield',
-    '#title' => check_plain($type->title_label),
-    '#default_value' => $node->title,
-    '#required' => TRUE,
-    '#weight' => -2,
-    '#description' => t('Question to be answered.  This will appear in all question listings, such as the FAQ blocks.'),
-  );
+  // Set defaults.
+  if (empty($node->detailed_question)) {
+    $node->detailed_question = '';
+  }
+
+  $form = node_content_form($node, $form_state);
+
+  $form['title']['#description'] = t('Question to be answered.  This will appear in all question listings, such as the FAQ blocks.');
 
   // Detailed question.
   if (variable_get('faq_question_long_form', 1) || variable_get('faq_question_length', 'short') == 'long') {
+    dpm(__LINE__, __FUNCTION__);
     $form['detailed_question'] = array(
       '#type' => 'textarea',
       '#title' => t('Question details (optional)'),
@@ -247,6 +247,7 @@ function faq_form(&$node, &$param) {
 
   // Answer.
   if (!empty($type->body_label)) {
+    dpm(__LINE__, __FUNCTION__);
     $form['body_field'] = node_body_field($node, $type->body_label, $type->min_word_count);
     $form['body_field']['body']['#description'] = t('This is that answer to the question.  It will be filtered according to the input format.');
   }
@@ -352,33 +353,19 @@ function faq_node_revision_delete($node) {
 }
 
 /**
- * Implements hook_nodeapi().
- */
-function faq_nodeapi_OLD(&$node, $op, $teaser, $page) { }
-
-
-/**
  * Implements hook_view().
- *
- * @param $node
- *   Which node to show.
- * @param $teaser
- *   Boolean variable, if set to TRUE, it will show only a short part of the
- *   content.
- * @param $page
- *   Boolean variable, if set to TRUE, it will setup the breadcrumbs.
- * @return
- *   The node object.
  */
-function faq_view($node, $teaser = FALSE, $page = FALSE) {
+function faq_view($node, $view_mode) {
   drupal_add_css(drupal_get_path('module', 'faq') . '/faq.css');
-  $node = node_prepare($node, $teaser);
+
+  /*
   $node->detailed_question = check_markup($node->detailed_question, $node->format);
   $content = $node->content['body']['#value'];
 
   if (!empty($node->detailed_question) && variable_get('faq_question_length', 'short') == 'both' && (variable_get('faq_display', 'questions_top') == 'hide_answer' || drupal_match_path($_GET['q'], 'node/' . $node->nid))) {
     $node->content['body']['#value'] = '<div class="faq-detailed-question">' . $node->detailed_question . '</div>' . $content;
   }
+   */
 
   return $node;
 }
