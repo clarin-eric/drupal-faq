@@ -146,7 +146,7 @@ function faq_menu() {
     'weight' => -8,
   );
 
-  $items['admin/config/faq'] = array(
+  $items['admin/config/content/faq'] = array(
     'title' => 'Frequently Asked Questions',
     'description' => 'Allows the user to configure the layout of questions and answers on a FAQ page.',
     'file' => 'faq.admin.inc',
@@ -154,7 +154,7 @@ function faq_menu() {
     'access callback' => 'user_access',
     'access arguments' => array('administer faq'),
   );
-  $items['admin/config/faq/general'] = array(
+  $items['admin/config/content/faq/general'] = array(
     'title' => 'General',
     'description' => 'Allows the user to configure the header and descriptive text for the FAQ page.',
     'file' => 'faq.admin.inc',
@@ -165,7 +165,7 @@ function faq_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );
-  $items['admin/config/faq/questions'] = array(
+  $items['admin/config/content/faq/questions'] = array(
     'title' => 'Questions',
     'description' => 'Allows the user to configure the layout of questions and answers on a FAQ page.',
     'file' => 'faq.admin.inc',
@@ -176,7 +176,7 @@ function faq_menu() {
     'type' => MENU_LOCAL_TASK,
     'weight' => -9,
   );
-  $items['admin/config/faq/categories'] = array(
+  $items['admin/config/content/faq/categories'] = array(
     'title' => 'Categories',
     'description' => 'Allows the user to configure the layout of questions and answers using categories on a FAQ page.',
     'file' => 'faq.admin.inc',
@@ -234,7 +234,6 @@ function faq_form($node, $form_state) {
 
   // Detailed question.
   if (variable_get('faq_question_long_form', 1) || variable_get('faq_question_length', 'short') == 'long') {
-    dpm(__LINE__, __FUNCTION__);
     $form['detailed_question'] = array(
       '#type' => 'textarea',
       '#title' => t('Question details (optional)'),
@@ -247,9 +246,7 @@ function faq_form($node, $form_state) {
 
   // Answer.
   if (!empty($type->body_label)) {
-    dpm(__LINE__, __FUNCTION__);
-    $form['body_field'] = node_body_field($node, $type->body_label, $type->min_word_count);
-    $form['body_field']['body']['#description'] = t('This is that answer to the question.  It will be filtered according to the input format.');
+    field_attach_form('node', $node, $form, $form_state, $node->language);
   }
 
   return $form;
@@ -1267,6 +1264,7 @@ function faq_view_question(&$data, $node, $path = NULL, $anchor = NULL) {
       $question = l($node->title, "node/$node->nid", array("attributes" => array("name" => "$anchor", "id" => "$anchor")));
     }
   }
+  $question = '<span datatype="" property="dc:title">' . $question . '</span>';
 
   if (variable_get('faq_display', 'questions_top') != 'hide_answer' && !empty($node->detailed_question) && variable_get('faq_question_length', 'short') == 'both') {
     $question .= '<div class="faq-detailed-question">' . $node->detailed_question . '</div>';
@@ -1290,20 +1288,16 @@ function faq_view_question(&$data, $node, $path = NULL, $anchor = NULL) {
  */
 function faq_view_answer(&$data, $node, $back_to_top, $teaser, $links) {
 
+  $view_mode = $teaser ? 'teaser' : 'full';
+  $langcode = $GLOBALS['language_content']->language;
+
   // Build the faq node content and invoke other modules' links, etc, functions.
   $node = (object) $node;
-  $node = node_build_content($node, $teaser, 0);
-  if ($links) {
-    $node->links = module_invoke_all('link', 'node', $node, $teaser);
-    foreach (module_implements('link_alter') as $module) {
-      $function = $module . '_link_alter';
-      $function($node->links, $node);
-    }
-  }
+  node_build_content($node, $view_mode, $langcode);
 
   // Add "edit answer" link if they have the correct permissions.
   if (node_access('update', $node)) {
-    $node->links['faq_edit_link'] = array(
+    $node->content['links']['node']['#links']['faq_edit_link'] = array(
       'title' => t('Edit answer'),
       'href' => "node/$node->nid/edit",
       'query' => drupal_get_destination(),
@@ -1313,11 +1307,33 @@ function faq_view_answer(&$data, $node, $back_to_top, $teaser, $links) {
 
   // Add "back to top" link.
   if (!empty($back_to_top)) {
-    $node->links['faq_back_to_top'] = $back_to_top;
+    $node->content['links']['node']['#links']['faq_back_to_top'] = $back_to_top;
+  }
+  $build = $node->content;
+  // We don't need duplicate rendering info in node->content.
+  unset($node->content);
+
+  $build += array(
+    '#theme' => 'node', 
+    '#node' => $node, 
+    '#view_mode' => $view_mode, 
+    '#language' => $langcode,
+  );
+
+  // Add contextual links for this node.
+  if (!empty($node->nid) && !($view_mode == 'full' && node_is_page($node))) {
+    $build['#contextual_links']['node'] = array('node', array($node->nid));
   }
 
-  $content = drupal_render($node->content);
-  module_invoke_all('node_build_alter', $node, $teaser);
+  // Allow modules to modify the structured node.
+  $type = 'node';
+  drupal_alter(array('node_view', 'entity_view'), $build, $type);
+
+  $node_links = $build['links']['node']['#links'];
+  unset($build['links']);
+  unset($build['#theme']); // We don't want node title displayed.
+
+  $content = drupal_render($build);
 
   // Unset unused $node text so that a bad theme can not open a security hole.
   // $node->body = NULL;
@@ -1325,7 +1341,7 @@ function faq_view_answer(&$data, $node, $back_to_top, $teaser, $links) {
 
   $data['body'] = $content;
   if ($links) {
-    $data['links'] = theme('links', array('links' => $node->links));
+    $data['links'] = theme('links', array('links' => $node_links, 'attributes' => array('class' => 'links inline')));
   }
 }
 
@@ -1542,13 +1558,18 @@ function faq_tt($string_id, $default, $language = NULL) {
  */
 function faq_filter_info() {
   $filters['faq_embed'] = array(
-    'name' => t('Embed FAQ page'),
-    'no cache' => TRUE,
+    'title' => t('Embed FAQ page'),
+    'cache' => FALSE,
     'description' => t('Embed FAQ page using [faq] type tags.  Disables filter caching so not recommended for all input formats.'),
     'tips callback' => 'faq_filter_tips_faq_embed',
     'process callback' => '_faq_filter_process',
+    'settings callback' => '_faq_filter_settings',
   );
   return $filters;
+}
+
+function _faq_filter_settings($form, &$form_state, $filter, $format, $defaults, $filters) {
+  return array();
 }
 
 function _faq_filter_process($text) {
@@ -1620,6 +1641,7 @@ function theme_faq_draggable_question_order_table($variables) {
   $form = $variables['form'];
   drupal_add_tabledrag('question-sort', 'order', 'sibling', 'sort');
   $header = array('', t('Question'), '', t('Sort'));
+  $rows = array();
   foreach (element_children($form) as $key) {
     // Add class to group weight fields for drag and drop.
     $form[$key]['sort']['#attributes']['class'] = 'sort';
@@ -1630,7 +1652,7 @@ function theme_faq_draggable_question_order_table($variables) {
     $row[] = drupal_render($form[$key]['sort']);
     $rows[] = array(
       'data' => $row,
-      'class' => 'draggable',
+      'class' => array('draggable'),
     );
   }
   $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'question-sort')));

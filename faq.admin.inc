@@ -43,8 +43,9 @@ function faq_general_settings_form($form) {
     '#default_value' => variable_get('faq_description', ''),
     '#description' => t('Your FAQ description.  This will be placed at the top of the page, above the questions and can serve as an introductory text.'),
     '#rows' => 5,
+    '#format' => variable_get('faq_description_format', NULL),
   );
-  $form['body_filter']['faq_description_format'] = filter_form(variable_get('faq_description_format', ''), NULL, array('faq_description_format'));
+
   $form['faq_custom_breadcrumbs'] = array(
     '#type' => 'checkbox',
     '#title' => t('Create custom breadcrumbs for the FAQ'),
