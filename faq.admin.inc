@@ -367,7 +367,7 @@ function faq_order_settings_form($form, $form_state, $category = NULL) {
     foreach ($vocabularies as $vid => $vobj) {
       $tree = taxonomy_get_tree($vid);
       foreach ($tree as $term) {
-        if (!taxonomy_term_count_nodes($term->tid, 'faq')) {
+        if (!faq_taxonomy_term_count_nodes($term->tid)) {
           continue;
         }
         $options[$term->tid] = faq_tt("taxonomy:term:$term->tid:name", $term->name);

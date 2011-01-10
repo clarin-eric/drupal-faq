@@ -79,7 +79,7 @@ function template_preprocess_faq_category_hide_answer(&$variables) {
   // Get number of questions, and account for hidden sub-categories.
   $count = 0;
   if ($display_faq_count && $hide_child_terms) {
-    $count = taxonomy_term_count_nodes($term->tid, 'faq');
+    $count = faq_taxonomy_term_count_nodes($term->tid);
   }
   $variables['display_faq_count'] = $display_faq_count;
 

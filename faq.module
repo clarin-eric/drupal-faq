@@ -572,7 +572,7 @@ function faq_page($tid = 0, $faq_display = '', $category_display = '') {
 
             case 'hide_qa':
             case 'categories_inline':
-              if (taxonomy_term_count_nodes($term->tid, 'faq')) {
+              if (faq_taxonomy_term_count_nodes($term->tid)) {
                 _display_faq_by_category($faq_display, $category_display, $term, 1, $output, $output_answers);
               }
               break;
@@ -619,13 +619,13 @@ function _display_faq_by_category($faq_display, $category_display, $term, $displ
   $default_sorting = variable_get('faq_default_sorting', 'DESC');
 
   $query = db_select('node', 'n');
-  $tn_alias = $query->innerJoin('taxonomy_term_node', 'tn', '(n.nid = %alias.nid AND n.vid = %alias.vid)');
-  $w_alias = $query->leftJoin('faq_weights', 'w', "%alias.tid = {$tn_alias}.tid AND n.nid = %alias.nid");
+  $ti_alias = $query->innerJoin('taxonomy_index', 'ti', '(n.nid = %alias.nid)');
+  $w_alias = $query->leftJoin('faq_weights', 'w', "%alias.tid = {$ti_alias}.tid AND n.nid = %alias.nid");
   $query
     ->fields('n', array('nid'))
     ->condition('n.type', 'faq')
     ->condition('n.status', 1)
-    ->condition("{$tn_alias}.tid", $term->tid)
+    ->condition("{$ti_alias}.tid", $term->tid)
     ->orderBy('weight')
     ->orderBy('n.sticky', 'DESC')
     ->addTag('node_access');
@@ -801,7 +801,7 @@ function faq_block_view($delta) {
           $vocabularies = array_diff_key($vocabularies, $vocab_omit);
           foreach ($vocabularies as $vocab) {
             foreach (taxonomy_get_tree($vocab->vid) as $term) {
-              if (taxonomy_term_count_nodes($term->tid, 'faq')) {
+              if (faq_taxonomy_term_count_nodes($term->tid)) {
                 $terms[$term->name] = $term->tid;
               }
             }
@@ -994,7 +994,7 @@ function _get_indented_faq_terms($vid, $tid) {
 
   foreach ($tree as $term) {
 
-    $tree_count = taxonomy_term_count_nodes($term->tid, 'faq');
+    $tree_count = faq_taxonomy_term_count_nodes($term->tid);
 
     if ($tree_count) {
       // Get taxonomy image.
@@ -1189,7 +1189,7 @@ function faq_link_alter(&$links, $node) {
         continue;
       }
       foreach ($vocabularies as $vid => $vobj) {
-        if ($term->vid == $vid && taxonomy_term_count_nodes($term->tid, 'faq')) {
+        if ($term->vid == $vid && faq_taxonomy_term_count_nodes($term->tid)) {
           $links[$module]['href'] = str_replace('taxonomy/term', 'faq', $link['href']);
           break;
         }
@@ -1402,7 +1402,7 @@ function faq_get_child_categories_faqs($term, $theme_function, $default_weight, 
   foreach ($list as $tid => $child_term) {
     $child_term->depth = $term->depth + 1;
 
-    if (taxonomy_term_count_nodes($child_term->tid, 'faq')) {
+    if (faq_taxonomy_term_count_nodes($child_term->tid)) {
       $query = db_select('node', 'n');
       $tn_alias = $query->innerJoin('taxonomy_term_node', 'tn', '(n.nid = %alias.nid AND n.vid = %alias.vid)');
       $w_alias = $query->leftJoin('faq_weights', 'w', "%alias.tid = {$tn_alias}.tid AND n.nid = %alias.nid");
@@ -1454,7 +1454,7 @@ function faq_view_child_category_headers($term) {
   $list = taxonomy_get_children($term->tid);
 
   foreach ($list as $tid => $child_term) {
-    $term_node_count = taxonomy_term_count_nodes($child_term->tid, 'faq');
+    $term_node_count = faq_taxonomy_term_count_nodes($child_term->tid);
     if ($term_node_count) {
 
       // Get taxonomy image.
@@ -1609,6 +1609,16 @@ function _faq_faq_page_filter_replacer($matches) {
   }
 
   return faq_page($tid, $faq_display, $category_display);
+}
+
+function faq_taxonomy_term_count_nodes($tid) {
+  $query = db_select('node', 'n');
+  $query->fields('n', array('nid'));
+  $query->join('taxonomy_index', 'ti', 'n.nid = ti.nid');
+  $query->condition('n.type', 'faq');
+  $query->condition('ti.tid', $tid);
+  $num_nodes = $query->countQuery()->execute()->fetchField();
+  return $num_nodes;
 }
 
 /**
