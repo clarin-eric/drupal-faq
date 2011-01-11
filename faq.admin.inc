@@ -406,21 +406,25 @@ function faq_order_settings_form($form, $form_state, $category = NULL) {
       ->fields('n', array('nid', 'title'))
       ->addTag('node_access')
       ->condition('n.type', 'faq')
-      ->condition('n.status', 1)
-      ->orderBy('weight', 'DESC')
-      ->orderBy('n.sticky', 'DESC')
-      ->orderBy('n.created', $default_sorting == 'DESC' ? 'DESC' : 'ASC');
+      ->condition('n.status', 1);
 
     $query->addExpression('if((w.weight IS NULL), :default_weight, w.weight)', 'weight', array(':default_weight' => $default_weight));
 
     if (empty($category)) {
       $category = 0;
       $w_alias = $query->leftJoin('faq_weights', 'w', 'n.nid = %alias.nid AND %alias.tid = :category', array(':category' => $category));
+      $query->orderBy('weight', 'DESC')
+        ->orderBy('n.sticky', 'DESC')
+        ->orderBy('n.created', $default_sorting == 'DESC' ? 'DESC' : 'ASC');
     }
     // Categorized ordering.
     else {
       $ti_alias = $query->innerJoin('taxonomy_index', 'ti', '(n.nid = %alias.nid)');
       $w_alias = $query->leftJoin('faq_weights', 'w', 'n.nid = %alias.nid AND %alias.tid = :category', array(':category' => $category));
+      $query->condition('ti.tid', $category);
+      $query->orderBy('weight', 'DESC')
+        ->orderBy('n.sticky', 'DESC')
+        ->orderBy('n.created', $default_sorting == 'DESC' ? 'DESC' : 'ASC');
     }
 
     $options = $query->execute()->fetchAll();

@@ -624,7 +624,7 @@ function _display_faq_by_category($faq_display, $category_display, $term, $displ
     ->condition('n.type', 'faq')
     ->condition('n.status', 1)
     ->condition("{$ti_alias}.tid", $term->tid)
-    ->orderBy('weight')
+    ->orderBy('weight', 'DESC')
     ->orderBy('n.sticky', 'DESC')
     ->addTag('node_access');
 
@@ -638,7 +638,6 @@ function _display_faq_by_category($faq_display, $category_display, $term, $displ
   }
 
   $query->addExpression('if((w.weight IS NULL), :default_weight, w.weight)', 'weight', array(':default_weight' => $default_weight));
-  $query->orderBy('weight');
 
   // We only want the first column, which is nid, so that we can load all
   // related nodes.
