@@ -1149,7 +1149,7 @@ function faq_get_faq_list() {
  function faq_site_map() {
  $title = variable_get('faq_title', 'Frequently Asked Questions');
  $output = faq_get_faq_list();
- return theme('box', $title, $output);
+ return theme('box', array('title' => $title, 'output' => $output));
  }
  */
 
