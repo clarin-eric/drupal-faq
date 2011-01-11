@@ -407,7 +407,7 @@ function faq_order_settings_form($form, $form_state, $category = NULL) {
       ->addTag('node_access')
       ->condition('n.type', 'faq')
       ->condition('n.status', 1)
-      ->orderBy('weight', 'ASC')
+      ->orderBy('weight', 'DESC')
       ->orderBy('n.sticky', 'DESC')
       ->orderBy('n.created', $default_sorting == 'DESC' ? 'DESC' : 'ASC');
 
@@ -419,11 +419,11 @@ function faq_order_settings_form($form, $form_state, $category = NULL) {
     }
     // Categorized ordering.
     else {
-      $tn_alias = $query->innerJoin('taxonomy_term_node', 'tn', '(n.nid = %alias.nid AND n.vid = %alias.vid)');
+      $ti_alias = $query->innerJoin('taxonomy_index', 'ti', '(n.nid = %alias.nid)');
       $w_alias = $query->leftJoin('faq_weights', 'w', 'n.nid = %alias.nid AND %alias.tid = :category', array(':category' => $category));
     }
 
-    $options = $query->execute()->fetchAllKeyed();
+    $options = $query->execute()->fetchAll();
 
     $form['weight']['faq_category'] = array(
       '#type' => 'value',
@@ -435,12 +435,12 @@ function faq_order_settings_form($form, $form_state, $category = NULL) {
     $form['order_no_cats']['#theme'] = 'faq_draggable_question_order_table';
 
     $i = 0;
-    foreach ($options as $nid => $title) {
+    foreach ($options as $record) {
       $form['order_no_cats'][$i]['nid'] = array(
         '#type' => 'hidden',
-        '#value' => $nid,
+        '#value' => $record->nid,
       );
-      $form['order_no_cats'][$i]['title'] = array('#value' => $title);
+      $form['order_no_cats'][$i]['title'] = array('#markup' => $record->title);
       $form['order_no_cats'][$i]['sort'] = array(
         '#type' => 'weight',
         '#delta' => count($options),

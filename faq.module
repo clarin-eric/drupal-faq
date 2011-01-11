@@ -44,7 +44,7 @@ function faq_permission() {
       'title' => t('Edit own FAQ nodes'),
     ),
     'edit faq' => array(
-      'title' => t('Edit own FAQ nodes'),
+      'title' => t('Edit all FAQ nodes'),
     ),
     'create faq' => array(
       'title' => t('Create FAQ nodes'),
@@ -475,8 +475,8 @@ function faq_page($tid = 0, $faq_display = '', $category_display = '') {
       ->condition('n.type', 'faq')
       ->condition('n.status', 1)
       ->condition(db_or()->condition("$weight_alias.tid", 0)->isNull("$weight_alias.tid"))
-      ->orderBy('n.sticky', 'DESC')
-      ->orderBy('n.created');
+      ->orderBy('weight', 'DESC')
+      ->orderBy('n.sticky', 'DESC');
 
     if ($default_sorting == 'DESC') {
       $query->orderBy('n.created', 'DESC');
@@ -488,11 +488,9 @@ function faq_page($tid = 0, $faq_display = '', $category_display = '') {
     }
 
     $query->addExpression('if((w.weight IS NULL), :default_weight, w.weight)', 'weight', array(':default_weight' => $default_weight));
-    $query->orderBy('weight');
 
 
-    // We only want the first column, which is nid, so that we can load all
-    // related nodes.
+    // Only need the nid column.
     $nids = $query->execute()->fetchCol();
     $data = node_load_multiple($nids);
 
@@ -712,7 +710,7 @@ function faq_theme() {
   $path = drupal_get_path('module', 'faq') . '/includes';
   return array(
     'faq_draggable_question_order_table' => array(
-      'render element' => array('form' => NULL),
+      'render element' => 'form',
     ),
     'faq_questions_top' => array(
       'path' => $path,
@@ -1011,20 +1009,12 @@ function _get_indented_faq_terms($vid, $tid) {
       }
 
       // See if this term has any nodes itself, should it be a link?
-      // TODO Please convert this statement to the D7 database API syntax.
-      $result = db_query(db_rewrite_sql("SELECT COUNT(n.nid) AS c 
-        FROM {taxonomy_term_node} tn
-        INNER JOIN {node} n ON (n.nid = tn.nid AND n.vid = tn.vid)
-        WHERE n.status = 1 AND n.type = 'faq'
-          AND tn.tid = '%d' ", "n", "nid"), $term->tid);
-      $term_node_count = db_fetch_object($result);
-
       $query = db_select('node', 'n');
-      $tn_alias = $query->innerJoin('taxonomy_term_node', 'tn', '(n.nid = %alias.nid AND n.vid = %alias.vid)');
+      $ti_alias = $query->innerJoin('taxonomy_index', 'ti', '(n.nid = %alias.nid)');
       $term_node_count = $query
         ->condition('n.status', 1)
         ->condition('n.type', 'faq')
-        ->condition("{$tn_alias}.tid", $term->tid)
+        ->condition("{$ti_alias}.tid", $term->tid)
         ->addTag('node_access')
         ->countQuery()
         ->execute()
@@ -1404,13 +1394,13 @@ function faq_get_child_categories_faqs($term, $theme_function, $default_weight, 
 
     if (faq_taxonomy_term_count_nodes($child_term->tid)) {
       $query = db_select('node', 'n');
-      $tn_alias = $query->innerJoin('taxonomy_term_node', 'tn', '(n.nid = %alias.nid AND n.vid = %alias.vid)');
-      $w_alias = $query->leftJoin('faq_weights', 'w', "%alias.tid = {$tn_alias}.tid AND n.nid = %alias.nid");
+      $ti_alias = $query->innerJoin('taxonomy_index', 'ti', '(n.nid = %alias.nid)');
+      $w_alias = $query->leftJoin('faq_weights', 'w', "%alias.tid = {$ti_alias}.tid AND n.nid = %alias.nid");
       $query
         ->fields('n', array('nid'))
         ->condition('n.type', 'faq')
         ->condition('n.status', 1)
-        ->condition("{$tn_alias}.tid", $child_term->tid)
+        ->condition("{$ti_alias}.tid", $child_term->tid)
         ->orderBy('weight')
         ->orderBy('n.sticky', 'DESC')
         ->addTag('node_access');
@@ -1432,8 +1422,7 @@ function faq_get_child_categories_faqs($term, $theme_function, $default_weight, 
       $nids = $query->execute()->fetchCol();
       $data = node_load_multiple($nids);
 
-      // TODO Please change this theme call to use an associative array for the $variables parameter.
-      $output[] = theme($theme_function, $data, 1, $category_display, $child_term, $class, $parent_term);
+      $output[] = theme($theme_function, array('data' => $data, 'display_header' => 1, 'category_display' => $category_display, 'term' => $child_term, 'class' => $class, 'parent_term' => $parent_term));
     }
   }
 
@@ -1654,7 +1643,7 @@ function theme_faq_draggable_question_order_table($variables) {
   $rows = array();
   foreach (element_children($form) as $key) {
     // Add class to group weight fields for drag and drop.
-    $form[$key]['sort']['#attributes']['class'] = 'sort';
+    $form[$key]['sort']['#attributes']['class'] = array('sort');
 
     $row = array('');
     $row[] = drupal_render($form[$key]['title']);
