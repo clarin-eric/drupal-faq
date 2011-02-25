@@ -1,4 +1,3 @@
-/* $Id$ */
 
 (function ($) {
   function teaser_handler(event) {
