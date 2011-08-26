@@ -1319,7 +1319,7 @@ function faq_view_answer(&$data, $node, $back_to_top, $teaser, $links) {
   $type = 'node';
   drupal_alter(array('node_view', 'entity_view'), $build, $type);
 
-  $node_links = $build['links']['node']['#links'];
+  $node_links = ($links ? $build['links']['node']['#links'] : (!empty($back_to_top) ? array($build['links']['node']['#links']['faq_back_to_top']) : NULL));
   unset($build['links']);
   unset($build['#theme']); // We don't want node title displayed.
 
@@ -1330,9 +1330,7 @@ function faq_view_answer(&$data, $node, $back_to_top, $teaser, $links) {
   // $node->teaser = NULL;
 
   $data['body'] = $content;
-  if ($links) {
-    $data['links'] = theme('links', array('links' => $node_links, 'attributes' => array('class' => 'links inline')));
-  }
+  $data['links'] = !empty($node_links) ? theme('links', array('links' => $node_links, 'attributes' => array('class' => 'links inline'))) : '';
 }
 
 /**
