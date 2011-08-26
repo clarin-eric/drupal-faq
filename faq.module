@@ -903,7 +903,7 @@ function faq_highlights_block($num = 5) {
 
   $items = array();
   foreach ($nodes as $node) {
-    $node = node_prepare($node);
+    node_object_prepare($node);
     if (node_access('view', $node)) {
       if ($disable_node_links) {
         $items[] = l($node->question, 'faq', array('fragment' => 'n' . $node->nid));
@@ -947,7 +947,7 @@ function faq_random_highlights_block($num = 5) {
 
   $items = array();
   foreach ($nodes as $node) {
-    $node = node_prepare($node);
+    node_object_prepare($node);
     if (node_access('view', $node)) {
       if ($disable_node_links) {
         $items[] = l($node->question, 'faq', array('fragment' => 'n' . $node->nid));
