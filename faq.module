@@ -424,10 +424,10 @@ function faq_page($tid = 0, $faq_display = '', $category_display = '') {
 
   // Configure the breadcrumb trail.
   if (!empty($tid) && $current_term = taxonomy_term_load($tid)) {
-    if (!drupal_lookup_path('alias', arg(0) . '/' . arg(1)) && module_exists('pathauto')) {
-      $placeholders = pathauto_get_placeholders('taxonomy', taxonomy_term_load($tid));
-      if ($alias = pathauto_create_alias('faq', 'insert', $placeholders, arg(0) . '/' . arg(1), arg(1))) {
-        drupal_goto($alias);
+    if (!drupal_lookup_path('alias', arg(0) . '/' . $tid) && module_exists('pathauto')) {
+      $alias = pathauto_create_alias('faq', 'insert', arg(0) . '/' . arg(1), array('term' => $current_term));
+      if ($alias) {
+        drupal_goto($alias['alias']);
       }
     }
     if (drupal_match_path($_GET['q'], 'faq/*')) {
@@ -1022,8 +1022,10 @@ function _get_indented_faq_terms($vid, $tid) {
         $path = "faq/$term->tid";
 
         if (!drupal_lookup_path('alias', arg(0) . '/' . $term->tid) && module_exists('pathauto')) {
-          $placeholders = pathauto_get_placeholders('taxonomy', $term);
-          $path = pathauto_create_alias('faq', 'insert', $placeholders, arg(0) . '/' . $term->tid, $term->tid);
+          $alias = pathauto_create_alias('faq', 'insert', arg(0) . '/' . $term->tid, array('term' => $term));
+          if ($alias) {
+            $path = $alias['alias'];
+          }
         }
 
         if ($display_faq_count) {
