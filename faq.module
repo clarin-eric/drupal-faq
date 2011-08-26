@@ -1471,7 +1471,7 @@ function faq_pathauto($op) {
       $settings['module'] = 'faq';
       $settings['groupheader'] = t('FAQ category path settings');
       $settings['patterndescr'] = t('Default path pattern (applies to all FAQ categories with blank patterns below)');
-      $settings['patterndefault'] = t('faq/[term:vocabulary]');
+      $settings['patterndefault'] = t('faq/[term:tid]');
       $settings['token_type'] = 'term';
 
       return (object) $settings;
