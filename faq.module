@@ -558,10 +558,10 @@ function faq_page($tid = 0, $faq_display = '', $category_display = '') {
       // Not a new page.
       else {
         if ($hide_child_terms && $category_display == 'hide_qa') {
-          $tree = taxonomy_get_tree($vid, 0, 1);
+          $tree = taxonomy_get_tree($vid, 0, 1, TRUE);
         }
         else {
-          $tree = taxonomy_get_tree($vid);
+          $tree = taxonomy_get_tree($vid, 0, NULL, TRUE);
         }
         foreach ($tree as $term) {
 
@@ -986,7 +986,7 @@ function _get_indented_faq_terms($vid, $tid) {
   $hide_child_terms = variable_get('faq_hide_child_terms', FALSE);
 
   $items = array();
-  $tree = taxonomy_get_tree($vid, $tid, 1);
+  $tree = taxonomy_get_tree($vid, $tid, 1, TRUE);
 
   foreach ($tree as $term) {
 
