@@ -770,6 +770,12 @@ function faq_theme() {
     'faq_page' => array(
       'variables' => array('content' => '', 'answers' => '', 'description' => NULL),
     ),
+    'faq_highlights_block' => array(
+      'variables' => array('items' => NULL),
+    ),
+    'faq_random_highlights_block' => array(
+      'variables' => array('items' => NULL),
+    ),
   );
 }
 
@@ -917,13 +923,7 @@ function faq_highlights_block($num = 5) {
     }
   }
 
-  $list_style = variable_get('faq_question_listing', 'ul');
-  $output = theme('item_list', array('items' => $items, 'title' => NULL, 'type' => $list_style));
-
-  // @todo: This is wrong. Fix it at some point. --LG
-  $output .= '<div class="faq-all-faqs-link">' . l(t('All FAQs'), 'faq') . '</div>';
-
-  return $output;
+  return theme('faq_highlights_block', array('items' => $items));
 }
 
 /**
@@ -961,13 +961,7 @@ function faq_random_highlights_block($num = 5) {
     }
   }
 
-  $list_style = variable_get('faq_question_listing', 'ul');
-  $output = theme('item_list', array('items' => $items, 'title' => NULL, 'type' => $list_style));
-
-  // @todo: This is wrong. Fix it at some point. --LG
-  $output .= '<div class="faq-all-faqs-link">' . l(t('All FAQs'), 'faq') . '</div>';
-
-  return $output;
+  return theme('faq_random_highlights_block', array('items' => $items));
 }
 
 /**
@@ -1649,6 +1643,28 @@ function theme_faq_draggable_question_order_table($variables) {
   }
   $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'question-sort')));
   $output .= drupal_render_children($form);
+  return $output;
+}
+
+/**
+ * Theme function for Recent FAQs block.
+ */
+function theme_faq_highlights_block($variables) {
+  $items = $variables['items'];
+  $list_style = variable_get('faq_question_listing', 'ul');
+  $output = theme('item_list', array('items' => $items, 'title' => NULL, 'type' => $list_style));
+  $output .= '<div class="faq-all-faqs-link">' . l(t('All FAQs'), 'faq') . '</div>';
+  return $output;
+}
+
+/**
+ * Theme function for Random FAQs block.
+ */
+function theme_faq_random_highlights_block($variables) {
+  $items = $variables['items'];
+  $list_style = variable_get('faq_question_listing', 'ul');
+  $output = theme('item_list', array('items' => $items, 'title' => NULL, 'type' => $list_style));
+  $output .= '<div class="faq-all-faqs-link">' . l(t('All FAQs'), 'faq') . '</div>';
   return $output;
 }
 
