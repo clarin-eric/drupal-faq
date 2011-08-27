@@ -66,7 +66,7 @@ function faq_schema() {
       'detailed_question' => array(
         'type' => 'text',
         'size' => 'normal',
-        'not null' => TRUE,
+        'not null' => FALSE,
         'description' => 'The faq long question text.',
       ),
     ),
@@ -239,5 +239,13 @@ function faq_update_6003() {
     ->execute();
 
   return t('Detailed question column added.  Existing nodes have been given the same detailed question as current question.');
+}
+
+/**
+ * Make'detailed_question' column nullable.
+ */
+function faq_update_7000() {
+  db_change_field('faq_questions', 'detailed_question', 'detailed_question', array('type' => 'text', 'size' => 'normal', 'not null' => FALSE));
+  return t('Detailed question field can now be null.');
 }
 
