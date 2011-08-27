@@ -456,7 +456,6 @@ function faq_order_settings_form($form, $form_state, $category = NULL) {
       '#type' => 'submit',
       '#value' => t('Save order'),
       '#weight' => 3,
-      '#attributes' => array('onclick' => 'faq_update_order();'),
       '#submit' => array('faq_order_settings_reorder_form_submit'),
     );
   }
