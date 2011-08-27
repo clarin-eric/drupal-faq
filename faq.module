@@ -39,15 +39,6 @@ function faq_permission() {
     'view faq page' => array(
       'title' => t('View FAQ pages'),
     ),
-    'edit own faq' => array(
-      'title' => t('Edit own FAQ nodes'),
-    ),
-    'edit faq' => array(
-      'title' => t('Edit all FAQ nodes'),
-    ),
-    'create faq' => array(
-      'title' => t('Create FAQ nodes'),
-    ),
   );
 }
 
@@ -60,23 +51,23 @@ function faq_node_access($node, $op, $account = NULL) {
   if (empty($account)) {
     $account = $user;
   }
+  // Ignore non-FAQ node.
+  if ((is_object($node) ? $node->type : $node) !== 'faq') {
+    return NODE_ACCESS_IGNORE;
+  }
 
   if ($op != 'create') {
     $node = (object) $node;
   }
-  if ($op == 'create') {
-    if (user_access('create faq') || user_access('administer faq')) {
-      return TRUE;
+  if ($op == 'view') {
+    return NODE_ACCESS_IGNORE;
+  }
+  elseif ($op == 'create' || $op == 'update' || $op == 'delete') {
+    if (user_access('administer faq')) {
+      return NODE_ACCESS_ALLOW;
     }
   }
-  elseif ($op == 'update' || $op == 'delete') {
-    if (user_access('edit faq') || user_access('administer faq')) {
-      return TRUE;
-    }
-    elseif (user_access('edit own faq') && $account->uid == $node->uid) {
-      return TRUE;
-    }
-  }
+  return NODE_ACCESS_IGNORE;
 }
 
 /**
