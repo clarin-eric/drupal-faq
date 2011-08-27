@@ -474,19 +474,20 @@ function faq_page($tid = 0, $faq_display = '', $category_display = '') {
       ->condition('n.type', 'faq')
       ->condition('n.status', 1)
       ->condition(db_or()->condition("$weight_alias.tid", 0)->isNull("$weight_alias.tid"))
-      ->orderBy('weight', 'ASC')
       ->orderBy('n.sticky', 'DESC');
 
-    if ($default_sorting == 'DESC') {
-      $query->orderBy('n.created', 'DESC');
-      $default_weight = 0;
+    $default_weight = 0;
+    if ($default_sorting == 'ASC') {
+      $default_weight = 1000000;
+    }
+    $query->addExpression('COALESCE(w.weight, CAST(:default_weight as SIGNED))', 'effective_weight', array(':default_weight' => $default_weight));
+    $query->orderBy('effective_weight', 'ASC');
+    if ($default_sorting == 'ASC') {
+      $query->orderBy('n.created', 'ASC');
     }
     else {
-      $default_weight = 1000000;
-      $query->orderBy('n.created');
+      $query->orderBy('n.created', 'DESC');
     }
-
-    $query->addExpression('if((w.weight IS NULL), CAST(:default_weight as SIGNED), w.weight)', 'weight', array(':default_weight' => $default_weight));
 
 
     // Only need the nid column.
@@ -623,20 +624,22 @@ function _display_faq_by_category($faq_display, $category_display, $term, $displ
     ->condition('n.type', 'faq')
     ->condition('n.status', 1)
     ->condition("{$ti_alias}.tid", $term->tid)
-    ->orderBy('weight', 'ASC')
     ->orderBy('n.sticky', 'DESC')
     ->addTag('node_access');
 
-  if ($default_sorting == 'DESC') {
-    $query->orderBy('n.created', 'DESC');
-    $default_weight = 0;
+  $default_weight = 0;
+  if ($default_sorting == 'ASC') {
+    $default_weight = 1000000;
+  }
+  $query->addExpression('COALESCE(w.weight, CAST(:default_weight as SIGNED))', 'effective_weight', array(':default_weight' => $default_weight));
+  $query->orderBy('effective_weight', 'ASC');
+  if ($default_sorting == 'ASC') {
+    $query->orderBy('n.created', 'ASC');
   }
   else {
-    $default_weight = 1000000;
-    $query->orderBy('n.created');
+    $query->orderBy('n.created', 'DESC');
   }
 
-  $query->addExpression('if((w.weight IS NULL), CAST(:default_weight as SIGNED), w.weight)', 'weight', array(':default_weight' => $default_weight));
 
   // We only want the first column, which is nid, so that we can load all
   // related nodes.
@@ -1103,21 +1106,21 @@ function faq_get_faq_list() {
     ->condition('n.type', 'faq')
     ->condition('n.status', 1)
     ->condition(db_or()->condition("{$w_alias}.tid", 0)->isNull("{$w_alias}.tid"))
-    ->orderBy('weight', 'ASC')
     ->orderBy('n.sticky', 'DESC')
     ->addTag('node_access');
 
-  if ($default_sorting == 'DESC') {
-    $query->orderBy('n.created', 'DESC');
-    $default_weight = 0;
+  $default_weight = 0;
+  if ($default_sorting == 'ASC') {
+    $default_weight = 1000000;
+  }
+  $query->addExpression('COALESCE(w.weight, CAST(:default_weight as SIGNED))', 'effective_weight', array(':default_weight' => $default_weight));
+  $query->orderBy('effective_weight', 'ASC');
+  if ($default_sorting == 'ASC') {
+    $query->orderBy('n.created', 'ASC');
   }
   else {
-    $default_weight = 1000000;
-    $query->orderBy('n.created');
+    $query->orderBy('n.created', 'DESC');
   }
-
-  $query->addExpression('if((w.weight IS NULL), CAST(:default_weight as SIGNED), w.weight)', 'weight', array(':default_weight' => $default_weight));
-  $query->orderBy('weight', 'ASC');
 
   // We only want the first column, which is nid, so that we can load all
   // related nodes.
@@ -1399,21 +1402,21 @@ function faq_get_child_categories_faqs($term, $theme_function, $default_weight, 
         ->condition('n.type', 'faq')
         ->condition('n.status', 1)
         ->condition("{$ti_alias}.tid", $child_term->tid)
-        ->orderBy('weight', 'ASC')
         ->orderBy('n.sticky', 'DESC')
         ->addTag('node_access');
 
-      if ($default_sorting == 'DESC') {
-        $query->orderBy('n.created', 'DESC');
-        $default_weight = 0;
+      $default_weight = 0;
+      if ($default_sorting == 'ASC') {
+        $default_weight = 1000000;
+      }
+      $query->addExpression('COALESCE(w.weight, CAST(:default_weight as SIGNED))', 'effective_weight', array(':default_weight' => $default_weight));
+      $query->orderBy('effective_weight', 'ASC');
+      if ($default_sorting == 'ASC') {
+        $query->orderBy('n.created', 'ASC');
       }
       else {
-        $default_weight = 1000000;
-        $query->orderBy('n.created');
+        $query->orderBy('n.created', 'DESC');
       }
-
-      $query->addExpression('if((w.weight IS NULL), CAST(:default_weight as SIGNED), w.weight)', 'weight', array(':default_weight' => $default_weight));
-      $query->orderBy('weight', 'ASC');
 
       // We only want the first column, which is nid, so that we can load all
       // related nodes.

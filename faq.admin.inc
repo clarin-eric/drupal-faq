@@ -407,12 +407,12 @@ function faq_order_settings_form($form, $form_state, $category = NULL) {
       ->condition('n.type', 'faq')
       ->condition('n.status', 1);
 
-    $query->addExpression('if((w.weight IS NULL), CAST(:default_weight as SIGNED), w.weight)', 'weight', array(':default_weight' => $default_weight));
+    $query->addExpression('COALESCE(w.weight, CAST(:default_weight as SIGNED))', 'effective_weight', array(':default_weight' => $default_weight));
 
     if (empty($category)) {
       $category = 0;
       $w_alias = $query->leftJoin('faq_weights', 'w', 'n.nid = %alias.nid AND %alias.tid = :category', array(':category' => $category));
-      $query->orderBy('weight', 'ASC')
+      $query->orderBy('effective_weight', 'ASC')
         ->orderBy('n.sticky', 'DESC')
         ->orderBy('n.created', $default_sorting == 'DESC' ? 'DESC' : 'ASC');
     }
@@ -421,7 +421,7 @@ function faq_order_settings_form($form, $form_state, $category = NULL) {
       $ti_alias = $query->innerJoin('taxonomy_index', 'ti', '(n.nid = %alias.nid)');
       $w_alias = $query->leftJoin('faq_weights', 'w', 'n.nid = %alias.nid AND %alias.tid = :category', array(':category' => $category));
       $query->condition('ti.tid', $category);
-      $query->orderBy('weight', 'ASC')
+      $query->orderBy('effective_weight', 'ASC')
         ->orderBy('n.sticky', 'DESC')
         ->orderBy('n.created', $default_sorting == 'DESC' ? 'DESC' : 'ASC');
     }
