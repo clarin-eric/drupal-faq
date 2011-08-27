@@ -473,15 +473,15 @@ function faq_page($tid = 0, $faq_display = '', $category_display = '') {
       ->fields('n', array('nid'))
       ->condition('n.type', 'faq')
       ->condition('n.status', 1)
-      ->condition(db_or()->condition("$weight_alias.tid", 0)->isNull("$weight_alias.tid"))
-      ->orderBy('n.sticky', 'DESC');
+      ->condition(db_or()->condition("$weight_alias.tid", 0)->isNull("$weight_alias.tid"));
 
     $default_weight = 0;
     if ($default_sorting == 'ASC') {
       $default_weight = 1000000;
     }
     $query->addExpression('COALESCE(w.weight, CAST(:default_weight as SIGNED))', 'effective_weight', array(':default_weight' => $default_weight));
-    $query->orderBy('effective_weight', 'ASC');
+    $query->orderBy('effective_weight', 'ASC')
+          ->orderBy('n.sticky', 'DESC');
     if ($default_sorting == 'ASC') {
       $query->orderBy('n.created', 'ASC');
     }
@@ -624,7 +624,6 @@ function _display_faq_by_category($faq_display, $category_display, $term, $displ
     ->condition('n.type', 'faq')
     ->condition('n.status', 1)
     ->condition("{$ti_alias}.tid", $term->tid)
-    ->orderBy('n.sticky', 'DESC')
     ->addTag('node_access');
 
   $default_weight = 0;
@@ -632,7 +631,8 @@ function _display_faq_by_category($faq_display, $category_display, $term, $displ
     $default_weight = 1000000;
   }
   $query->addExpression('COALESCE(w.weight, CAST(:default_weight as SIGNED))', 'effective_weight', array(':default_weight' => $default_weight));
-  $query->orderBy('effective_weight', 'ASC');
+  $query->orderBy('effective_weight', 'ASC')
+        ->orderBy('n.sticky', 'DESC');
   if ($default_sorting == 'ASC') {
     $query->orderBy('n.created', 'ASC');
   }
@@ -1106,7 +1106,6 @@ function faq_get_faq_list() {
     ->condition('n.type', 'faq')
     ->condition('n.status', 1)
     ->condition(db_or()->condition("{$w_alias}.tid", 0)->isNull("{$w_alias}.tid"))
-    ->orderBy('n.sticky', 'DESC')
     ->addTag('node_access');
 
   $default_weight = 0;
@@ -1114,7 +1113,8 @@ function faq_get_faq_list() {
     $default_weight = 1000000;
   }
   $query->addExpression('COALESCE(w.weight, CAST(:default_weight as SIGNED))', 'effective_weight', array(':default_weight' => $default_weight));
-  $query->orderBy('effective_weight', 'ASC');
+  $query->orderBy('effective_weight', 'ASC')
+        ->orderBy('n.sticky', 'DESC');
   if ($default_sorting == 'ASC') {
     $query->orderBy('n.created', 'ASC');
   }
@@ -1402,7 +1402,6 @@ function faq_get_child_categories_faqs($term, $theme_function, $default_weight, 
         ->condition('n.type', 'faq')
         ->condition('n.status', 1)
         ->condition("{$ti_alias}.tid", $child_term->tid)
-        ->orderBy('n.sticky', 'DESC')
         ->addTag('node_access');
 
       $default_weight = 0;
@@ -1410,7 +1409,8 @@ function faq_get_child_categories_faqs($term, $theme_function, $default_weight, 
         $default_weight = 1000000;
       }
       $query->addExpression('COALESCE(w.weight, CAST(:default_weight as SIGNED))', 'effective_weight', array(':default_weight' => $default_weight));
-      $query->orderBy('effective_weight', 'ASC');
+      $query->orderBy('effective_weight', 'ASC')
+            ->orderBy('n.sticky', 'DESC');
       if ($default_sorting == 'ASC') {
         $query->orderBy('n.created', 'ASC');
       }
