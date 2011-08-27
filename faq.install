@@ -240,3 +240,4 @@ function faq_update_6003() {
 
   return t('Detailed question column added.  Existing nodes have been given the same detailed question as current question.');
 }
+
