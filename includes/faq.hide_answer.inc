@@ -46,6 +46,7 @@ function template_preprocess_faq_category_hide_answer(&$variables) {
 
   // Fetch configuration.
   $teaser = variable_get('faq_use_teaser', FALSE);
+  $variables['use_teaser'] = $teaser;
   $links = variable_get('faq_show_node_links', FALSE);
   $disable_node_links = variable_get('faq_disable_node_links', FALSE);
   $display_faq_count = variable_get('faq_count', FALSE);
@@ -125,6 +126,7 @@ function template_preprocess_faq_category_hide_answer(&$variables) {
 
   if (!count($data)) {
     $variables['question_count'] = 0;
+    $variables['nodes'] = array();
     return;
   }
 
@@ -140,6 +142,5 @@ function template_preprocess_faq_category_hide_answer(&$variables) {
   }
   $variables['nodes'] = $nodes;
   $variables['question_count'] = $count;
-  $variables['use_teaser'] = $teaser;
 }
 
