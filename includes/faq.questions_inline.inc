@@ -145,7 +145,7 @@ function template_preprocess_faq_category_questions_inline(&$variables) {
   }
 
   if (!count($data)) {
-    $variables['question_count'] = 0;
+    $variables['question_count'] = $count;
     return;
   }
 
