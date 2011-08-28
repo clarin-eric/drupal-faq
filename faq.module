@@ -80,6 +80,7 @@ function faq_menu() {
     'access callback' => 'user_access',
     'access arguments' => array('view faq page'),
     'weight' => 1,
+    'type' => MENU_SUGGESTED_ITEM,
   );
 
   $items['faq-page/list'] = array(
