@@ -144,6 +144,11 @@
       }
       $('div.faq-dt-hide-answer', context).click(function() {
         if (faq_hide_qa_accordion) {
+          if ($('.faq-qa-visible', context).offset() != undefined) {
+            $('html, body', context).animate({
+              scrollTop: $('.faq-qa-visible', context).offset().top
+            }, 1);
+          }
           $('div.faq-dt-hide-answer').not($(this)).removeClass('faq-qa-visible');
         }
         $(this).toggleClass('faq-qa-visible');
@@ -171,6 +176,11 @@
       }
       $('div.faq-qa-header .faq-header', context).click(function() {
         if (faq_category_hide_qa_accordion) {
+          if ($('.faq-category-qa-visible', context).offset() != undefined) {
+            $('html, body', context).animate({
+              scrollTop: $('.faq-category-qa-visible', context).offset().top
+            }, 1);
+          }
           $('div.faq-qa-header .faq-header').not($(this)).removeClass('faq-category-qa-visible');
         }
         $(this).toggleClass('faq-category-qa-visible');
@@ -227,7 +237,6 @@
       $("input[name=faq_use_teaser]", context).bind("click", teaser_handler);
       $("input[name=faq_category_display]", context).bind("click", categories_handler);
       $("input[name=faq_hide_child_terms]", context).bind("click", child_term_handler);
-
     }
   }
 })(jQuery);
