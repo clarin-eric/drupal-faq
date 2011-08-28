@@ -74,7 +74,7 @@ function faq_node_access($node, $op, $account = NULL) {
 function faq_menu() {
   $items = array();
 
-  $items['faq'] = array(
+  $items['faq-page'] = array(
     'title' => 'Frequently Asked Questions',
     'page callback' => 'faq_page',
     'access callback' => 'user_access',
@@ -82,7 +82,7 @@ function faq_menu() {
     'weight' => 1,
   );
 
-  $items['faq/list'] = array(
+  $items['faq-page/list'] = array(
     'title' => 'List',
     'page callback' => 'faq_page',
     'access callback' => 'user_access',
@@ -91,7 +91,7 @@ function faq_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
 
-  $items['faq/order'] = array(
+  $items['faq-page/order'] = array(
     'title' => 'Order',
     'description' => 'Allows the user to configure the order of questions and answers on a FAQ page.',
     'file' => 'faq.admin.inc',
@@ -103,7 +103,7 @@ function faq_menu() {
     'weight' => -8,
   );
 
-  $items['faq/%'] = array(
+  $items['faq-page/%'] = array(
     'title' => 'Frequently Asked Questions',
     'page callback' => 'faq_page',
     'page arguments' => array(1),
@@ -112,7 +112,7 @@ function faq_menu() {
     'type' => MENU_CALLBACK,
   );
 
-  $items['faq/%/list'] = array(
+  $items['faq-page/%/list'] = array(
     'title' => 'List',
     'page callback' => 'faq_page',
     'page arguments' => array(1),
@@ -122,7 +122,7 @@ function faq_menu() {
     'weight' => -10,
   );
 
-  $items['faq/%/order'] = array(
+  $items['faq-page/%/order'] = array(
     'title' => 'Order',
     'description' => 'Allows the user to configure the order of questions and answers on a FAQ page.',
     'file' => 'faq.admin.inc',
@@ -425,7 +425,7 @@ function faq_page($tid = 0, $faq_display = '', $category_display = '') {
         drupal_goto($alias['alias']);
       }
     }
-    if (drupal_match_path($_GET['q'], 'faq/*')) {
+    if (drupal_match_path($_GET['q'], 'faq-page/*')) {
       faq_set_breadcrumb($current_term);
     }
   }
@@ -803,7 +803,7 @@ function faq_block_view($delta) {
           $block['subject'] = t('FAQ Categories');
           $items = array();
           foreach ($terms as $name => $tid) {
-            $items[] = l(faq_tt("taxonomy:term:$tid:name", $name), 'faq/' . $tid);
+            $items[] = l(faq_tt("taxonomy:term:$tid:name", $name), 'faq-page/' . $tid);
           }
           $list_style = variable_get('faq_category_listing', 'ul');
           $block['content'] = theme('item_list', array('items' => $items, 'title' => NULL, 'type' => $list_style));
@@ -867,7 +867,7 @@ function _get_indented_faq_terms($vid, $tid) {
         ->fetchField();
 
       if ($term_node_count > 0) {
-        $path = "faq/$term->tid";
+        $path = "faq-page/$term->tid";
 
         if (!drupal_lookup_path('alias', arg(0) . '/' . $term->tid) && module_exists('pathauto')) {
           $alias = pathauto_create_alias('faq', 'insert', arg(0) . '/' . $term->tid, array('term' => $term));
@@ -1055,7 +1055,7 @@ if (!function_exists('array_diff_key')) {
  * Implements hook_term_path().
  */
 function faq_term_path($term) {
-  return 'faq/' . $term->tid;
+  return 'faq-page/' . $term->tid;
 }
 
 /**
@@ -1186,7 +1186,7 @@ function faq_view_answer(&$data, $node, $back_to_top, $teaser, $links) {
  *
  * @param $path
  *   The path/url where the "back to top" link should bring the user too.  This
- *   could be the 'faq' page or one of the categorized faq pages, e.g 'faq/123'
+ *   could be the 'faq' page or one of the categorized faq pages, e.g 'faq-page/123'
  *   where 123 is the tid.
  * @return
  *   An array containing the "back to top" link.
@@ -1298,7 +1298,7 @@ function faq_view_child_category_headers($term) {
         $term_image = taxonomy_image_display($child_term->tid, array('class' => 'faq-tax-image'));
       }
 
-      $term_vars['link'] = l(faq_tt("taxonomy:term:$child_term->tid:name", $child_term->name), "faq/$child_term->tid");
+      $term_vars['link'] = l(faq_tt("taxonomy:term:$child_term->tid:name", $child_term->name), "faq-page/$child_term->tid");
       $term_vars['description'] = check_markup(faq_tt("taxonomy:term:$child_term->tid:description", $child_term->description));
       $term_vars['count'] = $term_node_count;
       $term_vars['term_image'] = $term_image;
@@ -1319,7 +1319,7 @@ function faq_pathauto($op) {
       $settings['module'] = 'faq';
       $settings['groupheader'] = t('FAQ category path settings');
       $settings['patterndescr'] = t('Default path pattern (applies to all FAQ categories with blank patterns below)');
-      $settings['patterndefault'] = t('faq/[term:tid]');
+      $settings['patterndefault'] = t('faq-page/[term:tid]');
       $settings['token_type'] = 'term';
 
       return (object) $settings;
@@ -1338,10 +1338,10 @@ function faq_set_breadcrumb($term = NULL) {
   $breadcrumb = array();
   if (variable_get('faq_custom_breadcrumbs', TRUE)) {
     if (module_exists("taxonomy") && $term) {
-      $breadcrumb[] = l(faq_tt("taxonomy:term:$term->tid:name", $term->name), 'faq/' . $term->tid);
+      $breadcrumb[] = l(faq_tt("taxonomy:term:$term->tid:name", $term->name), 'faq-page/' . $term->tid);
       while ($parents = taxonomy_get_parents($term->tid)) {
         $term = array_shift($parents);
-        $breadcrumb[] = l(faq_tt("taxonomy:term:$term->tid:name", $term->name), 'faq/' . $term->tid);
+        $breadcrumb[] = l(faq_tt("taxonomy:term:$term->tid:name", $term->name), 'faq-page/' . $term->tid);
       }
     }
     $breadcrumb[] = l(variable_get('faq_title', 'Frequently Asked Questions'), 'faq');

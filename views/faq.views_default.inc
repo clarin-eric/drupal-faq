@@ -2,13 +2,13 @@
 
 /**
  * @file
- * cra_views_media_items.views_default.inc
+ * faq.views_default.inc
  */
 
 /**
  * Implementation of hook_views_default_views().
  */
-function cra_views_media_items_views_default_views() {
+function faq_views_default_views() {
   $export = array();
 
   $view = new view;
@@ -52,10 +52,6 @@ function cra_views_media_items_views_default_views() {
   $handler->display->display_options['fields']['title']['hide_empty'] = 0;
   $handler->display->display_options['fields']['title']['empty_zero'] = 0;
   $handler->display->display_options['fields']['title']['link_to_node'] = 1;
-  /* Field: Content: Body */
-  $handler->display->display_options['fields']['body']['id'] = 'body';
-  $handler->display->display_options['fields']['body']['table'] = 'field_data_body';
-  $handler->display->display_options['fields']['body']['field'] = 'body';
   /* Sort criterion: Content: Sticky */
   $handler->display->display_options['sorts']['sticky']['id'] = 'sticky';
   $handler->display->display_options['sorts']['sticky']['table'] = 'node';
