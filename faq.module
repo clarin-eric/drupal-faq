@@ -765,12 +765,6 @@ function faq_theme() {
     'faq_page' => array(
       'variables' => array('content' => '', 'answers' => '', 'description' => NULL),
     ),
-    'faq_highlights_block' => array(
-      'variables' => array('items' => NULL),
-    ),
-    'faq_random_highlights_block' => array(
-      'variables' => array('items' => NULL),
-    ),
   );
 }
 
@@ -779,8 +773,6 @@ function faq_theme() {
  */
 function faq_block_info() {
   $blocks['faq_categories']['info'] = t('FAQ Categories');
-  $blocks['faq_recent']['info'] = t('Recent FAQs');
-  $blocks['faq_random']['info'] = t('Random FAQs');
   return $blocks;
 }
 
@@ -818,145 +810,9 @@ function faq_block_view($delta) {
         }
       }
       break;
-
-    case 'faq_recent':
-      $block['subject'] = t('Recent FAQs');
-      $block['content'] = faq_highlights_block(variable_get('faq_block_recent_faq_count', 5));
-      break;
-
-    case 'faq_random':
-      $block['subject'] = t('Random FAQs');
-      $block['content'] = faq_random_highlights_block(variable_get('faq_block_random_faq_count', 5));
-      break;
-
   } // End switch($delta).
 
   return $block;
-}
-
-/**
- * Implements hook_block_configure().
- */
-function faq_block_configure($delta) {
-  switch ($delta) {
-    case 'faq_categories':
-      return;
-
-    case 'faq_recent':
-      $form['faq_block_recent_faq_count'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Number of FAQs to show'),
-        '#description' => t("This controls the number of FAQs that appear in the 'Recent FAQs' block"),
-        '#default_value' => variable_get('faq_block_recent_faq_count', 5),
-      );
-      break;
-
-    case 'faq_random':
-      $form['faq_block_random_faq_count'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Number of FAQs to show'),
-        '#description' => t("This controls the number of FAQs that appear in the 'Random FAQs' block"),
-        '#default_value' => variable_get('faq_block_random_faq_count', 5),
-      );
-      break;
-  } // End switch($delta).
-
-  return $form;
-}
-
-/**
- * Implements hook_block_save().
- */
-function faq_block_save($delta, $edit) {
-  switch ($delta) {
-    case 'faq_categories':
-      break;
-
-    case 'faq_recent':
-      variable_set('faq_block_recent_faq_count', $edit['faq_block_recent_faq_count']);
-      break;
-
-    case 'faq_random':
-      variable_set('faq_block_random_faq_count', $edit['faq_block_random_faq_count']);
-      break;
-  } // End switch($delta).
-  return;
-}
-
-/**
- * Create the HTML output for the Recent FAQs block.
- *
- * @param $num
- *   The default value is 5; determines the number of FAQ entries to be shown.
- * @return
- *   The HTML-formatted code displaying the Recent FAQs.
- */
-function faq_highlights_block($num = 5) {
-  $disable_node_links = variable_get('faq_disable_node_links', FALSE);
-
-  $nids = db_select('node', 'n')
-    ->fields('n', array('nid'))
-    ->condition('n.type', 'faq')
-    ->condition('n.status', 1)
-    ->addTag('node_access')
-    ->orderBy('n.created', 'DESC')
-    ->execute()
-    ->fetchCol();
-
-  $nodes = node_load_multiple($nids);
-
-  $items = array();
-  foreach ($nodes as $node) {
-    node_object_prepare($node);
-    if (node_access('view', $node)) {
-      if ($disable_node_links) {
-        $items[] = l($node->question, 'faq', array('fragment' => 'n' . $node->nid));
-      }
-      else {
-        $items[] = l($node->question, 'node/' . $node->nid);
-      }
-    }
-  }
-
-  return theme('faq_highlights_block', array('items' => $items));
-}
-
-/**
- * Create the HTML output for the Random FAQs block.
- *
- * @param $num
- *   The default value is 5; determines the number of FAQ entries to be shown.
- * @return
- *   The HTML-formatted code displaying the Random FAQs.
- */
-function faq_random_highlights_block($num = 5) {
-  $disable_node_links = variable_get('faq_disable_node_links', FALSE);
-
-  $nids = db_select('node', 'n')
-    ->fields('n', array('nid'))
-    ->condition('n.type', 'faq')
-    ->condition('n.status', 1)
-    ->addTag('node_access')
-    ->orderRandom()
-    ->execute()
-    ->fetchCol();
-
-  $nodes = node_load_multiple($nids);
-
-  $items = array();
-  foreach ($nodes as $node) {
-    node_object_prepare($node);
-    if (node_access('view', $node)) {
-      if ($disable_node_links) {
-        $items[] = l($node->question, 'faq', array('fragment' => 'n' . $node->nid));
-      }
-      else {
-        $items[] = l($node->question, 'node/' . $node->nid);
-      }
-    }
-  }
-
-  return theme('faq_random_highlights_block', array('items' => $items));
 }
 
 /**
@@ -1670,28 +1526,6 @@ function theme_faq_draggable_question_order_table($variables) {
   }
   $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'question-sort')));
   $output .= drupal_render_children($form);
-  return $output;
-}
-
-/**
- * Theme function for Recent FAQs block.
- */
-function theme_faq_highlights_block($variables) {
-  $items = $variables['items'];
-  $list_style = variable_get('faq_question_listing', 'ul');
-  $output = theme('item_list', array('items' => $items, 'title' => NULL, 'type' => $list_style));
-  $output .= '<div class="faq-all-faqs-link">' . l(t('All FAQs'), 'faq') . '</div>';
-  return $output;
-}
-
-/**
- * Theme function for Random FAQs block.
- */
-function theme_faq_random_highlights_block($variables) {
-  $items = $variables['items'];
-  $list_style = variable_get('faq_question_listing', 'ul');
-  $output = theme('item_list', array('items' => $items, 'title' => NULL, 'type' => $list_style));
-  $output .= '<div class="faq-all-faqs-link">' . l(t('All FAQs'), 'faq') . '</div>';
   return $output;
 }
 

@@ -249,3 +249,12 @@ function faq_update_7000() {
   return t('Detailed question field can now be null.');
 }
 
+/**
+ * Delete obsolete variables.
+ */
+function faq_update_7001() {
+  variable_del('faq_block_recent_faq_count');
+  variable_del('faq_block_random_faq_count');
+  return t('Deleted obsolete variables.');
+}
+
