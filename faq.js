@@ -161,12 +161,31 @@
           });
         }
         $(this).next('div.faq-dd-hide-answer').toggleClass("collapsed");
+
+        // Change the fragment, too, for permalink/bookmark.
+        // To keep the current page from scrolling, refs
+        // http://stackoverflow.com/questions/1489624/modifying-document-location-hash-without-page-scrolling/1489802#1489802
+        var hash = $(this).find('a').attr('id');
+        var fx, node = $('#' + hash);
+        if (node.length) {
+          fx = $('<div></div>')
+            .css({position: 'absolute', visibility: 'hidden', top: $(window).scrollTop() + 'px'})
+            .attr('id', hash)
+            .appendTo(document.body);
+          node.attr('id', '');
+        }
+        document.location.hash = hash;
+        if (node.length) {
+          fx.remove();
+          node.attr('id', hash);
+        }
+
         return false;
       });
 
       // Show any question identified by a fragment
       if (/^#\w+$/.test(document.location.hash)) {
-        $('div.faq-dt-hide-answer > ' + document.location.hash).parent().triggerHandler('click');
+        $('div.faq-dt-hide-answer ' + document.location.hash).parents('.faq-dt-hide-answer').triggerHandler('click');
       }
 
       // Hide/show q/a for a category.
