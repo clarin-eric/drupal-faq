@@ -255,6 +255,7 @@ function faq_update_7000() {
 function faq_update_7001() {
   variable_del('faq_block_recent_faq_count');
   variable_del('faq_block_random_faq_count');
+  variable_del('faq_enable_term_links');
   return t('Deleted obsolete variables.');
 }
 

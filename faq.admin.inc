@@ -314,13 +314,6 @@ function faq_categories_settings_form($form, &$form_state) {
         '#multiple' => TRUE,
       );
     }
-
-    $form['faq_category_advanced']['faq_enable_term_links'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Enable FAQ taxonomy links'),
-      '#description' => t('Node links to taxonomy terms will be re-written to point at the FAQ pages instead.'),
-      '#default_value' => variable_get('faq_enable_term_links', 1),
-    );
   }
 
   return system_settings_form($form);
