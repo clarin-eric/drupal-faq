@@ -198,7 +198,7 @@ function faq_node_info() {
 }
 
 /**
- * Defines the form where new questions and answers are written.
+ * Implements hook_form().
  *
  * @param &$node
  *   The node being added or edited.
@@ -224,9 +224,8 @@ function faq_form($node, $form_state) {
   if (variable_get('faq_question_long_form', 1) || variable_get('faq_question_length', 'short') == 'long') {
     $form['detailed_question'] = array(
       '#type' => 'textarea',
-      '#title' => t('Question details (optional)'),
+      '#title' => t('Question details'),
       '#default_value' => $node->detailed_question,
-      '#weight' => module_exists('content') ? content_extra_field_weight($node->type, 'detailed_question') : -1,
       '#rows' => 3,
       '#description' => t('Longer question text.  This will be displayed in all layouts where the answer appears, in addition to the shorter question text.'),
     );
@@ -240,8 +239,25 @@ function faq_form($node, $form_state) {
   return $form;
 }
 
+/**
+ * Implements hook_field_extra_fields().
+ */
+function faq_field_extra_fields() {
+  $extra['node']['faq'] = array(
+    'form' => array(
+      'detailed_question' => array(
+        'label' => t('Question details'),
+        'description' => t('Longer question text'),
+        'weight' => -5,
+      ),
+    ),
+  );
+  return $extra;
+}
 
 /**
+ * Implements hook_insert().
+ *
  * Inserts the faq node question text into the 'faq_questions' table.
  *
  * @param $node
@@ -259,6 +275,8 @@ function faq_insert($node) {
 }
 
 /**
+ * Implements hook_update().
+ *
  * Updates the faq node question text in the 'faq_questions' table.
  *
  * @param $node
@@ -284,6 +302,8 @@ function faq_update($node) {
 }
 
 /**
+ * Implements hook_delete().
+ *
  * Deletes an FAQ node from the database.
  *
  * @param &$node
@@ -343,6 +363,7 @@ function faq_node_revision_delete($node) {
 function faq_view($node, $view_mode) {
   drupal_add_css(drupal_get_path('module', 'faq') . '/faq.css');
 
+  // @todo: why is this not used?
   /*
   $node->detailed_question = check_markup($node->detailed_question, $node->format);
   $content = $node->content['body']['#value'];
@@ -363,21 +384,6 @@ function faq_views_api() {
     'api' => 3,
     'path' => drupal_get_path('module', 'faq') . '/views',
   );
-}
-
-/**
- * Implements hook_content_extra_fields().
- */
-function faq_content_extra_fields($type_name) {
-  $extras = array();
-
-  $extras['detailed_question'] = array(
-    'label' => t('Detailed question'),
-    'description' => t('FAQ detailed question field'),
-    'weight' => 10,
-  );
-
-  return $extras;
 }
 
 /**
