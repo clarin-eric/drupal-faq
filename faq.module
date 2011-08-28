@@ -1586,7 +1586,8 @@ function faq_taxonomy_term_count_nodes($tid) {
 
   if (!isset($count) || !isset($count[$tid])) {
     $query = db_select('node', 'n')
-             ->fields('n', array('nid'));
+             ->fields('n', array('nid'))
+             ->addTag('node_access');
     $query->join('taxonomy_index', 'ti', 'n.nid = ti.nid');
     $query->condition('n.type', 'faq')
           ->condition('n.status', 1)
