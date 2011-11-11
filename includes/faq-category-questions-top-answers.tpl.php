@@ -101,7 +101,6 @@ $depth = 0;
       <?php foreach ($nodes as $i => $node): ?>
 
         <div class="faq-question">
-        <strong><?php print $question_label; ?></strong>
         <?php if (!empty($question_label)): ?>
           <strong class="faq-question-label">
           <?php print $question_label; ?>
