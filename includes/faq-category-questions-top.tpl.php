@@ -68,7 +68,7 @@ else {
 }
 
 ?>
-<a name="top"></a>
+<a id="top"></a>
 <div class="faq-category-menu">
 
   <!-- category header with title, link, image, description, and count of questions inside -->
