@@ -284,7 +284,7 @@ function faq_insert($node) {
  *   The node object.
  */
 function faq_update($node) {
-  if ($node->revision) {
+  if (isset($node->revision) && $node->revision) {
     faq_insert($node);
   }
   else {
