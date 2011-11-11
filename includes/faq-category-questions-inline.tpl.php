@@ -130,15 +130,15 @@ else {
       </div> <!-- Close div: faq-question -->
 
       <div class="faq-answer">
-      <?php if (!empty($answer_label)): ?>
-        <strong class="faq-answer-label">
-        <?php print $answer_label; ?>
-        </strong>
-      <?php endif; ?>
-      <?php print $node['body']; ?>
-      <?php if (isset($node['links'])): ?>
-        <?php print $node['links']; ?>
-      <?php endif; ?>
+        <?php if (!empty($answer_label)): ?>
+          <strong class="faq-answer-label">
+            <?php print $answer_label; ?>
+          </strong>
+        <?php endif; ?>
+        <?php print $node['body']; ?>
+        <?php if (isset($node['links'])): ?>
+          <?php print $node['links']; ?>
+        <?php endif; ?>
       </div> <!-- Close div: faq-answer -->
     <?php endforeach; ?>
   <?php endif; ?>

@@ -76,6 +76,14 @@ function template_preprocess_faq_category_questions_top(&$variables) {
   $show_term_page_children = variable_get('faq_show_term_page_children', FALSE);
   $group_questions_top = variable_get('faq_group_questions_top', FALSE);
   $default_sorting = variable_get('faq_default_sorting', 'DESC');
+  
+  // Configure labels.
+  $variables['question_label'] = '';
+  $variables['answer_label'] = '';
+  if (variable_get('faq_qa_mark', FALSE)) {
+    $variables['question_label'] = check_plain(variable_get('faq_question_label', "Q:"));
+    $variables['answer_label'] = check_plain(variable_get('faq_answer_label', "A:"));
+  }
 
   // Initialise some variables.
   $default_weight = 0;
