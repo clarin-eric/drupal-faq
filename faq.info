@@ -20,3 +20,4 @@ files[] = includes/faq.new_page.inc
 files[] = includes/faq.questions_inline.inc
 files[] = includes/faq.questions_top.inc
 files[] = views/faq.views.inc
+configure = /admin/config/content/faq
