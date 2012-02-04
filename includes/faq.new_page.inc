@@ -39,6 +39,7 @@ function template_preprocess_faq_category_new_page(&$variables) {
   $term = $variables['term'];
   $parent_term = $variables['parent_term'];
   $class = $variables['class'];
+  $this_page = $_GET['q'];
 
   // Fetch configuration.
   $display_faq_count = variable_get('faq_count', FALSE);
