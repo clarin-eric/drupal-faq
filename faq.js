@@ -145,11 +145,6 @@
       }
       $('div.faq-dt-hide-answer:not(.faq-processed)', context).addClass('faq-processed').click(function() {
         if (faq_hide_qa_accordion) {
-          if ($('.faq-qa-visible', context).offset() != undefined) {
-            $('html, body', context).animate({
-              scrollTop: $('.faq-qa-visible', context).offset().top
-            }, 1);
-          }
           $('div.faq-dt-hide-answer').not($(this)).removeClass('faq-qa-visible');
         }
         $(this).toggleClass('faq-qa-visible');
@@ -180,6 +175,16 @@
           node.attr('id', hash);
         }
 
+        // Scroll the page if the collapsed FAQ is not visible.
+        // If we have the toolbar so the title may be hidden by the bar.
+        var mainScrollTop = Math.max($('html', context).scrollTop(), $('body', context).scrollTop());
+        // We compute mainScrollTop because the behaviour is different on FF, IE and CR
+        if (mainScrollTop > $(this).offset().top) {
+          $('html, body', context).animate({
+            scrollTop: $(this).offset().top
+          }, 1);
+        }
+        
         return false;
       });
 
@@ -196,11 +201,6 @@
       }
       $('div.faq-qa-header .faq-header:not(.faq-processed)', context).addClass('faq-processed').click(function() {
         if (faq_category_hide_qa_accordion) {
-          if ($('.faq-category-qa-visible', context).offset() != undefined) {
-            $('html, body', context).animate({
-              scrollTop: $('.faq-category-qa-visible', context).offset().top
-            }, 1);
-          }
           $('div.faq-qa-header .faq-header').not($(this)).removeClass('faq-category-qa-visible');
         }
         $(this).toggleClass('faq-category-qa-visible');
@@ -211,6 +211,17 @@
           });
         }
         $(this).parent().next('div.faq-qa-hide').toggleClass("collapsed");
+
+        // Scroll the page if the collapsed FAQ is not visible.
+        // If we have the toolbar so the title may be hidden by the bar.
+        var mainScrollTop = Math.max($('html', context).scrollTop(), $('body', context).scrollTop());
+        // We compute mainScrollTop because the behaviour is different on FF, IE and CR
+        if (mainScrollTop > $(this).offset().top) {
+          $('html, body', context).animate({
+            scrollTop: $(this).offset().top
+          }, 1);
+        }
+        
         return false;
       });
 
