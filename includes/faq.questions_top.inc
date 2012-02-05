@@ -40,7 +40,7 @@ function template_preprocess_faq_questions_top(&$variables) {
   foreach ($data as $node) {
     $anchor = 'n' . $node->nid;
     $questions[$key] = l($node->title, $this_page, array('fragment' => $anchor));
-    faq_view_question($answers[$key], $node, $this_page, $anchor);
+    faq_view_question($answers[$key], $node, NULL, $anchor);
     faq_view_answer($answers[$key], $node, $back_to_top, $teaser, $links);
     $key++;
   }
@@ -170,7 +170,7 @@ function template_preprocess_faq_category_questions_top(&$variables) {
     }
     $node_var = array();
     $anchor = 't' . $term->tid . 'n' . $node->nid;
-    faq_view_question($node_var, $node, $this_page, $anchor);
+    faq_view_question($node_var, $node, NULL, $anchor);
     if ($group_questions_top || $category_display == 'hide_qa') {
       faq_view_answer($node_var, $node, $back_to_top, $teaser, $links);
     }
@@ -273,7 +273,7 @@ function template_preprocess_faq_category_questions_top_answers(&$variables) {
   foreach ($data as $node) {
     $node_var = array();
     $anchor = 't' . $term->tid . 'n' . $node->nid;
-    faq_view_question($node_var, $node, $this_page, $anchor);
+    faq_view_question($node_var, $node, NULL, $anchor);
     faq_view_answer($node_var, $node, $back_to_top, $teaser, $links);
     $nodes[] = $node_var;
   }

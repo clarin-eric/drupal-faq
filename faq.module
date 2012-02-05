@@ -1021,7 +1021,7 @@ function faq_view_question(&$data, $node, $path = NULL, $anchor = NULL) {
     elseif (empty($path)) {
       // Can't seem to use l() function with empty string as screen-readers
       // don't like it, so create anchor name manually.
-      $question = '<a id="' . $anchor . '">' . check_plain($node->title) . '</a>';
+      $question = '<a id="' . $anchor . '"></a>' . check_plain($node->title);
     }
     else {
       $options = array();

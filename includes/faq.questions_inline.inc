@@ -35,7 +35,7 @@ function template_preprocess_faq_questions_inline(&$variables) {
   $count = 0;
   foreach ($data as $node) {
     $anchor = 'n' . $node->nid;
-    faq_view_question($nodes[$count], $node, $this_page, $anchor);
+    faq_view_question($nodes[$count], $node, NULL, $anchor);
     faq_view_answer($nodes[$count], $node, $back_to_top, $teaser, $links);
     $count++;
   }
@@ -157,7 +157,7 @@ function template_preprocess_faq_category_questions_inline(&$variables) {
     }
     $node_var = array();
     $anchor = 't' . $term->tid . 'n' . $node->nid;
-    faq_view_question($node_var, $node, $this_page, $anchor);
+    faq_view_question($node_var, $node, NULL, $anchor);
     faq_view_answer($node_var, $node, $back_to_top, $teaser, $links);
     $nodes[] = $node_var;
   }
