@@ -475,7 +475,11 @@ function faq_page($tid = 0, $faq_display = '', $category_display = '') {
     if ($default_sorting == 'ASC') {
       $default_weight = 1000000;
     }
-    $query->addExpression('COALESCE(w.weight, CAST(:default_weight as SIGNED))', 'effective_weight', array(':default_weight' => $default_weight));
+    // Works, but involves variable concatenation - safe though, since
+    // $default_weight is an integer.
+    $query->addExpression("COALESCE(w.weight, $default_weight)", 'effective_weight');
+    // Doesn't work in Postgres.
+    //$query->addExpression('COALESCE(w.weight, CAST(:default_weight as SIGNED))', 'effective_weight', array(':default_weight' => $default_weight));
     $query->orderBy('effective_weight', 'ASC')
           ->orderBy('n.sticky', 'DESC');
     if ($default_sorting == 'ASC') {
@@ -626,7 +630,11 @@ function _display_faq_by_category($faq_display, $category_display, $term, $displ
   if ($default_sorting == 'ASC') {
     $default_weight = 1000000;
   }
-  $query->addExpression('COALESCE(w.weight, CAST(:default_weight as SIGNED))', 'effective_weight', array(':default_weight' => $default_weight));
+  // Works, but involves variable concatenation - safe though, since
+  // $default_weight is an integer.
+  $query->addExpression("COALESCE(w.weight, $default_weight)", 'effective_weight');
+  // Doesn't work in Postgres.
+  //$query->addExpression('COALESCE(w.weight, CAST(:default_weight as SIGNED))', 'effective_weight', array(':default_weight' => $default_weight));
   $query->orderBy('effective_weight', 'ASC')
         ->orderBy('n.sticky', 'DESC');
   if ($default_sorting == 'ASC') {
@@ -958,7 +966,11 @@ function faq_get_faq_list() {
   if ($default_sorting == 'ASC') {
     $default_weight = 1000000;
   }
-  $query->addExpression('COALESCE(w.weight, CAST(:default_weight as SIGNED))', 'effective_weight', array(':default_weight' => $default_weight));
+  // Works, but involves variable concatenation - safe though, since
+  // $default_weight is an integer.
+  $query->addExpression("COALESCE(w.weight, $default_weight)", 'effective_weight');
+  // Doesn't work in Postgres.
+  //$query->addExpression('COALESCE(w.weight, CAST(:default_weight as SIGNED))', 'effective_weight', array(':default_weight' => $default_weight));
   $query->orderBy('effective_weight', 'ASC')
         ->orderBy('n.sticky', 'DESC');
   if ($default_sorting == 'ASC') {
@@ -1192,7 +1204,11 @@ function faq_get_child_categories_faqs($term, $theme_function, $default_weight, 
       if ($default_sorting == 'ASC') {
         $default_weight = 1000000;
       }
-      $query->addExpression('COALESCE(w.weight, CAST(:default_weight as SIGNED))', 'effective_weight', array(':default_weight' => $default_weight));
+      // Works, but involves variable concatenation - safe though, since
+      // $default_weight is an integer.
+      $query->addExpression("COALESCE(w.weight, $default_weight)", 'effective_weight');
+      // Doesn't work in Postgres.
+      //$query->addExpression('COALESCE(w.weight, CAST(:default_weight as SIGNED))', 'effective_weight', array(':default_weight' => $default_weight));
       $query->orderBy('effective_weight', 'ASC')
             ->orderBy('n.sticky', 'DESC');
       if ($default_sorting == 'ASC') {

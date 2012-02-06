@@ -400,7 +400,11 @@ function faq_order_settings_form($form, $form_state, $category = NULL) {
       ->condition('n.type', 'faq')
       ->condition('n.status', 1);
 
-    $query->addExpression('COALESCE(w.weight, CAST(:default_weight as SIGNED))', 'effective_weight', array(':default_weight' => $default_weight));
+    // Works, but involves variable concatenation - safe though, since
+    // $default_weight is an integer.
+    $query->addExpression("COALESCE(w.weight, $default_weight)", 'effective_weight');
+    // Doesn't work in Postgres.
+    //$query->addExpression('COALESCE(w.weight, CAST(:default_weight as SIGNED))', 'effective_weight', array(':default_weight' => $default_weight));
 
     if (empty($category)) {
       $category = 0;
