@@ -1272,14 +1272,129 @@ function faq_pathauto($op) {
     case 'settings':
       $settings = array();
       $settings['module'] = 'faq';
-      $settings['groupheader'] = t('FAQ category path settings');
+      $settings['groupheader'] = t('FAQ category page settings');
       $settings['patterndescr'] = t('Default path pattern (applies to all FAQ categories with blank patterns below)');
       $settings['patterndefault'] = t('faq-page/[term:tid]');
+      $settings['batch_update_callback'] = 'faq_pathauto_bulkupdate';
       $settings['token_type'] = 'term';
 
       return (object) $settings;
     default:
       break;
+  }
+}
+
+/**
+ * Implements hook_path_alias_types().
+ */
+function faq_path_alias_types() {
+  $objects['faq-page/'] = t('FAQ pages');
+  return $objects;
+}
+
+/**
+ * Batch processing callback; Generate aliases for faq pages.
+ */
+function faq_pathauto_bulkupdate() {
+  module_load_include('inc', 'pathauto');
+
+  if (!isset($context['sandbox']['current'])) {
+    $context['sandbox']['count'] = 0;
+    $context['sandbox']['current'] = 0;
+  }
+
+  // Get the allowed vocabs.
+  $vocabularies = taxonomy_get_vocabularies('faq');
+  $vocab_omit = variable_get('faq_omit_vocabulary', array());
+  $faq_vocabs = array();
+  foreach ($vocabularies as $vid => $vobj) {
+    if (isset($vocab_omit[$vid]) && $vocab_omit[$vid] != 0) {
+      continue;
+    }
+    $faq_vocabs[$vid] = $vid;
+  }
+
+  // Get tids that need aliasing.
+  $query = db_select('taxonomy_term_data', 'td');
+  $query->leftJoin('url_alias', 'ua', "CONCAT('faq-page/', td.tid) = ua.source");
+  $query->addField('td', 'tid');
+  $query->isNull('ua.source');
+  $query->condition('td.tid', $context['sandbox']['current'], '>');
+  $query->condition('td.vid', $faq_vocabs, 'IN');
+  $query->orderBy('td.tid');
+  $query->addTag('pathauto_bulk_update');
+  $query->addMetaData('entity', 'taxonomy_term');
+
+  // Get the total amount of items to process.
+  if (!isset($context['sandbox']['total'])) {
+    $context['sandbox']['total'] = $query->countQuery()->execute()->fetchField();
+
+    // If there are no nodes to update, the stop immediately.
+    if (!$context['sandbox']['total']) {
+      $context['finished'] = 1;
+      return;
+    }
+  }
+
+  $query->range(0, 25);
+  $tids = $query->execute()->fetchCol();
+
+  $terms = taxonomy_term_load_multiple($tids);
+  foreach ($terms as $term) {
+    pathauto_create_alias('faq', 'bulkupdate', 'faq-page/' . $term->tid, array('term' => $term));
+  }
+  $context['sandbox']['count'] += count($tids);
+  $context['sandbox']['current'] = max($tids);
+  $context['message'] = t('Updated alias for faq page @tid.', array('@tid' => end($tids)));
+
+  if ($context['sandbox']['count'] != $context['sandbox']['total']) {
+    $context['finished'] = $context['sandbox']['count'] / $context['sandbox']['total'];
+  }
+}
+
+/**
+ * Implements hook_taxonomy_term_insert().
+ */
+function faq_taxonomy_term_insert($term) {
+  if (module_exists('pathauto')) {
+    module_load_include('inc', 'pathauto');
+
+    $vocabularies = taxonomy_get_vocabularies('faq');
+    $vocab_omit = variable_get('faq_omit_vocabulary', array());
+    foreach ($vocabularies as $vid => $vobj) {
+      if ((isset($vocab_omit[$vid]) && $vocab_omit[$vid] != 0) || ($term->vid != $vid)) {
+        continue;
+      }
+      $alias = pathauto_create_alias('faq', 'insert', 'faq-page/' . $term->tid, array('term' => $term));
+    }
+  }
+}
+
+/**
+ * Implements hook_taxonomy_term_update().
+ */
+function faq_taxonomy_term_update($term) {
+  if (module_exists('pathauto')) {
+    module_load_include('inc', 'pathauto');
+
+    $vocabularies = taxonomy_get_vocabularies('faq');
+    $vocab_omit = variable_get('faq_omit_vocabulary', array());
+    foreach ($vocabularies as $vid => $vobj) {
+      if ((isset($vocab_omit[$vid]) && $vocab_omit[$vid] != 0) || ($term->vid != $vid)) {
+        continue;
+      }
+      $alias = pathauto_create_alias('faq', 'update', 'faq-page/' . $term->tid, array('term' => $term));
+    }
+  }
+}
+
+/**
+ * Implements hook_taxonomy_term_delete().
+ */
+function faq_taxonomy_term_delete($term) {
+  if (module_exists('pathauto')) {
+    module_load_include('inc', 'pathauto');
+    pathauto_path_delete_all("faq-page/{$term->tid}");
   }
 }
 
