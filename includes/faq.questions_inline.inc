@@ -66,6 +66,7 @@ function template_preprocess_faq_category_questions_inline(&$variables) {
   $default_sorting = variable_get('faq_default_sorting', 'DESC');
 
   // Initialise some variables.
+  $variables['use_teaser'] = $teaser;
   $default_weight = 0;
   if ($default_sorting != 'DESC') {
     $default_weight = 1000000;
@@ -147,6 +148,7 @@ function template_preprocess_faq_category_questions_inline(&$variables) {
 
   if (!count($data)) {
     $variables['question_count'] = $count;
+    $variables['nodes'] = array();
     return;
   }
 
@@ -163,6 +165,5 @@ function template_preprocess_faq_category_questions_inline(&$variables) {
   }
   $variables['nodes'] = $nodes;
   $variables['question_count'] = $count;
-  $variables['use_teaser'] = $teaser;
 }
 

@@ -157,8 +157,12 @@ function template_preprocess_faq_category_questions_top(&$variables) {
     $variables['subcat_body_list'] = faq_get_child_categories_faqs($term, 'faq_category_questions_top', $default_weight, $default_sorting, $category_display, $variables['class'], $parent_term);
   }
 
+  $variables['group_questions_top'] = $group_questions_top;
+
   if (!count($data)) {
     $variables['question_count'] = $count;
+    $variables['nodes'] = array();
+    $variables['answer_category_name'] = FALSE;
     return;
   }
 
@@ -182,7 +186,6 @@ function template_preprocess_faq_category_questions_top(&$variables) {
   $variables['question_list'] = $questions;
   $variables['question_list_style'] = variable_get('faq_question_listing', 'ul');
 
-  $variables['group_questions_top'] = $group_questions_top;
   if ($group_questions_top || $category_display == "hide_qa") {
     $variables['nodes'] = $nodes;
     $variables['answer_category_name'] = variable_get('faq_answer_category_name', FALSE);

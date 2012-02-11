@@ -117,6 +117,7 @@ function template_preprocess_faq_category_new_page(&$variables) {
 
   if (!count($data)) {
     $variables['question_count'] = $count;
+    $variables['nodes'] = array();
     return;
   }
 
