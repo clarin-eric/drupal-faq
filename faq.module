@@ -1056,6 +1056,7 @@ function faq_view_question(&$data, $node, $path = NULL, $anchor = NULL) {
   $question = '<span datatype="" property="dc:title">' . $question . '</span>';
 
   if (variable_get('faq_display', 'questions_top') != 'hide_answer' && !empty($node->detailed_question) && variable_get('faq_question_length', 'short') == 'both') {
+    $node->detailed_question = check_markup($node->detailed_question, 'filtered_html', '', FALSE);
     $question .= '<div class="faq-detailed-question">' . $node->detailed_question . '</div>';
   }
   $data['question'] = $question;

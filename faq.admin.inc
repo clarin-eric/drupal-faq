@@ -440,7 +440,7 @@ function faq_order_settings_form($form, $form_state, $category = NULL) {
         '#type' => 'hidden',
         '#value' => $record->nid,
       );
-      $form['order_no_cats'][$i]['title'] = array('#markup' => $record->title);
+      $form['order_no_cats'][$i]['title'] = array('#markup' => check_plain($record->title));
       $form['order_no_cats'][$i]['sort'] = array(
         '#type' => 'weight',
         '#delta' => count($options),
