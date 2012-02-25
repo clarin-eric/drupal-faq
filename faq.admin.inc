@@ -199,9 +199,24 @@ function faq_questions_settings_form($form, &$form_state) {
  *   The form code inside the $form array.
  */
 function faq_categories_settings_form($form, &$form_state) {
+  $categorization_enabled = variable_get('faq_use_categories', FALSE);
+  $vocabularies = array();
+  $vocab_omit = array();
+  $vocab_options = array();
+
+  // Display error messages if the taxonomy module isn't enabled or if there is
+  // no valid FAQ vocabulary.
   if (!module_exists("taxonomy")) {
     drupal_set_message(t('Categorization of questions will not work without the "taxonomy" module being enabled.'), 'error');
   }
+  else {
+    $vocabularies = taxonomy_get_vocabularies('faq');
+    $vocab_omit = variable_get('faq_omit_vocabulary', array());
+    foreach ($vocabularies as $vid => $vobj) {
+      $vocab_options[$vid] = $vobj->name;
+    }
+  }
+
   drupal_add_js(array('faq' => array('faq_hide_qa_accordion' => variable_get('faq_hide_qa_accordion', FALSE))), array('type' => 'setting', 'scope' => JS_DEFAULT));
   drupal_add_js(array('faq' => array('faq_category_hide_qa_accordion' => variable_get('faq_category_hide_qa_accordion', FALSE))), array('type' => 'setting', 'scope' => JS_DEFAULT));
   drupal_add_js(drupal_get_path('module', 'faq') . '/faq.js');
@@ -216,7 +231,7 @@ function faq_categories_settings_form($form, &$form_state) {
     '#type' => 'checkbox',
     '#title' => t('Categorize questions'),
     '#description' => t('This allows the user to display the questions according to the categories configured on the add/edit FAQ page.  Use of sub-categories is only recommended for large lists of questions.  The Taxonomy module must be enabled.'),
-    '#default_value' => variable_get('faq_use_categories', FALSE),
+    '#default_value' => $categorization_enabled,
   );
 
   $category_options['none'] = t("Don't display");
@@ -291,7 +306,7 @@ function faq_categories_settings_form($form, &$form_state) {
     '#default_value' => variable_get('faq_show_term_page_children', FALSE),
   );
 
-  if (module_exists('taxonomy')) {
+  if (module_exists('taxonomy') && !empty($vocab_options)) {
     $form['faq_category_advanced'] = array(
       '#type' => 'fieldset',
       '#title' => t('Advanced category settings'),
@@ -299,25 +314,41 @@ function faq_categories_settings_form($form, &$form_state) {
       '#collapsed' => TRUE,
     );
 
-    $vocab_options = array();
-    $vocabularies = taxonomy_get_vocabularies('faq');
-    foreach ($vocabularies as $vid => $vobj) {
-      $vocab_options[$vid] = $vobj->name;
-    }
-    if (!empty($vocab_options)) {
-      $form['faq_category_advanced']['faq_omit_vocabulary'] = array(
-        '#type' => 'checkboxes',
-        '#title' => t('Omit vocabulary'),
-        '#description' => t('Terms from these vocabularies will be <em>excluded</em> from the FAQ pages.'),
-        '#default_value' => variable_get('faq_omit_vocabulary', array()),
-        '#options' => $vocab_options,
-        '#multiple' => TRUE,
-      );
-    }
+    $form['faq_category_advanced']['faq_omit_vocabulary'] = array(
+      '#type' => 'checkboxes',
+      '#title' => t('Omit vocabulary'),
+      '#description' => t('Terms from these vocabularies will be <em>excluded</em> from the FAQ pages.'),
+      '#default_value' => variable_get('faq_omit_vocabulary', array()),
+      '#options' => $vocab_options,
+      '#multiple' => TRUE,
+    );
   }
+
+  $form['#submit'][] = 'faq_categories_settings_form_submit';
 
   return system_settings_form($form);
 }
+
+/**
+ * Display an error if no valid FAQ vocabularies available.
+ */
+function faq_categories_settings_form_submit($form, &$form_state) {
+  if ($form_state['values']['faq_use_categories'] && isset($form_state['values']['faq_omit_vocabulary'])) {
+    $vocabularies = taxonomy_get_vocabularies('faq');
+    $vocab_omit = $form_state['values']['faq_omit_vocabulary'];
+    $valid_vocab = FALSE;
+
+    foreach ($vocabularies as $vid => $vobj) {
+      if (empty($vocab_omit[$vid])) {
+        $valid_vocab = TRUE;
+      }
+    }
+    if (!$valid_vocab) {
+      drupal_set_message(t('Categories are enabled but no vocabulary is associated with the FAQ content type. Either create a vocabulary or disable categorization in order for questions to appear.'), 'error');
+    }
+  }
+}
+
 
 /**
  * Define the elements for the FAQ Settings page - order tab.

@@ -546,10 +546,12 @@ function faq_page($tid = 0, $faq_display = '', $category_display = '') {
     $vocab_omit = variable_get('faq_omit_vocabulary', array());
     $items = array();
     $vocab_items = array();
+    $valid_vocab = FALSE;
     foreach ($vocabularies as $vid => $vobj) {
       if (isset($vocab_omit[$vid]) && $vocab_omit[$vid] != 0) {
         continue;
       }
+      $valid_vocab = TRUE;
 
       if ($category_display == "new_page") {
         $vocab_items = _get_indented_faq_terms($vid, 0);
@@ -578,11 +580,14 @@ function faq_page($tid = 0, $faq_display = '', $category_display = '') {
 
           } // End of switch (category_display).
         } // End of foreach term.
-      } // End of foreach vocab.
-    } // End of if $category_display != new_page.
+      } // End of if $category_display != new_page.
+    } // End of foreach vocab.
 
     if ($category_display == "new_page") {
       $output = theme('item_list', array('items' => $items, 'title' => NULL, 'type' => $list_style));
+    }
+    if (!$valid_vocab) {
+      drupal_set_message(t('Categories are enabled but no vocabulary is associated with the FAQ content type. Either create a vocabulary or disable categorization in order for questions to appear.'), 'error');
     }
   }
 
