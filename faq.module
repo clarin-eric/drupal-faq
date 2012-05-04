@@ -193,7 +193,6 @@ function faq_node_info() {
       'base' => 'faq',
       'description' => t('A frequently asked question and its answer.'),
       'title_label' => t('Question'),
-      'body_label' => t('Answer'),
     ),
   );
 }

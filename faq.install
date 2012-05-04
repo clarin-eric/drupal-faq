@@ -89,6 +89,11 @@ function faq_install() {
   node_types_rebuild();
   $types = node_type_get_types();
   node_add_body_field($types['faq']);
+
+  // Change the default label on the body field.
+  $body_instance = field_info_instance('node', 'body', 'faq');
+  $body_instance['label']  = $t('Answer');
+  field_update_instance($body_instance);
 }
 
 /**
