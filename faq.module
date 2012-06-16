@@ -500,6 +500,9 @@ function faq_page($tid = 0, $faq_display = '', $category_display = '') {
     else {
       $query->orderBy('n.created', 'DESC');
     }
+    if (module_exists('i18n_select')) {
+      $query->condition('n.language', i18n_select_langcodes());
+    }
 
 
     // Only need the nid column.
@@ -635,6 +638,7 @@ function _display_faq_by_category($faq_display, $category_display, $term, $displ
 
   $query = db_select('node', 'n');
   $ti_alias = $query->innerJoin('taxonomy_index', 'ti', '(n.nid = %alias.nid)');
+  $td_alias = $query->innerJoin('taxonomy_term_data', 'td', "({$ti_alias}.tid = %alias.tid)");
   $w_alias = $query->leftJoin('faq_weights', 'w', "%alias.tid = {$ti_alias}.tid AND n.nid = %alias.nid");
   $query
     ->fields('n', array('nid'))
@@ -659,6 +663,10 @@ function _display_faq_by_category($faq_display, $category_display, $term, $displ
   }
   else {
     $query->orderBy('n.created', 'DESC');
+  }
+  if (module_exists('i18n_select')) {
+    $query->condition('n.language', i18n_select_langcodes());
+    $query->condition("{$td_alias}.language", i18n_select_langcodes());
   }
 
 
@@ -996,6 +1004,9 @@ function faq_get_faq_list() {
   else {
     $query->orderBy('n.created', 'DESC');
   }
+  if (module_exists('i18n_select')) {
+    $query->condition('n.language', i18n_select_langcodes());
+  }
 
   // We only want the first column, which is nid, so that we can load all
   // related nodes.
@@ -1210,6 +1221,7 @@ function faq_get_child_categories_faqs($term, $theme_function, $default_weight, 
     if (faq_taxonomy_term_count_nodes($child_term->tid)) {
       $query = db_select('node', 'n');
       $ti_alias = $query->innerJoin('taxonomy_index', 'ti', '(n.nid = %alias.nid)');
+      $td_alias = $query->innerJoin('taxonomy_term_data', 'td', "({$ti_alias}.tid = %alias.tid)");
       $w_alias = $query->leftJoin('faq_weights', 'w', "%alias.tid = {$ti_alias}.tid AND n.nid = %alias.nid");
       $query
         ->fields('n', array('nid'))
@@ -1234,6 +1246,10 @@ function faq_get_child_categories_faqs($term, $theme_function, $default_weight, 
       }
       else {
         $query->orderBy('n.created', 'DESC');
+      }
+      if (module_exists('i18n_select')) {
+        $query->condition('n.language', i18n_select_langcodes());
+        $query->condition("{$td_alias}.language", i18n_select_langcodes());
       }
 
       // We only want the first column, which is nid, so that we can load all
