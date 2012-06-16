@@ -93,29 +93,58 @@ function faq_questions_settings_form($form, &$form_state) {
       'ul' => t('Unordered list'),
     ),
     '#title' => t('Questions listing style'),
-    '#description' => t("This allows to select how the questions listing is presented.  It only applies to the layouts: 'Clicking on question takes user to answer further down the page' and 'Clicking on question opens the answer in a new page'.  An ordered listing would number the questions, whereas an unordered list will have a bullet to the left of each question."),
     '#default_value' => variable_get('faq_question_listing', 'ul'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="faq_display"], dummy-0' => array('!value' => 'hide_answer'),
+        ':input[name="faq_display"], dummy-1' => array('!value' => 'questions_inline'),
+      ),
+    ),
   );
 
   $form['faq_questions_misc']['faq_qa_mark'] = array(
     '#type' => 'checkbox',
     '#title' => t('Label questions and answers'),
-    '#description' => t('This option is only valid for the "Questions Inline" and "Clicking on question takes user to answer further down the page" layouts.  It labels all questions on the faq page with the "question label" setting and all answers with the "answer label" setting.  For example these could be set to "Q:" and "A:".'),
+    '#description' => t('It labels all questions on the faq page with the "question label" setting and all answers with the "answer label" setting.  For example these could be set to "Q:" and "A:".'),
     '#default_value' => variable_get('faq_qa_mark', FALSE),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="faq_display"], dummy-0' => array('!value' => 'hide_answer'),
+        ':input[name="faq_display"], dummy-1' => array('!value' => 'new_page'),
+      ),
+    ),
   );
 
   $form['faq_questions_misc']['faq_question_label'] = array(
     '#type' => 'textfield',
     '#title' => t('Question Label'),
-    '#description' => t('The label to pre-pend to the question text in the "Questions Inline" layout if labelling is enabled.'),
     '#default_value' => variable_get('faq_question_label', 'Q:'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="faq_display"], dummy-0' => array('!value' => 'hide_answer'),
+        ':input[name="faq_display"], dummy-1' => array('!value' => 'new_page'),
+        ':input[name="faq_qa_mark"]' => array('checked' => TRUE),
+      ),
+    ),
   );
 
   $form['faq_questions_misc']['faq_answer_label'] = array(
     '#type' => 'textfield',
     '#title' => t('Answer Label'),
-    '#description' => t('The label to pre-pend to the answer text in the "Questions Inline" layout if labelling is enabled.'),
     '#default_value' => variable_get('faq_answer_label', 'A:'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="faq_display"], dummy-0' => array('!value' => 'hide_answer'),
+        ':input[name="faq_display"], dummy-1' => array('!value' => 'new_page'),
+        ':input[name="faq_qa_mark"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+
+  $form['faq_questions_misc']['faq_question_long_form'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Allow long question text to be configured'),
+    '#default_value' => variable_get('faq_question_long_form', 1),
   );
 
   $form['faq_questions_misc']['faq_question_length'] = array(
@@ -126,14 +155,13 @@ function faq_questions_settings_form($form, &$form_state) {
       'short' => t('Display short text'),
       'both' => t('Display both short and long questions'),
     ),
-    '#description' => t("The length of question text to display on the FAQ page.  The short question will always be displayed in the FAQ blocks."),
+    '#description' => t('The length of question text to display on the FAQ page.  The short question will always be displayed in the FAQ blocks.'),
     '#default_value' => variable_get('faq_question_length', 'short'),
-  );
-
-  $form['faq_questions_misc']['faq_question_long_form'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Allow long question text to be configured'),
-    '#default_value' => variable_get('faq_question_long_form', 1),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="faq_question_long_form"]' => array('checked' => TRUE),
+      ),
+    ),
   );
 
   $form['faq_questions_misc']['faq_hide_qa_accordion'] = array(
@@ -141,20 +169,28 @@ function faq_questions_settings_form($form, &$form_state) {
     '#title' => t('Use accordion effect for "opens/hides answer under question" layout'),
     '#description' => t('This enables an "accordion" style effect where when a question is clicked, the answer appears beneath, and is then hidden when another question is opened.'),
     '#default_value' => variable_get('faq_hide_qa_accordion', FALSE),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="faq_display"]' => array('value' => 'hide_answer'),
+      ),
+    ),
   );
 
   $form['faq_questions_misc']['faq_show_expand_all'] = array(
     '#type' => 'checkbox',
     '#title' => t('Show "expand / collapse all" links for collapsed questions'),
-    '#description' => t('The links will only be displayed if using the "opens/hides answer under question" or "opens/hides questions and answers under category" layouts.'),
     '#default_value' => variable_get('faq_show_expand_all', FALSE),
   );
 
   $form['faq_questions_misc']['faq_use_teaser'] = array(
     '#type' => 'checkbox',
     '#title' => t('Use answer teaser'),
-    '#description' => t("This enables the display of the answer teaser text instead of the full answer when using the 'Questions inline' or 'Clicking on question takes user to answer further down the page' display options.  This is useful when you have long descriptive text.  The user can see the full answer by clicking on the question."),
     '#default_value' => variable_get('faq_use_teaser', FALSE),
+    '#states' => array(
+      'invisible' => array(
+        ':input[name="faq_display"]' => array('value' => 'new_page'),
+      ),
+    ),
   );
 
   $form['faq_questions_misc']['faq_show_node_links'] = array(
@@ -162,6 +198,11 @@ function faq_questions_settings_form($form, &$form_state) {
     '#title' => t('Show node links'),
     '#description' => t('This enables the display of links under the answer text on the faq page.  Examples of these links include "Read more", "Add comment".'),
     '#default_value' => variable_get('faq_show_node_links', FALSE),
+    '#states' => array(
+      'invisible' => array(
+        ':input[name="faq_display"]' => array('value' => 'new_page'),
+      ),
+    ),
   );
 
   $form['faq_questions_misc']['faq_back_to_top'] = array(
@@ -169,13 +210,23 @@ function faq_questions_settings_form($form, &$form_state) {
     '#title' => t('"Back to Top" link text'),
     '#description' => t('This allows the user to change the text displayed for the links which return the user to the top of the page on certain page layouts.  Defaults to "Back to Top".  Leave blank to have no link.'),
     '#default_value' => variable_get('faq_back_to_top', 'Back to Top'),
+    '#states' => array(
+      'invisible' => array(
+        ':input[name="faq_display"]' => array('value' => 'new_page'),
+      ),
+    ),
   );
 
   $form['faq_questions_misc']['faq_disable_node_links'] = array(
     '#type' => 'checkbox',
     '#title' => t('Disable question links to nodes'),
-    '#description' => t('This allows the user to prevent the questions being links to the faq node in all layouts except "Clicking on question opens the answer in a new page".'),
+    '#description' => t('This allows the user to prevent the questions being links to the faq node.'),
     '#default_value' => variable_get('faq_disable_node_links', FALSE),
+    '#states' => array(
+      'invisible' => array(
+        ':input[name="faq_display"]' => array('value' => 'new_page'),
+      ),
+    ),
   );
 
   $form['faq_questions_misc']['faq_default_sorting'] = array(
@@ -245,12 +296,22 @@ function faq_categories_settings_form($form, &$form_state) {
     '#title' => t('Categories layout'),
     '#description' => t('This controls how the categories are displayed on the page and what happens when someone clicks on the category.'),
     '#default_value' => variable_get('faq_category_display', 'categories_inline'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="faq_use_categories"]' => array('checked' => TRUE),
+      ),
+    ),
   );
 
   $form['faq_category_misc'] = array(
     '#type' => 'fieldset',
     '#title' => t('Miscellaneous layout settings'),
     '#collapsible' => TRUE,
+    '#states' => array(
+      'visible' => array(
+        ':input[name="faq_use_categories"]' => array('checked' => TRUE),
+      ),
+    ),
   );
 
   $form['faq_category_misc']['faq_category_listing'] = array(
@@ -260,15 +321,25 @@ function faq_categories_settings_form($form, &$form_state) {
       'ul' => t('Unordered list'),
     ),
     '#title' => t('Categories listing style'),
-    '#description' => t("This allows to select how the categories listing is presented.  It only applies to the 'Clicking on category opens the questions/answers in a new page' layout.  An ordered listing would number the categories, whereas an unordered list will have a bullet to the left of each category."),
+    '#description' => t('This allows to select how the categories listing is presented. An ordered listing would number the categories, whereas an unordered list will have a bullet to the left of each category.'),
     '#default_value' => variable_get('faq_category_listing', 'ul'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="faq_category_display"]' => array('value' => 'new_page'),
+      ),
+    ),
   );
 
   $form['faq_category_misc']['faq_category_hide_qa_accordion'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Use accordion effect for "opens/hides questions and answers under category" layout'),
+    '#title' => t('Use accordion effect'),
     '#description' => t('This enables an "accordion" style effect where when a category is clicked, the questions appears beneath, and is then hidden when another category is opened.'),
     '#default_value' => variable_get('faq_category_hide_qa_accordion', FALSE),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="faq_category_display"]' => array('value' => 'hide_qa'),
+      ),
+    ),
   );
 
   $form['faq_category_misc']['faq_count'] = array(
@@ -281,22 +352,37 @@ function faq_categories_settings_form($form, &$form_state) {
   $form['faq_category_misc']['faq_answer_category_name'] = array(
     '#type' => 'checkbox',
     '#title' => t('Display category name for answers'),
-    '#description' => t("This allows the user to toggle the visibility of the category name above each answer section for the 'Clicking on question takes user to answer further down the page' question/answer display."),
+    '#description' => t('This allows the user to toggle the visibility of the category name above each answer section.'),
     '#default_value' => variable_get('faq_answer_category_name', FALSE),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="faq_display"]' => array('value' => 'hide_qa'),
+      ),
+    ),
   );
 
   $form['faq_category_misc']['faq_group_questions_top'] = array(
     '#type' => 'checkbox',
-    '#title' => t("Group questions and answers for 'Categories inline'"),
-    '#description' => t("This controls how categories are implemented with the 'Clicking on question takes user to answer further down the page' question/answer display."),
+    '#title' => t("Group questions and answers"),
     '#default_value' => variable_get('faq_group_questions_top', FALSE),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="faq_category_display"]' => array('value' => 'categories_inline'),
+        ':input[name="faq_display"]' => array('value' => 'hide_qa'),
+      ),
+    ),
   );
 
   $form['faq_category_misc']['faq_hide_child_terms'] = array(
     '#type' => 'checkbox',
     '#title' => t('Only show sub-categories when parent category is selected'),
-    '#description' => t("This allows the user more control over how and when sub-categories are displayed.  It does not affect the 'Categories inline' display."),
+    '#description' => t('This allows the user more control over how and when sub-categories are displayed.'),
     '#default_value' => variable_get('faq_hide_child_terms', FALSE),
+    '#states' => array(
+      'invisible' => array(
+        ':input[name="faq_category_display"]' => array('value' => 'categories_inline'),
+      ),
+    ),
   );
 
   $form['faq_category_misc']['faq_show_term_page_children'] = array(
@@ -304,6 +390,12 @@ function faq_categories_settings_form($form, &$form_state) {
     '#title' => t('Show sub-categories on FAQ category pages'),
     '#description' => t("Sub-categories with 'faq' nodes will be displayed on the per category FAQ page.  This will also happen if 'Only show sub-categories when parent category is selected' is set."),
     '#default_value' => variable_get('faq_show_term_page_children', FALSE),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="faq_hide_child_terms"]' => array('checked' => FALSE),
+        ':input[name="faq_category_display"]' => array('!value' => 'categories_inline'),
+      ),
+    ),
   );
 
   if (module_exists('taxonomy') && !empty($vocab_options)) {
@@ -312,6 +404,11 @@ function faq_categories_settings_form($form, &$form_state) {
       '#title' => t('Advanced category settings'),
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
+      '#states' => array(
+        'visible' => array(
+          ':input[name="faq_use_categories"]' => array('checked' => TRUE),
+        ),
+      ),
     );
 
     $form['faq_category_advanced']['faq_omit_vocabulary'] = array(
