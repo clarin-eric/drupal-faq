@@ -63,9 +63,15 @@ function faq_general_settings_form($form) {
  */
 function faq_questions_settings_form($form, &$form_state) {
 
-  drupal_add_js(array('faq' => array('faq_hide_qa_accordion' => variable_get('faq_hide_qa_accordion', FALSE))), array('type' => 'setting', 'scope' => JS_DEFAULT));
-  drupal_add_js(array('faq' => array('faq_category_hide_qa_accordion' => variable_get('faq_category_hide_qa_accordion', FALSE))), array('type' => 'setting', 'scope' => JS_DEFAULT));
-  drupal_add_js(drupal_get_path('module', 'faq') . '/faq.js');
+  $form['faq_category_display'] = array(
+    '#type' => 'hidden',
+    '#value' => variable_get('faq_category_display', 'categories_inline'),
+  );
+
+  $form['faq_use_categories'] = array(
+    '#type' => 'hidden',
+    '#value' => variable_get('faq_use_categories', FALSE),
+  );
 
   $display_options['questions_inline'] = t('Questions inline');
   $display_options['questions_top'] = t('Clicking on question takes user to answer further down the page');
@@ -166,7 +172,7 @@ function faq_questions_settings_form($form, &$form_state) {
 
   $form['faq_questions_misc']['faq_hide_qa_accordion'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Use accordion effect for "opens/hides answer under question" layout'),
+    '#title' => t('Use accordion effect'),
     '#description' => t('This enables an "accordion" style effect where when a question is clicked, the answer appears beneath, and is then hidden when another question is opened.'),
     '#default_value' => variable_get('faq_hide_qa_accordion', FALSE),
     '#states' => array(
@@ -180,6 +186,13 @@ function faq_questions_settings_form($form, &$form_state) {
     '#type' => 'checkbox',
     '#title' => t('Show "expand / collapse all" links for collapsed questions'),
     '#default_value' => variable_get('faq_show_expand_all', FALSE),
+    '#states' => array(
+      'invisible' => array(
+        ':input[name="faq_display"]' => array('!value' => 'hide_answer'),
+        ':input[name="faq_use_categories"]' => array('checked' => FALSE),
+        ':input[name="faq_category_display"]' => array('!value' => 'hide_qa'),
+      ),
+    ),
   );
 
   $form['faq_questions_misc']['faq_use_teaser'] = array(
@@ -208,7 +221,7 @@ function faq_questions_settings_form($form, &$form_state) {
   $form['faq_questions_misc']['faq_back_to_top'] = array(
     '#type' => 'textfield',
     '#title' => t('"Back to Top" link text'),
-    '#description' => t('This allows the user to change the text displayed for the links which return the user to the top of the page on certain page layouts.  Defaults to "Back to Top".  Leave blank to have no link.'),
+    '#description' => t('This allows the user to change the text displayed for the links which return the user to the top of the page.  Defaults to "Back to Top".  Leave blank to have no link.'),
     '#default_value' => variable_get('faq_back_to_top', 'Back to Top'),
     '#states' => array(
       'invisible' => array(
@@ -267,10 +280,6 @@ function faq_categories_settings_form($form, &$form_state) {
       $vocab_options[$vid] = $vobj->name;
     }
   }
-
-  drupal_add_js(array('faq' => array('faq_hide_qa_accordion' => variable_get('faq_hide_qa_accordion', FALSE))), array('type' => 'setting', 'scope' => JS_DEFAULT));
-  drupal_add_js(array('faq' => array('faq_category_hide_qa_accordion' => variable_get('faq_category_hide_qa_accordion', FALSE))), array('type' => 'setting', 'scope' => JS_DEFAULT));
-  drupal_add_js(drupal_get_path('module', 'faq') . '/faq.js');
 
   // Set up a hidden variable.
   $form['faq_display'] = array(
