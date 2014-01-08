@@ -183,7 +183,7 @@ function faq_menu() {
  * Implements hook_node_info().
  *
  * Defines the FAQ node/content type.
- * @return
+ * @return array
  *   An array, containing the title, module name and the description.
  */
 function faq_node_info() {
@@ -200,12 +200,12 @@ function faq_node_info() {
 /**
  * Implements hook_form().
  *
- * @param &$node
+ * @param &$node object
  *   The node being added or edited.
- * @param &$param
+ * @param &$form_state array
  *   The hook can set this variable to an associative array of attributes to add
  *   to the enclosing <form> tag.
- * @return
+ * @return array
  *   The form elements in the $form array.
  */
 function faq_form($node, $form_state) {
@@ -324,7 +324,7 @@ function faq_delete($node) {
  *
  * Initialises $node->question using the value in the 'faq_questions' table.
  *
- * @param $node
+ * @param $nodes
  *   The node object.
  */
 function faq_load($nodes) {
@@ -402,14 +402,14 @@ function faq_views_api() {
 /**
  * Function to display the faq page.
  *
- * @param $tid
+ * @param $tid int
  *   Default is 0, determines if the questions and answers on the page
  *   will be shown according to a category or non-categorized.
- * @param $faq_display
+ * @param $faq_display string
  *   Optional parameter to override default question layout setting.
- * @param $category_display
+ * @param $category_display string
  *   Optional parameter to override default category layout setting.
- * @return
+ * @return string|NULL
  *   The output variable which contains an HTML formatted page with FAQ
  *   questions and answers.
  */
@@ -617,18 +617,18 @@ function faq_page($tid = 0, $faq_display = '', $category_display = '') {
 /**
  * Display FAQ questions and answers filtered by category.
  *
- * @param $faq_display
+ * @param $faq_display string
  *   Define the way the FAQ is being shown; can have the values:
  *   'questions top',hide answers','questions inline','new page'.
- * @param $category_display
+ * @param $category_display string
  *   The layout of categories which should be used.
- * @param $term
+ * @param $term object
  *   The category / term to display FAQs for.
- * @param $display_header
+ * @param $display_header int
  *   Set if the header will be shown or not.
- * @param &$output
+ * @param &$output string
  *   Reference which holds the content of the page, HTML formatted.
- * @param &$output_answer
+ * @param &$output_answers string
  *   Reference which holds the answers from the FAQ, when showing questions
  *   on top.
  */
@@ -852,11 +852,11 @@ function faq_block_view($delta) {
 /**
  * Return a HTML formatted list of terms indented according to the term depth.
  *
- * @param $vid
+ * @param $vid int
  *   Vocabulary id.
- * @param $tid
+ * @param $tid int
  *   Term id.
- * @return
+ * @return string
  *   Return a HTML formatted list of terms indented according to the term depth.
  */
 function _get_indented_faq_terms($vid, $tid) {
@@ -945,7 +945,7 @@ function _get_indented_faq_terms($vid, $tid) {
 /**
  * Get a list of terms associated with the FAQ nodes.
  *
- * @return
+ * @return string
  *   Return the HTML-formatted content.
  */
 function faq_get_terms() {
@@ -963,7 +963,7 @@ function faq_get_terms() {
 /**
  * Format the output for the faq_site_map() function.
  *
- * @return
+ * @return array
  *   Return a list of FAQ categories if categorization is enabled, otherwise
  *   return a list of faq nodes.
  */
@@ -1164,11 +1164,11 @@ function faq_view_answer(&$data, $node, $back_to_top, $teaser, $links) {
 /**
  * Helper function to setup the "back to top" link.
  *
- * @param $path
+ * @param $path string
  *   The path/url where the "back to top" link should bring the user too.  This
  *   could be the 'faq-page' page or one of the categorized faq pages, e.g 'faq-page/123'
  *   where 123 is the tid.
- * @return
+ * @return array
  *   An array containing the "back to top" link.
  */
 function faq_init_back_to_top($path) {
@@ -1190,22 +1190,23 @@ function faq_init_back_to_top($path) {
 /**
  * Helper function for retrieving the sub-categories faqs.
  *
- * @param $term
+ * @param $term object
  *   The category / term to display FAQs for.
- * @param $theme_function
+ * @param $theme_function string
  *   Theme function to use to format the Q/A layout for sub-categories.
- * @param $default_weight
+ * @param $default_weight int
  *   Is 0 for $default_sorting = DESC; is 1000000 for $default_sorting = ASC.
- * @param $default_sorting
+ * @param $default_sorting string
  *   If 'DESC', nodes are sorted by creation date descending; if 'ASC', nodes
  *   are sorted by creation date ascending.
- * @param $category_display
+ * @param $category_display string
  *   The layout of categories which should be used.
- * @param $class
+ * @param $class string
  *   CSS class which the HTML div will be using. A special class name is
  *   required in order to hide and questions / answers.
- * @param $parent_term
+ * @param $parent_term string
  *   The original, top-level, term we're displaying FAQs for.
+ * @return string
  */
 function faq_get_child_categories_faqs($term, $theme_function, $default_weight, $default_sorting, $category_display, $class, $parent_term = NULL) {
   $output = array();
@@ -1267,9 +1268,9 @@ function faq_get_child_categories_faqs($term, $theme_function, $default_weight, 
 /**
  * Helper function to setup the list of sub-categories for the header.
  *
- * @param $term
+ * @param $term object
  *   The term to setup the list of child terms for.
- * @return
+ * @return array
  *   An array of sub-categories.
  */
 function faq_view_child_category_headers($term) {
@@ -1435,8 +1436,9 @@ function faq_taxonomy_term_delete($term) {
 /**
  * Function to set up the FAQ breadcrumbs for a given taxonomy term.
  *
- * @param $term
+ * @param $term object
  *   The taxonomy term object.
+ * @return array|NULL
  */
 function faq_set_breadcrumb($term = NULL) {
   $breadcrumb = array();
