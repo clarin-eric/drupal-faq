@@ -1,7 +1,9 @@
 name = Frequently Asked Questions
 description = "Manages configuration of questions for a FAQ page."
 core = 7.x
+package = FAQ
 
+dependencies[] = faq_content
 files[] = faq.admin.inc
 files[] = faq.install
 files[] = faq.module

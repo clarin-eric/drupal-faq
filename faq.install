@@ -81,8 +81,9 @@ function faq_schema() {
  * Implements hook_install().
  *
  * Inserts the FAQ module's schema in the SQL database.
+ * @todo rewrite it for 7.x-2.x
  */
-function faq_install() {
+function new_faq_install() {
   variable_set('node_type_faq', array('status'));
   $t = get_t();
   // Ensure the FAQ node type is available.
@@ -100,8 +101,9 @@ function faq_install() {
  * Implements hook_uninstall().
  *
  * Remove the variables, nodes and schema corresponding to the FAQ module.
+ * @todo rewrite it for 7.x-2.x
  */
-function faq_uninstall() {
+function new_faq_uninstall() {
   // Delete the variables we created.
   // General settings.
   variable_del('faq_title');
