@@ -1,7 +1,0 @@
-name = faq_expert
-description = Faq module expert role
-core = 7.x
-package = FAQ
-dependencies[] = features
-features[features_api][] = api:2
-features[user_role][] = expert
