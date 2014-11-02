@@ -11,7 +11,7 @@ settings:
       promote: false
       sticky: false
       revision: false
-    preview: 1
+    preview: true
     submitted: true
 status: true
 langcode: en

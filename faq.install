@@ -5,6 +5,9 @@
  * FAQ module install file.
  */
 
+/**
+ * Implements hook_schema().
+ */
 function faq_schema() {
     $schema = array();
     
@@ -52,6 +55,3 @@ function faq_uninstall(){
     unset($locked['faq']);
     Drupal::state()->set('node.type.locked', $locked);
 }
-
-
-?>

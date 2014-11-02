@@ -5,7 +5,7 @@ dependencies:
     - node
     - text
 id: node.field_detailed_question
-name: field_detailed_question
+field_name: field_detailed_question
 entity_type: node
 type: text_long
 settings: {  }
