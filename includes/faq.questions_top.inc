@@ -5,6 +5,7 @@
  * FAQ page callbacks for the "questions top" layouts.
  */
 
+use Drupal\Core\Url;
 use Drupal\faq\FaqHelper;
 use Drupal\faq\FaqViewer;
 
@@ -31,7 +32,7 @@ function template_preprocess_faq_questions_top(&$variables) {
     $variables['answer_label'] = $faq_settings->get('answer_label');
   }
 
-  $this_page = current_path();
+  $this_page = Url::fromRoute('<current>');
 
   // Loop through results.
   $questions = array();
@@ -39,7 +40,8 @@ function template_preprocess_faq_questions_top(&$variables) {
   $key = 0;
   foreach ($data as $node) {
     $anchor = 'n' . $node->id();
-    $questions[$key] = l($node->getTitle(), $this_page, array('fragment' => $anchor));
+    $this_page->setOptions(array('fragment' => $anchor));
+    $questions[$key] = \Drupal::l($node->getTitle(), $this_page);
     FaqViewer::viewQuestion($answers[$key], $node, NULL, $anchor);
     FaqViewer::viewAnswer($answers[$key], $node, $teaser);
     $key++;
@@ -97,7 +99,7 @@ function template_preprocess_faq_category_questions_top(&$variables) {
   if ($default_sorting != 'DESC') {
     $default_weight = 1000000;
   }
-  $this_page = current_path();
+  $this_page = URL::fromRoute('<current>');
   $get_child_terms = 0;
   // Check if we're on a faq page.
   if (FaqHelper::arg(0) == 'faq-page') {
@@ -133,14 +135,15 @@ function template_preprocess_faq_category_questions_top(&$variables) {
   $variables['category_depth'] = $term->depth;
   $variables['category_name'] = $term->getName();
   if ($category_display == 'hide_qa') {
-    $variables['header_title'] = l($term->getName(), "faq/$term_id");
+    $url = URL::fromUserInput('/faq/' . $term_id);
+    $variables['header_title'] = \Drupal::l($term->getName(), $url);
   }
   else {
     $variables['header_title'] = $term->getName();
   }
 
   // Configure category description.
-  $variables['description'] = t($term->getDescription());
+  $variables['description'] = ($term->getDescription()) ? t($term->getDescription()) : '';
 
   // Get list of sub-categories if necessary.
   $child_categories = array();
@@ -181,7 +184,8 @@ function template_preprocess_faq_category_questions_top(&$variables) {
     }
     $node_var = array();
     $anchor = 't' . $term->id() . 'n' . $node->id();
-    $questions[] = l($node->getTitle(), $this_page, array('fragment' => $anchor));
+    $this_page->setOptions(array('fragment' => $anchor));
+    $questions[] = \Drupal::l($node->getTitle(), $this_page);
     FaqViewer::viewQuestion($node_var, $node, NULL, $anchor);
     if ($group_questions_top || $category_display == 'hide_qa') {
       FaqViewer::viewAnswer($node_var, $node, $teaser);
@@ -245,7 +249,7 @@ function template_preprocess_faq_category_questions_top_answers(&$variables) {
   }
   $variables['display_answers'] = TRUE;
 
-  $this_page = current_path();
+  $this_page = URL::fromRoute('<current>');
   $get_child_terms = 0;
   // Check if we're on a faq page.
   if (FaqHelper::arg(0) == 'faq-page') {

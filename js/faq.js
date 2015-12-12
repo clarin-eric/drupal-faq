@@ -136,7 +136,7 @@
     Drupal.behaviors.initFaqModule = {
         attach: function (context, settings) {
             // Hide/show answer for a question.
-            var faq_hide_qa_accordion = settings.hide_qa_accordion;
+            var faq_hide_qa_accordion = settings.faqSettings.hide_qa_accordion;
             $('div.faq-dd-hide-answer', context).addClass("collapsible collapsed");
 
             if (!faq_hide_qa_accordion) {
@@ -193,7 +193,7 @@
             }
 
             // Hide/show q/a for a category.
-            var faq_category_hide_qa_accordion = settings.category_hide_qa_accordion;
+            var faq_category_hide_qa_accordion = settings.faqSettings.category_hide_qa_accordion;
             $('div.faq-qa-hide', context).addClass("collapsible collapsed");
             if (!faq_category_hide_qa_accordion) {
                 $('div.faq-qa-hide', context).hide();

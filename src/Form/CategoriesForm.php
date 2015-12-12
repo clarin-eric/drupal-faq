@@ -26,6 +26,13 @@ class CategoriesForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
+  protected function getEditableConfigNames() {
+    return [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $faq_settings = $this->config('faq.settings');
 
@@ -124,7 +131,7 @@ class CategoriesForm extends ConfigFormBase {
       $vocab_options = array();
       $vocabularies = Vocabulary::loadMultiple();
       foreach ($vocabularies as $vid => $vobj) {
-        $vocab_options[$vid] = $vobj->name;
+        $vocab_options[$vid] = $vobj->get('name');
       }
       if (!empty($vocab_options)) {
         $form['faq_category_advanced']['faq_omit_vocabulary'] = array(
@@ -146,19 +153,19 @@ class CategoriesForm extends ConfigFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     // Remove unnecessary values.
-    form_state_values_clean($form_state);
+    $form_state->cleanValues();
 
-    $this->config('faq.settings')
-      ->set('use_categories', $form_state['values']['faq_use_categories'])
-      ->set('category_display', $form_state['values']['faq_category_display'])
-      ->set('category_listing', $form_state['values']['faq_category_listing'])
-      ->set('category_hide_qa_accordion', $form_state['values']['faq_category_hide_qa_accordion'])
-      ->set('count', $form_state['values']['faq_count'])
-      ->set('answer_category_name', $form_state['values']['faq_answer_category_name'])
-      ->set('group_questions_top', $form_state['values']['faq_group_questions_top'])
-      ->set('hide_child_terms', $form_state['values']['faq_hide_child_terms'])
-      ->set('show_term_page_children', $form_state['values']['faq_show_term_page_children'])
-      ->set('omit_vocabulary', $form_state['values']['faq_omit_vocabulary'])
+    $this->configFactory()->getEditable('faq.settings')
+      ->set('use_categories', $form_state->getValue('faq_use_categories'))
+      ->set('category_display', $form_state->getValue('faq_category_display'))
+      ->set('category_listing', $form_state->getValue('faq_category_listing'))
+      ->set('category_hide_qa_accordion', $form_state->getValue('faq_category_hide_qa_accordion'))
+      ->set('count', $form_state->getValue('faq_count'))
+      ->set('answer_category_name', $form_state->getValue('faq_answer_category_name'))
+      ->set('group_questions_top', $form_state->getValue('faq_group_questions_top'))
+      ->set('hide_child_terms', $form_state->getValue('faq_hide_child_terms'))
+      ->set('show_term_page_children', $form_state->getValue('faq_show_term_page_children'))
+      ->set('omit_vocabulary', $form_state->getValue('faq_omit_vocabulary'))
       ->save();
 
     parent::submitForm($form, $form_state);

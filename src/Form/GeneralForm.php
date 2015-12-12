@@ -25,6 +25,13 @@ class GeneralForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
+  protected function getEditableConfigNames() {
+    return [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $faq_settings = $this->config('faq.settings');
 
@@ -61,12 +68,12 @@ class GeneralForm extends ConfigFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     // Remove unnecessary values.
-    form_state_values_clean($form_state);
+    $form_state->cleanValues();
 
-    $this->config('faq.settings')
-      ->set('title', $form_state['values']['faq_title'])
-      ->set('description', $form_state['values']['faq_description'])
-      ->set('custom_breadcrumbs', $form_state['values']['faq_custom_breadcrumbs'])
+    $this->configFactory()->getEditable('faq.settings')
+      ->set('title', $form_state->getValue('faq_title'))
+      ->set('description', $form_state->getValue('faq_description'))
+      ->set('custom_breadcrumbs', $form_state->getValue('faq_custom_breadcrumbs'))
       ->save();
 
     parent::submitForm($form, $form_state);

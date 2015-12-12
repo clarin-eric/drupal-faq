@@ -7,12 +7,12 @@
 
 namespace Drupal\faq\Controller;
 
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Url;
 use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\node\Entity\Node;
 use Drupal\taxonomy\Entity\Term;
-use Drupal\Component\Utility\String;
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\faq\FaqHelper;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -45,9 +45,7 @@ class FaqController extends ControllerBase {
 
     $build = array();
     $build['#type'] = 'markup';
-    $build['#attached']['css'] = array(
-      drupal_get_path('module', 'faq') . '/css/faq.css'
-    );
+    $build['#attached']['library'][] = 'faq/faq-css';
     
     $build['#title'] = $faq_settings->get('title');
     
@@ -64,18 +62,9 @@ class FaqController extends ControllerBase {
     }
 
     if (($use_categories && $category_display == 'hide_qa') || $faq_display == 'hide_answer') {
-      $build['#attached']['js'] = array(
-        array(
-          'data' => drupal_get_path('module', 'faq') . '/js/faq.js'
-        ),
-        array(
-          'data' => array(
-            'hide_qa_accordion' => $faq_settings->get('hide_qa_accordion'),
-            'category_hide_qa_accordion' => $faq_settings->get('category_hide_qa_accordion')
-          ),
-          'type' => 'setting'
-        )
-      );
+      $build['#attached']['library'][] = 'faq/faq-scripts';
+      $build['#attached']['drupalSettings']['faqSettings']['hide_qa_accordion'] = $faq_settings->get('hide_qa_accordion');
+      $build['#attached']['drupalSettings']['faqSettings']['category_hide_qa_accordion'] = $faq_settings->get('category_hide_qa_accordion');
     }
 
     // Non-categorized questions and answers.
@@ -148,14 +137,14 @@ class FaqController extends ControllerBase {
       if (!empty($tid)) {
         if ($term = Term::load($tid)) {
           $title = $faq_settings->get('title');
-          
+
           $build['#title'] = ($title . ($title ? ' - ' : '') . $this->t($term->getName()));
           
           $this->_displayFaqByCategory($faq_display, $category_display, $term, 0, $output, $output_answers);
           $to_render = array(
             '#theme' => 'faq_page',
-            '#content' => SafeMarkup::set($output),
-            '#answers' => SafeMarkup::set($output_answers),
+            '#content' => new FormattableMarkup($output, []),
+            '#answers' => new FormattableMarkup($output_answers, []),
           );
           $build['#markup'] = drupal_render($to_render);
           return $build;
@@ -182,10 +171,10 @@ class FaqController extends ControllerBase {
         // Not a new page.
         else {
           if ($hide_child_terms && $category_display == 'hide_qa') {
-            $tree = taxonomy_get_tree($vid, 0, 1, TRUE);
+            $tree = \Drupal::entityManager()->getStorage('taxonomy_term')->loadTree($vid, 0, 1, TRUE);
           }
           else {
-            $tree = taxonomy_get_tree($vid, 0, NULL, TRUE);
+            $tree = \Drupal::entityManager()->getStorage('taxonomy_term')->loadTree($vid, 0, NULL, TRUE);
           }
           foreach ($tree as $term) {
             switch ($category_display) {
@@ -209,9 +198,9 @@ class FaqController extends ControllerBase {
     
     $markup = array(
       '#theme' => 'faq_page',
-      '#content' => SafeMarkup::set($output),
-      '#answers' => SafeMarkup::set($output_answers),
-      '#description' => SafeMarkup::set($faq_description),
+      '#content' => new FormattableMarkup($output, []),
+      '#answers' => new FormattableMarkup($output_answers, []),
+      '#description' => new FormattableMarkup($faq_description, []),
     );
     $build['#markup'] = drupal_render($markup);
 
@@ -231,21 +220,10 @@ class FaqController extends ControllerBase {
     $faq_settings = \Drupal::config('faq.settings');
     $build = array();
 
-    $build['#attached']['js'] = array(
-      array(
-        'data' => drupal_get_path('module', 'faq') . '/js/faq.js'
-      ),
-      array(
-        'data' => array(
-          'hide_qa_accordion' => $faq_settings->get('hide_qa_accordion'),
-          'category_hide_qa_accordion' => $faq_settings->get('category_hide_qa_accordion')
-        ),
-        'type' => 'setting'
-      )
-    );
-    $build['#attached']['css'] = array(
-      drupal_get_path('module', 'faq') . '/css/faq.css'
-    );
+    $build['#attached']['library'][] = 'faq/faq-scripts';
+    $build['#attached']['drupalSettings']['faqSettings']['hide_qa_accordion'] = $faq_settings->get('hide_qa_accordion');
+    $build['#attached']['drupalSettings']['faqSettings']['category_hide_qa_accordion'] = $faq_settings->get('category_hide_qa_accordion');
+    $build['#attached']['library'][] = 'faq/faq-css';
 
     $build['faq_order'] = $this->formBuilder()->getForm('Drupal\faq\Form\OrderForm');
 
@@ -277,18 +255,9 @@ class FaqController extends ControllerBase {
 
     $build = array();
 
-    $build['#attached']['js'] = array(
-      array(
-        'data' => drupal_get_path('module', 'faq') . '/js/faq.js'
-      ),
-      array(
-        'data' => array(
-          'hide_qa_accordion' => $faq_settings->get('hide_qa_accordion'),
-          'category_hide_qa_accordion' => $faq_settings->get('category_hide_qa_accordion')
-        ),
-        'type' => 'setting'
-      )
-    );
+    $build['#attached']['library'][] = 'faq/faq-scripts';
+    $build['#attached']['drupalSettings']['faqSettings']['hide_qa_accordion'] = $faq_settings->get('hide_qa_accordion');
+    $build['#attached']['drupalSettings']['faqSettings']['category_hide_qa_accordion'] = $faq_settings->get('category_hide_qa_accordion');
 
     $build['faq_questions_settings_form'] = $this->formBuilder()->getForm('Drupal\faq\Form\QuestionsForm');
 
@@ -306,18 +275,9 @@ class FaqController extends ControllerBase {
 
     $build = array();
 
-    $build['#attached']['js'] = array(
-      array(
-        'data' => drupal_get_path('module', 'faq') . '/js/faq.js'
-      ),
-      array(
-        'data' => array(
-          'hide_qa_accordion' => $faq_settings->get('hide_qa_accordion'),
-          'category_hide_qa_accordion' => $faq_settings->get('category_hide_qa_accordion')
-        ),
-        'type' => 'setting'
-      )
-    );
+    $build['#attached']['library'][] = 'faq/faq-scripts';
+    $build['#attached']['drupalSettings']['faqSettings']['hide_qa_accordion'] = $faq_settings->get('hide_qa_accordion');
+    $build['#attached']['drupalSettings']['faqSettings']['category_hide_qa_accordion'] = $faq_settings->get('category_hide_qa_accordion');
 
     if (!$this->moduleHandler()->moduleExists('taxonomy')) {
       drupal_set_message(t('Categorization of questions will not work without the "taxonomy" module being enabled.'), 'error');
@@ -391,7 +351,7 @@ class FaqController extends ControllerBase {
     // Handle indenting of categories.
     $depth = 0;
     if (!isset($term->depth)) {
-      $children = taxonomy_term_load_children($term->id());
+      $children = \Drupal::entityManager()->getStorage('taxonomy_term')->loadChildren($term->id());
       $term->depth = count($children);
     }
     while ($depth < $term->depth) {
@@ -466,7 +426,7 @@ class FaqController extends ControllerBase {
     $hide_child_terms = $faq_settings->get('hide_child_terms');
 
     $items = array();
-    $tree = taxonomy_get_tree($vid, $tid, 1, TRUE);
+    $tree = \Drupal::entityManager()->getStorage('taxonomy_term')->loadTree($vid, $tid, 1, TRUE);
 
     foreach ($tree as $term) {
       $term_id = $term->id();
@@ -495,7 +455,7 @@ class FaqController extends ControllerBase {
 
 
         if ($term_node_count > 0) {
-          $path = "faq-page/$term_id";
+          $path = URL::fromUserInput('/faq-page/' . $term_id);
 
           // pathauto is not exists in D8 yet
           //if (!\Drupal::service('path.alias_manager.cached')->getPathAlias(arg(0) . '/' . $tid) && $this->moduleHandler()->moduleExists('pathauto')) {
@@ -506,10 +466,10 @@ class FaqController extends ControllerBase {
             if ($hide_child_terms) {
               $count = $tree_count;
             }
-            $cur_item = l($this->t($term->getName()), $path) . " ($count) " . $desc;
+            $cur_item = \Drupal::l($this->t($term->getName()), $path) . " ($count) " . $desc;
           }
           else {
-            $cur_item = l($this->t($term->getName()), $path) . $desc;
+            $cur_item = \Drupal::l($this->t($term->getName()), $path) . $desc;
           }
         }
         else {
@@ -552,7 +512,7 @@ class FaqController extends ControllerBase {
       if (!empty($item['children'])) {
         $pre = $this->_renderCategoriesToList($item['children'], $list_style);
       }
-      $list[] = SafeMarkup::set($item['item'] . $pre);
+      $list[] = new FormattableMarkup($item['item'] . $pre, []);
     }
     
     $render = array(

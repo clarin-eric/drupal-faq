@@ -5,6 +5,7 @@
  * FAQ page callbacks for the "hide answer" layouts.
  */
 
+use Drupal\Core\Url;
 use Drupal\faq\FaqHelper;
 use Drupal\faq\FaqViewer;
 use Drupal\Component\Utility\SafeMarkup;
@@ -18,7 +19,7 @@ use Drupal\Component\Utility\SafeMarkup;
 function template_preprocess_faq_hide_answer(&$variables) {
   $faq_settings = \Drupal::config('faq.settings');
   $data = $variables['data'];
-  $this_page = current_path();
+  $this_page = URL::fromRoute('<current>');
 
   // Fetch configuration.
   $teaser = $faq_settings->get('use_teaser');
@@ -61,7 +62,7 @@ function template_preprocess_faq_category_hide_answer(&$variables) {
   if ($default_sorting != 'DESC') {
     $default_weight = 1000000;
   }
-  $this_page = current_path();
+  $this_page = URL::fromRoute('<current>');
   $get_child_terms = 0;
   // Check if we're on a faq page.
   if (FaqHelper::arg(0) == 'faq-page') {
@@ -95,14 +96,14 @@ function template_preprocess_faq_category_hide_answer(&$variables) {
   $variables['category_depth'] = $term->depth;
   $variables['category_name'] = $term->getName();
   if ($category_display == 'hide_qa') {
-    $variables['header_title'] = l($term->getName(), "faq/$term_id");
+    $variables['header_title'] = \Drupal::l($term->getName(), URL::fromUserInput('/faq/' . $term_id));
   }
   else {
     $variables['header_title'] = $term->getName();
   }
 
   // Configure category description.
-  $variables['description'] = SafeMarkup::set($term->getDescription());
+  $variables['description'] = SafeMarkup::checkPlain($term->getDescription());
 
   // Get list of sub-categories if necessary.
   $child_categories = array();

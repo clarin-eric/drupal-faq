@@ -7,11 +7,10 @@
 
 namespace Drupal\faq\Plugin\Block;
 
+use Drupal\Core\Url;
 use Drupal\faq\FaqHelper;
-use Drupal\block\BlockBase;
+use Drupal\Core\Block\BlockBase;
 use Drupal\taxonomy\Entity\Vocabulary;
-use Drupal\Component\Annotation\Plugin;
-use Drupal\Core\Annotation\Translation;
 
 /**
  * Provides a simple block.
@@ -43,7 +42,7 @@ class FaqCategoriesBlock extends BlockBase {
         $vocab_omit = array_flip($faq_settings->get('omit_vocabulary'));
         $vocabularies = array_diff_key($vocabularies, $vocab_omit);
         foreach ($vocabularies as $vocab) {
-          foreach (taxonomy_get_tree($vocab->vid) as $term) {
+          foreach (\Drupal::entityManager()->getStorage('taxonomy_term')->loadTree($vocab->id()) as $term) {
             if (FaqHelper::taxonomyTermCountNodes($term->tid)) {
               $terms[$term->name] = $term->tid;
             }
@@ -52,7 +51,7 @@ class FaqCategoriesBlock extends BlockBase {
       }
       if (count($terms) > 0) {
         foreach ($terms as $name => $tid) {
-          $items[] = l($name, 'faq-page/' . $tid);
+          $items[] = \Drupal::l($name, URL::fromUserInput('/faq-page/' . $tid));
         }
       }
     }

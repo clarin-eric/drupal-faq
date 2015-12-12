@@ -7,10 +7,11 @@
 
 namespace Drupal\faq\Form;
 
+use Drupal\Component\Utility\SafeMarkup;
+use Drupal\Core\Database\Database;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\faq\FaqHelper;
-use Drupal\Component\Utility\String;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
@@ -23,6 +24,13 @@ class OrderForm extends ConfigFormBase {
    */
   public function getFormId() {
     return 'faq_order_form';
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getEditableConfigNames() {
+    return [];
   }
 
   /**
@@ -42,7 +50,7 @@ class OrderForm extends ConfigFormBase {
     if (!$use_categories) {
       $step = "order";
     }
-    elseif (!isset($form_state['values']) && empty($category)) {
+    elseif ($form_state->getValues() != NULL && empty($category)) {
       $step = "categories";
     }
     else {
@@ -60,7 +68,7 @@ class OrderForm extends ConfigFormBase {
       $vocabularies = Vocabulary::loadMultiple();
       $options = array();
       foreach ($vocabularies as $vid => $vobj) {
-        $tree = taxonomy_get_tree($vid);
+        $tree = \Drupal::entityManager()->getStorage('taxonomy_term')->loadTree($vid);
         foreach ($tree as $term) {
           if (!FaqHelper::taxonomyTermCountNodes($term->tid)) {
             continue;
@@ -90,8 +98,8 @@ class OrderForm extends ConfigFormBase {
       }
 
       $options = array();
-      if (!empty($form_state['values']['faq_category'])) {
-        $category = $form_state['values']['faq_category'];
+      if (!empty($form_state->getValue('faq_category'))) {
+        $category = $form_state->getValue('faq_category');
       }
 
       // Uncategorized ordering.
@@ -142,7 +150,7 @@ class OrderForm extends ConfigFormBase {
           '#type' => 'hidden',
           '#value' => $record->nid,
         );
-        $form['order_no_cats'][$i]['title'] = array('#markup' => String::checkPlain($record->title));
+        $form['order_no_cats'][$i]['title'] = array('#markup' => SafeMarkup::checkPlain($record->title));
         $form['order_no_cats'][$i]['sort'] = array(
           '#type' => 'weight',
           '#delta' => count($options),
@@ -165,17 +173,17 @@ class OrderForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    if ($form_state['values']['op'] == t('Save order') && !empty($form_state['values']['order_no_cats'])) {
-
-      foreach ($form_state['values']['order_no_cats'] as $i => $faq) {
+    $order_no_cats = $form_state->getValue('order_no_cats');
+    if ($form_state->getValue('op')->__toString() == t('Save order') && !empty($order_no_cats)) {
+      foreach ($order_no_cats as $i => $faq) {
         $nid = $faq['nid'];
         $index = $faq['sort'];
-        db_merge('faq_weights')
+        Database::getConnection()->merge('faq_weights')
           ->fields(array(
             'weight' => $index,
           ))
-          ->key(array(
-            'tid' => $form_state['values']['faq_category'],
+          ->keys(array(
+            'tid' => $form_state->getValue('faq_category'),
             'nid' => $nid,
           ))
           ->execute();

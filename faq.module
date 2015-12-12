@@ -6,6 +6,7 @@
  * displayed in different styles, according to the settings.
  */
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Render\Element;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\faq\FaqHelper;
@@ -58,19 +59,19 @@ function faq_permission(){
 function faq_node_access(\Drupal\node\NodeInterface $node, $op, $account, $langcode) {
   // Ignore non-FAQ node.
   if ($node->getType() !== 'faq') {
-    return NODE_ACCESS_IGNORE;
+    return AccessResult::neutral();
   }
   
   if ($op == 'view') {
-    return NODE_ACCESS_IGNORE;
+    return AccessResult::neutral();
   }
   elseif ($op == 'create' || $op == 'update' || $op == 'delete') {
     if(\Drupal::currentUser()->hasPermission('administer faq')) {
-      return NODE_ACCESS_ALLOW;
+      return AccessResult::allowed();
     }
   }
   
-  return NODE_ACCESS_IGNORE;
+  return AccessResult::neutral();
 }
 
 /**

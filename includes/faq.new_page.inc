@@ -5,8 +5,9 @@
  * FAQ page callbacks for the "new page" layouts.
  */
 
+use Drupal\Component\Render\FormattableMarkup;
+use Drupal\Core\Url;
 use Drupal\faq\FaqHelper;
-use Drupal\faq\FaqViewer;
 use Drupal\Component\Utility\SafeMarkup;
 
 /**
@@ -22,7 +23,7 @@ function template_preprocess_faq_new_page(&$variables) {
 
   foreach ($data as $node) {
     $node_id = $node->id();
-    $items[] = l($node->getTitle(), "node/$node_id");
+    $items[] = \Drupal::l($node->getTitle(), $url = $node->toUrl());
   }
 
   $list_style = $faq_settings->get('question_listing');
@@ -36,7 +37,7 @@ function template_preprocess_faq_new_page(&$variables) {
     '#items' => $items,
   );
 
-  $variables['list'] = SafeMarkup::set(drupal_render($item_list));
+  $variables['list'] = new FormattableMarkup(drupal_render($item_list), []);
 }
 
 /**
@@ -53,7 +54,7 @@ function template_preprocess_faq_category_new_page(&$variables) {
   $term_id = $term->id();
   $parent_term = $variables['parent_term'];
   $class = $variables['class'];
-  $this_page = current_path();
+  $this_page = URL::fromRoute('<current>');
 
   // Fetch configuration.
   $display_faq_count = $faq_settings->get('count');
@@ -98,14 +99,14 @@ function template_preprocess_faq_category_new_page(&$variables) {
   // Configure header.
   $variables['category_depth'] = $term->depth;
   if ($category_display == 'hide_qa') {
-    $variables['header_title'] = l($term->getName(), "faq/$term_id");
+    $variables['header_title'] = \Drupal::l($term->getName(), URL::fromUserInput('/faq/' . $term_id));
   }
   else {
     $variables['header_title'] = $term->getName();
   }
 
   // Configure category description.
-  $variables['description'] = SafeMarkup::set($term->getDescription());
+  $variables['description'] = SafeMarkup::checkPlain($term->getDescription());
 
   // Get list of sub-categories if necessary.
   $child_categories = array();
@@ -141,7 +142,7 @@ function template_preprocess_faq_category_new_page(&$variables) {
       $count++;
     }
     $node_id = $node->id();
-    $nodes[] = l($node->getTitle(), "node/$node_id");
+    $nodes[] = \Drupal::l($node->getTitle(), $node->toUrl());
   }
   $variables['question_list'] = $nodes;
   $variables['question_list_style'] = $faq_settings->get('question_listing');

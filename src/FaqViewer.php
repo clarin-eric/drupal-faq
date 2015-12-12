@@ -7,8 +7,8 @@
 
 namespace Drupal\faq;
 
-use Drupal\Component\Utility\String;
-use Drupal\Component\Utility\SafeMarkup;
+use Drupal\Component\Render\FormattableMarkup;
+use Drupal\Core\Url;
 
 /**
  * Controlls the display of questions and answers.
@@ -48,7 +48,7 @@ class FaqViewer {
         if ($anchor) {
           $options['attributes'] = array('id' => $anchor);
         }
-        $question = l($node->getTitle(), $path, $options);
+        $question = \Drupal::l($node->getTitle(), $path, $options);
       }
     }
 
@@ -56,10 +56,11 @@ class FaqViewer {
     else {
       $node_id = $node->id();
       if (empty($anchor)) {
-        $question = l($node->getTitle(), "node/$node_id)");
+        $question = \Drupal::l($node->getTitle(), "node/$node_id)");
       }
       else {
-        $question = l($node->getTitle(), "node/$node_id", array("attributes" => array("id" => "$anchor")));
+        $url = $node->toUrl()->setOptions(array("attributes" => array("id" => "$anchor")));
+        $question = \Drupal::l($node->getTitle(), $url);
       }
     }
     $question = '<span datatype="" property="dc:title">' . $question . '</span>';
@@ -68,7 +69,7 @@ class FaqViewer {
     if ($faq_settings->get('display') != 'hide_answer' && !empty($detailed_question) && $faq_settings->get('question_length') == 'both') {
       $question .= '<div class="faq-detailed-question">' . $detailed_question . '</div>';
     }
-    $data['question'] = SafeMarkup::set($question);
+    $data['question'] = new FormattableMarkup($question, []);
   }
 
   /**
@@ -102,7 +103,7 @@ class FaqViewer {
 
     $content .= FaqViewer::initBackToTop();
 
-    $data['body'] = SafeMarkup::set($content);
+    $data['body'] = new FormattableMarkup($content, []);
   }
 
   /**
@@ -127,7 +128,7 @@ class FaqViewer {
         'html' => TRUE,
         'fragment' => 'top',
       );
-      $back_to_top = l(String::checkPlain($back_to_top_text), current_path(), $options);
+      $back_to_top = \Drupal::l(new FormattableMarkup($back_to_top_text, []), Url::fromRoute('<current>'), $options);
     }
 
     return $back_to_top;

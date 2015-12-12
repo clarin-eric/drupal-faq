@@ -25,6 +25,13 @@ class QuestionsForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
+  protected function getEditableConfigNames() {
+    return [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $faq_settings = $this->config('faq.settings');
 
@@ -159,23 +166,22 @@ class QuestionsForm extends ConfigFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     // Remove unnecessary values.
-    form_state_values_clean($form_state);
+    $form_state->cleanValues();
 
-    $this->config('faq.settings')
-      ->set('display', $form_state['values']['faq_display'])
-      ->set('question_listing', $form_state['values']['faq_question_listing'])
-      ->set('qa_mark', $form_state['values']['faq_qa_mark'])
-      ->set('question_label', $form_state['values']['faq_question_label'])
-      ->set('answer_label', $form_state['values']['faq_answer_label'])
-      ->set('question_length', $form_state['values']['faq_question_length'])
-      ->set('question_long_form', $form_state['values']['faq_question_long_form'])
-      ->set('hide_qa_accordion', $form_state['values']['faq_hide_qa_accordion'])
-      ->set('show_expand_all', $form_state['values']['faq_show_expand_all'])
-      ->set('use_teaser', $form_state['values']['faq_use_teaser'])
-      //->set('show_node_links', $form_state['values']['faq_show_node_links'])
-      ->set('back_to_top', $form_state['values']['faq_back_to_top'])
-      ->set('disable_node_links', $form_state['values']['faq_disable_node_links'])
-      ->set('default_sorting', $form_state['values']['faq_default_sorting'])
+    $this->configFactory()->getEditable('faq.settings')
+      ->set('display', $form_state->getValue('faq_display'))
+      ->set('question_listing', $form_state->getValue('faq_question_listing'))
+      ->set('qa_mark', $form_state->getValue('faq_qa_mark'))
+      ->set('question_label', $form_state->getValue('faq_question_label'))
+      ->set('answer_label', $form_state->getValue('faq_answer_label'))
+      ->set('question_length', $form_state->getValue('faq_question_length'))
+      ->set('question_long_form', $form_state->getValue('faq_question_long_form'))
+      ->set('hide_qa_accordion', $form_state->getValue('faq_hide_qa_accordion'))
+      ->set('show_expand_all', $form_state->getValue('faq_show_expand_all'))
+      ->set('use_teaser', $form_state->getValue('faq_use_teaser'))
+      ->set('back_to_top', $form_state->getValue('faq_back_to_top'))
+      ->set('disable_node_links', $form_state->getValue('faq_disable_node_links'))
+      ->set('default_sorting', $form_state->getValue('faq_default_sorting'))
       ->save();
 
     parent::submitForm($form, $form_state);
