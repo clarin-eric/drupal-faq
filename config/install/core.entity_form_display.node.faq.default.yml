@@ -1,9 +1,9 @@
 langcode: en
 status: true
 dependencies:
-  entity:
-    - field.instance.node.faq.body
-    - field.instance.node.faq.field_detailed_question
+  config:
+    - field.field.node.faq.body
+    - field.field.node.faq.field_detailed_question
     - node.type.faq
   module:
     - path
@@ -14,7 +14,7 @@ bundle: faq
 mode: default
 content:
   title:
-    type: string
+    type: string_textfield
     weight: 0
     settings:
       size: 60

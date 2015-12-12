@@ -15,4 +15,7 @@ settings:
     submitted: true
 status: true
 langcode: en
+new_revision: true
+preview_mode: 1
+display_submitted: true
 dependencies: {  }
