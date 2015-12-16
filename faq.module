@@ -27,33 +27,6 @@ function faq_help($route_name, \Drupal\Core\Routing\RouteMatchInterface $route_m
 }
 
 /**
- * Implements hook_permission().
- */
-function faq_permission(){
-    /**
-     * Permissions of the faq module
-     */
-    $permissions = array();
-    
-    $permissions['administer faq'] = array(
-        'title' => t('Administer FAQ module'),
-        'description' => t('Allows user to administer FAQ module settings')
-    );
-    
-    $permissions['administer faq order'] = array(
-        'title' => t('Administer FAQ order'),
-        'description' => t('Allows user to order FAQ entities.')
-    );
-    
-    $permissions['view faq page'] = array(
-        'title' => t('View FAQ pages'),
-        'description' => t('Allows user to view FAQ pages.')
-    );
-    
-    return $permissions;
-}
-
-/**
  * Implements hook_node_access().
  */
 function faq_node_access(\Drupal\node\NodeInterface $node, $op, $account, $langcode) {
