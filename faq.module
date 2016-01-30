@@ -200,9 +200,9 @@ function faq_preprocess_page(&$variables){
 /**
  * Implements hook_form_FORM_ID_alter().
  * 
- * If question_long_form is disabled, hide the 'detailed queston' from node editing.
+ * If question_long_form is disabled, hide the 'detailed question' from node editing.
  */
-function faq_form_faq_node_edit_form_alter(&$form, &$form_state, $form_id) {
+function faq_form_node_faq_edit_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
   $faq_settings = \Drupal::config('faq.settings');
   if (!$faq_settings->get('question_long_form')) {
     $form['field_detailed_question']['#access'] = FALSE;
