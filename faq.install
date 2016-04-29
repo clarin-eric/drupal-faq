@@ -4,6 +4,8 @@
  * @file
  * FAQ module install file.
  */
+use Drupal\node\Entity\Node;
+use Drupal\node\Entity\NodeType;
 
 /**
  * Implements hook_schema().
@@ -50,7 +52,16 @@ function faq_install(){
 }
 
 function faq_uninstall(){
-    $locked = Drupal::state()->get('node.type.locked');
-    unset($locked['faq']);
-    Drupal::state()->set('node.type.locked', $locked);
+  $info = NodeType::load('faq');
+  if ($info) {
+    $info->delete();
+    field_purge_batch(500);
+    $nids = \Drupal::entityQuery('node')
+      ->condition('type', 'faq')
+      ->execute();
+    foreach ($nids as $nid) {
+      $faqNode = Node::load($nid);
+      $faqNode->delete();
+    }
+  }
 }

@@ -51,7 +51,6 @@ function faq_node_access(\Drupal\node\NodeInterface $node, $op, $account, $langc
  * Implements hook_theme().
  */
 function faq_theme() {
-    $path = drupal_get_path('module', 'faq') . '/includes';
     return array(
     'faq_draggable_question_order_table' => array(
       'template' => 'faq-draggable-question-order-table',
@@ -194,7 +193,6 @@ function faq_preprocess_page(&$variables){
       $variables['breadcrumb']['#breadcrumb'] = $breadcrumb;
     }
   }
-
 }
 
 /**
