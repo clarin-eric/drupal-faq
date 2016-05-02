@@ -102,10 +102,11 @@ function template_preprocess_faq_category_questions_top(&$variables) {
   $this_page = URL::fromRoute('<current>');
   $get_child_terms = 0;
   // Check if we're on a faq page.
-  if (FaqHelper::arg(0) == 'faq-page') {
+  if ($id = FaqHelper::searchInArgs('faq-page')) {
+    $next_id = ($id) + 1;
     // Check if we're on a categorized faq page.
-    if (is_numeric(FaqHelper::arg(1))) {
-      $get_child_terms = FaqHelper::arg(1);
+    if (is_numeric(FaqHelper::arg($next_id))) {
+      $get_child_terms = FaqHelper::arg($next_id);
     }
   }
   // Force some settings in case we're processing a special faq question list
@@ -252,10 +253,11 @@ function template_preprocess_faq_category_questions_top_answers(&$variables) {
   $this_page = URL::fromRoute('<current>');
   $get_child_terms = 0;
   // Check if we're on a faq page.
-  if (FaqHelper::arg(0) == 'faq-page') {
+  if ($id = FaqHelper::searchInArgs('faq-page')) {
+    $next_id = ($id) + 1;
     // Check if we're on a categorized faq page.
-    if (is_numeric(FaqHelper::arg(1))) {
-      $get_child_terms = FaqHelper::arg(1);
+    if (is_numeric(FaqHelper::arg($next_id))) {
+      $get_child_terms = FaqHelper::arg($next_id);
     }
   }
   // Force some settings in case we're processing a special faq question list

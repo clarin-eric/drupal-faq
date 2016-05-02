@@ -242,7 +242,25 @@ class FaqHelper {
       return $url_comp[$id];
     }
     else {
-      return null;
+      return NULL;
+    }
+  }
+
+  /**
+   * Helper function to search a string in the path.
+   *
+   * @param integer $id
+   *   Number of the path's part.
+   * @return string
+   *   The id of the path which indexed by the given path.
+   */
+  public static function searchInArgs($path) {
+    $url_comp = explode('/', \Drupal::request()->getRequestUri());
+    if ($key = array_search($path, $url_comp)) {
+      return $key;
+    }
+    else {
+      return NULL;
     }
   }
 

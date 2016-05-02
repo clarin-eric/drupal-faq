@@ -186,8 +186,8 @@ function faq_preprocess_page(&$variables){
   
   $route_match = \Drupal::service('current_route_match');
   $tid = $route_match->getRawParameter('tid');
-  
-  if (FaqHelper::arg(0) == 'faq-page' && $use_categories && is_numeric($tid) && $current_term = Term::load($tid)) {
+
+  if (FaqHelper::searchInArgs('faq-page') && $use_categories && is_numeric($tid) && $current_term = Term::load($tid)) {
     $breadcrumb = FaqHelper::setFaqBreadcrumb($current_term);
     if (!empty($breadcrumb)) {
       $variables['breadcrumb']['#breadcrumb'] = $breadcrumb;

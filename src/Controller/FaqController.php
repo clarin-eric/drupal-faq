@@ -9,6 +9,7 @@ namespace Drupal\faq\Controller;
 
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Database\Query\Condition;
 use Drupal\Core\Url;
 use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\node\Entity\Node;
@@ -20,13 +21,10 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  * Controller routines for FAQ routes.
  */
 class FaqController extends ControllerBase {
-  /*   * *****************************************************
-   * FAQ PAGES
-   * **************************************************** */
 
   /**
    * Function to display the faq page.
-   * 
+   *
    * @param int $tid
    *   Default is 0, determines if the questions and answers on the page
    *   will be shown according to a category or non-categorized.
@@ -46,9 +44,9 @@ class FaqController extends ControllerBase {
     $build = array();
     $build['#type'] = 'markup';
     $build['#attached']['library'][] = 'faq/faq-css';
-    
+
     $build['#title'] = $faq_settings->get('title');
-    
+
     if (!$this->moduleHandler()->moduleExists('taxonomy')) {
       $tid = 0;
     }
@@ -72,17 +70,20 @@ class FaqController extends ControllerBase {
       if (!empty($tid)) {
         throw new NotFoundHttpException();
       }
+      $langcode = \Drupal::languageManager()->getCurrentLanguage()->getId();
       $default_sorting = $faq_settings->get('default_sorting');
-
-      $query = db_select('node', 'n');
+      $query = \Drupal::database()->select('node', 'n');
       $weight_alias = $query->leftJoin('faq_weights', 'w', '%alias.nid=n.nid');
-      $node_data = $query->leftJoin('node_field_data', 'd', 'd.nid=n.nid');
+      $query->leftJoin('node_field_data', 'd', 'd.nid=n.nid');
+      $db_or = new Condition('OR');
+      $db_or->condition("$weight_alias.tid", 0)->isNull("$weight_alias.tid");
       $query
-        ->addTag('node_access')
-        ->fields('n', array('nid'))
+        ->fields('n', ['nid'])
         ->condition('n.type', 'faq')
+        ->condition('d.langcode', $langcode)
         ->condition('d.status', 1)
-        ->condition(db_or()->condition("$weight_alias.tid", 0)->isNull("$weight_alias.tid"));
+        ->condition($db_or)
+        ->addTag('node_access');
 
       $default_weight = 0;
       if ($default_sorting == 'ASC') {
@@ -105,6 +106,9 @@ class FaqController extends ControllerBase {
       // Only need the nid column.
       $nids = $query->execute()->fetchCol();
       $data = Node::loadMultiple($nids);
+      foreach ($data as $key => &$node) {
+        $node =  ($node->hasTranslation($langcode)) ? $node->getTranslation($langcode) : $node;
+      }
 
       $questions_to_render = array();
       $questions_to_render['#data'] = $data;
@@ -126,7 +130,7 @@ class FaqController extends ControllerBase {
           $questions_to_render['#theme'] = 'faq_new_page';
           break;
       } // End of switch.
-      $output = drupal_render($questions_to_render);
+      $output = \Drupal::service('renderer')->render($questions_to_render);
     }
 
     // Categorize questions.
@@ -311,16 +315,18 @@ class FaqController extends ControllerBase {
    *   on top.
    */
   private function _displayFaqByCategory($faq_display, $category_display, $term, $display_header, &$output, &$output_answers) {
+    $langcode = \Drupal::languageManager()->getCurrentLanguage()->getId();
     $default_sorting = \Drupal::config('faq.settings')->get('default_sorting');
 
     $term_id = $term->id();
 
-    $query = db_select('node', 'n');
+    $query = \Drupal::database()->select('node', 'n');
     $query->join('node_field_data', 'd', 'd.nid = n.nid');
     $query->innerJoin('taxonomy_index', 'ti', 'n.nid = ti.nid');
     $query->leftJoin('faq_weights', 'w', 'w.tid = ti.tid AND n.nid = w.nid');
-    $query->fields('n', array('nid'))
+    $query->fields('n', ['nid'])
       ->condition('n.type', 'faq')
+      ->condition('d.langcode', $langcode)
       ->condition('d.status', 1)
       ->condition("ti.tid", $term_id)
       ->addTag('node_access');
@@ -347,6 +353,9 @@ class FaqController extends ControllerBase {
     // related nodes.
     $nids = $query->execute()->fetchCol();
     $data = Node::loadMultiple($nids);
+    foreach ($data as $key => &$node) {
+      $node =  ($node->hasTranslation($langcode)) ? $node->getTranslation($langcode) : $node;
+    }
 
     // Handle indenting of categories.
     $depth = 0;

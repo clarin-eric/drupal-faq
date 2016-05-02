@@ -39,8 +39,12 @@ class OrderForm extends ConfigFormBase {
   public function buildForm(array $form, FormStateInterface $form_state, $category = NULL) {
 
     //get category id from route values
-    if (is_numeric(FaqHelper::arg(1))) {
-      $category = FaqHelper::arg(1);
+    if ($id = FaqHelper::searchInArgs('faq-page')) {
+      $next_id = ($id) + 1;
+      // Check if we're on a categorized faq page.
+      if (is_numeric(FaqHelper::arg($next_id))) {
+        $category = FaqHelper::arg($next_id);
+      }
     }
 
     $order = $date_order = '';
@@ -102,14 +106,16 @@ class OrderForm extends ConfigFormBase {
         $category = $form_state->getValue('faq_category');
       }
 
+      $langcode = \Drupal::languageManager()->getCurrentLanguage()->getId();
       // Uncategorized ordering.
-      $query = db_select('node', 'n');
+      $query = \Drupal::database()->select('node', 'n');
       $query->join('node_field_data', 'd', 'n.nid = d.nid');
-      $query->fields('n', array('nid'))
-        ->fields('d', array('title'))
-        ->addTag('node_access')
+      $query->fields('n', ['nid'])
+        ->fields('d', ['title'])
         ->condition('n.type', 'faq')
-        ->condition('d.status', 1);
+        ->condition('d.langcode', $langcode)
+        ->condition('d.status', 1)
+        ->addTag('node_access');
 
       // Works, but involves variable concatenation - safe though, since
       // $default_weight is an integer.
@@ -119,15 +125,15 @@ class OrderForm extends ConfigFormBase {
 
       if (empty($category)) {
         $category = 0;
-        $w_alias = $query->leftJoin('faq_weights', 'w', 'n.nid = %alias.nid AND %alias.tid = :category', array(':category' => $category));
+        $query->leftJoin('faq_weights', 'w', 'n.nid = %alias.nid AND %alias.tid = :category', array(':category' => $category));
         $query->orderBy('effective_weight', 'ASC')
           ->orderBy('d.sticky', 'DESC')
           ->orderBy('d.created', $default_sorting == 'DESC' ? 'DESC' : 'ASC');
       }
       // Categorized ordering.
       else {
-        $ti_alias = $query->innerJoin('taxonomy_index', 'ti', '(n.nid = %alias.nid)');
-        $w_alias = $query->leftJoin('faq_weights', 'w', 'n.nid = %alias.nid AND %alias.tid = :category', array(':category' => $category));
+        $query->innerJoin('taxonomy_index', 'ti', '(n.nid = %alias.nid)');
+        $query->leftJoin('faq_weights', 'w', 'n.nid = %alias.nid AND %alias.tid = :category', array(':category' => $category));
         $query->condition('ti.tid', $category);
         $query->orderBy('effective_weight', 'ASC')
           ->orderBy('d.sticky', 'DESC')
