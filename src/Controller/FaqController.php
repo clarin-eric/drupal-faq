@@ -164,7 +164,7 @@ class FaqController extends ControllerBase {
       $items = array();
       $vocab_items = array();
       foreach ($vocabularies as $vid => $vobj) {
-        if (isset($vocab_omit[$vid]) && $vocab_omit[$vid] != 0) {
+        if (isset($vocab_omit[$vid]) && ($vocab_omit[$vid] !== 0)) {
           continue;
         }
 
