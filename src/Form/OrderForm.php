@@ -2,17 +2,53 @@
 
 namespace Drupal\faq\Form;
 
-use Drupal\Component\Utility\SafeMarkup;
+use \Drupal\Component\Utility\Html;
+use Drupal\Core\Database\Connection;
 use Drupal\Core\Database\Database;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\ConfigFormBase;
+use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\faq\FaqHelper;
 use Drupal\Core\Form\FormStateInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Form for reordering the FAQ-s.
  */
 class OrderForm extends ConfigFormBase {
+
+  protected  $entityTypeManager;
+  protected  $languageManager;
+  protected  $database;
+
+  /**
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
+   * @param \Drupal\Core\Language\LanguageManagerInterface $languageManager
+   * @param \Drupal\Core\Database\Connection $database
+   */
+  public function __construct(
+    EntityTypeManagerInterface $entityTypeManager,
+    LanguageManagerInterface $languageManager,
+    Connection $database
+  ) {
+    $this->entityTypeManager = $entityTypeManager;
+    $this->languageManager = $languageManager;
+    $this->database = $database;
+  }
+
+  /**
+   * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
+   * @return static
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+    // Load the service required to construct this class.
+      $container->get('entity_type.manager'),
+      $container->get('language_manager'),
+      $container->get('database')
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -33,7 +69,7 @@ class OrderForm extends ConfigFormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state, $category = NULL) {
 
-    //get category id from route values
+    // Get category id from route values.
     if ($id = FaqHelper::searchInArgs('faq-page')) {
       $next_id = ($id) + 1;
       // Check if we're on a categorized faq page.
@@ -67,7 +103,7 @@ class OrderForm extends ConfigFormBase {
       $vocabularies = Vocabulary::loadMultiple();
       $options = array();
       foreach ($vocabularies as $vid => $vobj) {
-        $tree = \Drupal::entityManager()->getStorage('taxonomy_term')->loadTree($vid);
+        $tree = $this->entityTypeManager->getStorage('taxonomy_term')->loadTree($vid);
         foreach ($tree as $term) {
           if (!FaqHelper::taxonomyTermCountNodes($term->tid)) {
             continue;
@@ -101,9 +137,9 @@ class OrderForm extends ConfigFormBase {
         $category = $form_state->getValue('faq_category');
       }
 
-      $langcode = \Drupal::languageManager()->getCurrentLanguage()->getId();
+      $langcode = $this->languageManager->getCurrentLanguage()->getId();
       // Uncategorized ordering.
-      $query = \Drupal::database()->select('node', 'n');
+      $query = $this->database->select('node', 'n');
       $query->join('node_field_data', 'd', 'n.nid = d.nid');
       $query->fields('n', ['nid'])
         ->fields('d', ['title'])
@@ -116,8 +152,7 @@ class OrderForm extends ConfigFormBase {
       // $default_weight is an integer.
       $query->addExpression("COALESCE(w.weight, $default_weight)", 'effective_weight');
       // Doesn't work in Postgres.
-      //$query->addExpression('COALESCE(w.weight, CAST(:default_weight as SIGNED))', 'effective_weight', array(':default_weight' => $default_weight));
-
+      // $query->addExpression('COALESCE(w.weight, CAST(:default_weight as SIGNED))', 'effective_weight', array(':default_weight' => $default_weight));.
       if (empty($category)) {
         $category = 0;
         $query->leftJoin('faq_weights', 'w', 'n.nid = %alias.nid AND %alias.tid = :category', array(':category' => $category));
@@ -151,7 +186,7 @@ class OrderForm extends ConfigFormBase {
           '#type' => 'hidden',
           '#value' => $record->nid,
         );
-        $form['order_no_cats'][$i]['title'] = array('#markup' => SafeMarkup::checkPlain($record->title));
+        $form['order_no_cats'][$i]['title'] = array('#markup' => Html::escape($record->title));
         $form['order_no_cats'][$i]['sort'] = array(
           '#type' => 'weight',
           '#delta' => count($options),

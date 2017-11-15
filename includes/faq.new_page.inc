@@ -37,7 +37,7 @@ function template_preprocess_faq_new_page(&$variables) {
     '#items' => $items,
   );
 
-  $variables['list'] = new FormattableMarkup(drupal_render($item_list), []);
+  $variables['list'] = new FormattableMarkup(\Drupal::service('renderer')->render($item_list), []);
 }
 
 /**

@@ -59,7 +59,7 @@ function template_preprocess_faq_questions_top(&$variables) {
     '#title' => t('Content'),
     '#list_type' => $list_style,
   );
-  $variables['questions_list'] = drupal_render($item_list);
+  $variables['questions_list'] = \Drupal::service('renderer')->render($item_list);
 }
 
 /**
