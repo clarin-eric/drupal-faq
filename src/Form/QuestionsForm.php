@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\faq\Form\QuestionsForm.
- */
-
 namespace Drupal\faq\Form;
 
 use Drupal\Core\Form\ConfigFormBase;

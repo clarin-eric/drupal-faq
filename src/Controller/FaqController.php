@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\faq\Controller\FaqController.
- */
-
 namespace Drupal\faq\Controller;
 
 use Drupal\Component\Render\FormattableMarkup;

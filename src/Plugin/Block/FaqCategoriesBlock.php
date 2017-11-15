@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\faq\Plugin\Block\FaqCategoriesBlock.
- */
-
 namespace Drupal\faq\Plugin\Block;
 
 use Drupal\Core\Url;

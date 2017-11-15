@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\faq\FaqHelper.
- */
-
 namespace Drupal\faq;
 
 use Drupal\Core\Url;

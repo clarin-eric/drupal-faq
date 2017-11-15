@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\faq\Form\OrderForm.
- */
-
 namespace Drupal\faq\Form;
 
 use Drupal\Component\Utility\SafeMarkup;
