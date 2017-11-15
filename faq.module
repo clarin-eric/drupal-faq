@@ -29,7 +29,7 @@ function faq_help($route_name, \Drupal\Core\Routing\RouteMatchInterface $route_m
 /**
  * Implements hook_node_access().
  */
-function faq_node_access(\Drupal\node\NodeInterface $node, $op, $account, $langcode) {
+function faq_node_access(\Drupal\node\NodeInterface $node, $op, \Drupal\Core\Session\AccountInterface $account) {
   // Ignore non-FAQ node.
   if ($node->getType() !== 'faq') {
     return AccessResult::neutral();
