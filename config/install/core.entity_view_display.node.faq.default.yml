@@ -13,16 +13,23 @@ targetEntityType: node
 bundle: faq
 mode: default
 content:
-  title:
-    type: string
+  body:
+    type: text_default
     weight: 0
-    settings:
-      size: 60
-      placeholder: ''
+    settings: {  }
     third_party_settings: {  }
+    label: hidden
+    region: content
   field_detailed_question:
     type: text_default
     weight: 2
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+    label: above
+  links:
+    weight: 100
+    region: content
     settings: {  }
     third_party_settings: {  }
   path:
@@ -30,10 +37,12 @@ content:
     weight: 2
     settings: {  }
     third_party_settings: {  }
-  body:
-    type: text_default
+    region: content
+  title:
+    type: string
     weight: 0
-    settings: {  }
+    settings:
+      size: 60
+      placeholder: ''
     third_party_settings: {  }
-    label: hidden
 hidden: {  }
