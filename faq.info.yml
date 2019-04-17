@@ -2,8 +2,7 @@ name: 'Frequently Asked Questions'
 type: module
 description: 'Manages configuration of questions for a FAQ page.'
 core: 8.x
-version: VERSION
 package: FAQ
 dependencies:
-  - node
+  - drupal:node
 configure: faq.faq-admin
