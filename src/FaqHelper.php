@@ -79,11 +79,11 @@ class FaqHelper {
     static $children;
 
     if (!isset($children)) {
-      $result = \Drupal::database()->select('taxonomy_term_hierarchy', 'tth')
-        ->fields('tth', array('parent', 'tid'))
+      $result = \Drupal::database()->select('taxonomy_term__parent', 'tth')
+        ->fields('tth', array('entity_id', 'parent_target_id'))
         ->execute();
       while ($term = $result->fetch()) {
-        $children[$term->parent][] = $term->tid;
+        $children[$term->parent_target_id][] = $term->entity_id;
       }
     }
 
