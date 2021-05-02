@@ -45,7 +45,7 @@ class FaqViewer {
         if ($anchor) {
           $options['attributes'] = array('id' => $anchor);
         }
-        $question = Link::fromTextAndUrl($node->getTitle(), $path, $options);
+        $question = Link::fromTextAndUrl($node->getTitle(), $path, $options)->toString();
       }
     }
 
@@ -53,11 +53,11 @@ class FaqViewer {
     else {
       $node_id = $node->id();
       if (empty($anchor)) {
-        $question = Link::fromTextAndUrl($node->getTitle(), "node/$node_id)");
+        $question = Link::fromTextAndUrl($node->getTitle(), "node/$node_id)")->toString();
       }
       else {
         $url = $node->toUrl()->setOptions(array("attributes" => array("id" => "$anchor")));
-        $question = Link::fromTextAndUrl($node->getTitle(), $url);
+        $question = Link::fromTextAndUrl($node->getTitle(), $url)->toString();
       }
     }
     $question = '<span datatype="" property="dc:title">' . $question . '</span>';
@@ -125,7 +125,8 @@ class FaqViewer {
         'html' => TRUE,
         'fragment' => 'top',
       );
-      $back_to_top = Link::fromTextAndUrl(new FormattableMarkup($back_to_top_text, []), Url::fromRoute('<current>'), $options);
+      $back_to_top = Link::fromTextAndUrl($back_to_top_text, Url::fromUserInput('#', $options ))->toString();
+
     }
 
     return $back_to_top;

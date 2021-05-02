@@ -120,7 +120,7 @@ function template_preprocess_faq_category_questions_inline(&$variables) {
   $variables['category_depth'] = $term->depth;
   if ($category_display == 'hide_qa') {
 
-    $variables['header_title'] = Link::fromTextAndUrl($term->getName(), Url::fromUserInput('/faq/' . $term_id));
+    $variables['header_title'] = Link::fromTextAndUrl($term->getName(), Url::fromUserInput('/faq/' . $term_id))->toString();
   }
   else {
     $variables['header_title'] = $term->getName();

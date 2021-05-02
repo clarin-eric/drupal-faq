@@ -24,7 +24,7 @@ function template_preprocess_faq_new_page(&$variables) {
 
   foreach ($data as $node) {
     $node_id = $node->id();
-    $items[] = Link::fromTextAndUrl($node->getTitle(), $url = $node->toUrl());
+    $items[] = Link::fromTextAndUrl($node->getTitle(), $url = $node->toUrl())->toString();
   }
 
   $list_style = $faq_settings->get('question_listing');
@@ -101,7 +101,7 @@ function template_preprocess_faq_category_new_page(&$variables) {
   // Configure header.
   $variables['category_depth'] = $term->depth;
   if ($category_display == 'hide_qa') {
-    $variables['header_title'] = Link::fromTextAndUrl($term->getName(), Url::fromUserInput('/faq/' . $term_id));
+    $variables['header_title'] = Link::fromTextAndUrl($term->getName(), Url::fromUserInput('/faq/' . $term_id))->toString();
   }
   else {
     $variables['header_title'] = $term->getName();
@@ -144,7 +144,7 @@ function template_preprocess_faq_category_new_page(&$variables) {
       $count++;
     }
     $node_id = $node->id();
-    $nodes[] = Link::fromTextAndUrl($node->getTitle(), $node->toUrl());
+    $nodes[] = Link::fromTextAndUrl($node->getTitle(), $node->toUrl())->toString();
   }
   $variables['question_list'] = $nodes;
   $variables['question_list_style'] = $faq_settings->get('question_listing');

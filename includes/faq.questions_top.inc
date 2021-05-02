@@ -42,7 +42,7 @@ function template_preprocess_faq_questions_top(&$variables) {
   foreach ($data as $node) {
     $anchor = 'n' . $node->id();
     $this_page->setOptions(array('fragment' => $anchor));
-    $questions[$key] = Link::fromTextAndUrl($node->getTitle(), $this_page);
+    $questions[$key] = Link::fromTextAndUrl($node->getTitle(), $this_page)->toString();
     FaqViewer::viewQuestion($answers[$key], $node, NULL, $anchor);
     FaqViewer::viewAnswer($answers[$key], $node, $teaser);
     $key++;
@@ -138,7 +138,7 @@ function template_preprocess_faq_category_questions_top(&$variables) {
   $variables['category_name'] = $term->getName();
   if ($category_display == 'hide_qa') {
     $url = Url::fromUserInput('/faq/' . $term_id);
-    $variables['header_title'] = Link::fromTextAndUrl($term->getName(), $url);
+    $variables['header_title'] = Link::fromTextAndUrl($term->getName(), $url)->toString();
   }
   else {
     $variables['header_title'] = $term->getName();
@@ -187,7 +187,7 @@ function template_preprocess_faq_category_questions_top(&$variables) {
     $node_var = array();
     $anchor = 't' . $term->id() . 'n' . $node->id();
     $this_page->setOptions(array('fragment' => $anchor));
-    $questions[] = Link::fromTextAndUrl($node->getTitle(), $this_page);
+    $questions[] = Link::fromTextAndUrl($node->getTitle(), $this_page)->toString();
     FaqViewer::viewQuestion($node_var, $node, NULL, $anchor);
     if ($group_questions_top || $category_display == 'hide_qa') {
       FaqViewer::viewAnswer($node_var, $node, $teaser);
