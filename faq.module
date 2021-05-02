@@ -1,5 +1,9 @@
 <?php
 
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\node\NodeInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Form\FormStateInterface;
 /**
  * @file
  * The FAQ module allows users to create a FAQ page, with questions and answers
@@ -14,7 +18,7 @@ use Drupal\faq\FaqHelper;
 /**
  * Implements hook_help().
  */
-function faq_help($route_name, \Drupal\Core\Routing\RouteMatchInterface $route_match) {
+function faq_help($route_name, RouteMatchInterface $route_match) {
   $output = '';
   switch ($route_name) {
     case 'help.page.faq':
@@ -29,7 +33,7 @@ function faq_help($route_name, \Drupal\Core\Routing\RouteMatchInterface $route_m
 /**
  * Implements hook_node_access().
  */
-function faq_node_access(\Drupal\node\NodeInterface $node, $op, \Drupal\Core\Session\AccountInterface $account) {
+function faq_node_access(NodeInterface $node, $op, AccountInterface $account) {
   // Ignore non-FAQ node.
   if ($node->getType() !== 'faq') {
     return AccessResult::neutral();
@@ -126,9 +130,9 @@ function template_preprocess_faq_draggable_question_order_table(&$variables){
     $form[$key]['sort']['#attributes']['class'] = array('sort');
     $form[$key]['nid']['#attributes']['class'] = array('hidden-nid');
     $row = array('');
-    $row[] = drupal_render($form[$key]['title']);
-    $row[] = drupal_render($form[$key]['nid']);
-    $row[] = drupal_render($form[$key]['sort']);
+    $row[] = \Drupal::service('renderer')->render($form[$key]['title']);
+    $row[] = \Drupal::service('renderer')->render($form[$key]['nid']);
+    $row[] = \Drupal::service('renderer')->render($form[$key]['sort']);
     
     $rows[] = array(
       'data' => $row,
@@ -200,7 +204,7 @@ function faq_preprocess_page(&$variables){
  * 
  * If question_long_form is disabled, hide the 'detailed question' from node editing.
  */
-function faq_form_node_faq_edit_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+function faq_form_node_faq_edit_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   $faq_settings = \Drupal::config('faq.settings');
   if (!$faq_settings->get('question_long_form')) {
     $form['field_detailed_question']['#access'] = FALSE;

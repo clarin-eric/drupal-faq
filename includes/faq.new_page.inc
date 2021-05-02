@@ -7,6 +7,7 @@
 
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Url;
+use Drupal\Core\Link;
 use Drupal\faq\FaqHelper;
 use Drupal\Component\Utility\SafeMarkup;
 
@@ -23,7 +24,7 @@ function template_preprocess_faq_new_page(&$variables) {
 
   foreach ($data as $node) {
     $node_id = $node->id();
-    $items[] = \Drupal::l($node->getTitle(), $url = $node->toUrl());
+    $items[] = Link::fromTextAndUrl($node->getTitle(), $url = $node->toUrl());
   }
 
   $list_style = $faq_settings->get('question_listing');
@@ -54,7 +55,7 @@ function template_preprocess_faq_category_new_page(&$variables) {
   $term_id = $term->id();
   $parent_term = $variables['parent_term'];
   $class = $variables['class'];
-  $this_page = URL::fromRoute('<current>');
+  $this_page = Url::fromRoute('<current>');
 
   // Fetch configuration.
   $display_faq_count = $faq_settings->get('count');
@@ -100,7 +101,7 @@ function template_preprocess_faq_category_new_page(&$variables) {
   // Configure header.
   $variables['category_depth'] = $term->depth;
   if ($category_display == 'hide_qa') {
-    $variables['header_title'] = \Drupal::l($term->getName(), URL::fromUserInput('/faq/' . $term_id));
+    $variables['header_title'] = Link::fromTextAndUrl($term->getName(), Url::fromUserInput('/faq/' . $term_id));
   }
   else {
     $variables['header_title'] = $term->getName();
@@ -143,7 +144,7 @@ function template_preprocess_faq_category_new_page(&$variables) {
       $count++;
     }
     $node_id = $node->id();
-    $nodes[] = \Drupal::l($node->getTitle(), $node->toUrl());
+    $nodes[] = Link::fromTextAndUrl($node->getTitle(), $node->toUrl());
   }
   $variables['question_list'] = $nodes;
   $variables['question_list_style'] = $faq_settings->get('question_listing');

@@ -6,6 +6,7 @@
  */
 
 use Drupal\Core\Url;
+use Drupal\Core\Link;
 use Drupal\faq\FaqHelper;
 use Drupal\faq\FaqViewer;
 use Drupal\Component\Utility\SafeMarkup;
@@ -19,7 +20,7 @@ use Drupal\Component\Utility\SafeMarkup;
 function template_preprocess_faq_hide_answer(&$variables) {
   $faq_settings = \Drupal::config('faq.settings');
   $data = $variables['data'];
-  $this_page = URL::fromRoute('<current>');
+  $this_page = Url::fromRoute('<current>');
 
   // Fetch configuration.
   $teaser = $faq_settings->get('use_teaser');
@@ -62,7 +63,7 @@ function template_preprocess_faq_category_hide_answer(&$variables) {
   if ($default_sorting != 'DESC') {
     $default_weight = 1000000;
   }
-  $this_page = URL::fromRoute('<current>');
+  $this_page = Url::fromRoute('<current>');
   $get_child_terms = 0;
   // Check if we're on a faq page.
   if ($id = FaqHelper::searchInArgs('faq-page')) {
@@ -97,7 +98,7 @@ function template_preprocess_faq_category_hide_answer(&$variables) {
   $variables['category_depth'] = $term->depth;
   $variables['category_name'] = $term->getName();
   if ($category_display == 'hide_qa') {
-    $variables['header_title'] = \Drupal::l($term->getName(), URL::fromUserInput('/faq/' . $term_id));
+    $variables['header_title'] = Link::fromTextAndUrl($term->getName(), Url::fromUserInput('/faq/' . $term_id));
   }
   else {
     $variables['header_title'] = $term->getName();

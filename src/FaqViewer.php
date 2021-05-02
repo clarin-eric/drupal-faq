@@ -2,6 +2,8 @@
 
 namespace Drupal\faq;
 
+use Drupal\node\NodeInterface;
+use Drupal\Core\Link;
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Url;
 
@@ -22,7 +24,7 @@ class FaqViewer {
    * @param string $anchor
    *   Link anchor to use in question links.
    */
-  public static function viewQuestion(&$data, \Drupal\node\NodeInterface $node, $path = NULL, $anchor = NULL) {
+  public static function viewQuestion(&$data, NodeInterface $node, $path = NULL, $anchor = NULL) {
 
     $faq_settings = \Drupal::config('faq.settings');
     $disable_node_links = $faq_settings->get('disable_node_links');
@@ -43,7 +45,7 @@ class FaqViewer {
         if ($anchor) {
           $options['attributes'] = array('id' => $anchor);
         }
-        $question = \Drupal::l($node->getTitle(), $path, $options);
+        $question = Link::fromTextAndUrl($node->getTitle(), $path, $options);
       }
     }
 
@@ -51,11 +53,11 @@ class FaqViewer {
     else {
       $node_id = $node->id();
       if (empty($anchor)) {
-        $question = \Drupal::l($node->getTitle(), "node/$node_id)");
+        $question = Link::fromTextAndUrl($node->getTitle(), "node/$node_id)");
       }
       else {
         $url = $node->toUrl()->setOptions(array("attributes" => array("id" => "$anchor")));
-        $question = \Drupal::l($node->getTitle(), $url);
+        $question = Link::fromTextAndUrl($node->getTitle(), $url);
       }
     }
     $question = '<span datatype="" property="dc:title">' . $question . '</span>';
@@ -81,20 +83,20 @@ class FaqViewer {
    * @param bool $links
    *   Whether or not to show node links.
    */
-  public static function viewAnswer(&$data, \Drupal\node\NodeInterface $node, $teaser) {
+  public static function viewAnswer(&$data, NodeInterface $node, $teaser) {
     $faq_settings = \Drupal::config('faq.settings');
 
     // TODO: hide 'submitted by ... on ...'
     $view_mode = $teaser ? 'teaser' : 'full';
 
-    $node_build = node_view($node, $view_mode);
-    
+    $node_build = \Drupal::entityTypeManager()->getViewBuilder('node')->view($node, $view_mode);
+
     hide($node_build['title']);
     if (!$faq_settings->get('question_long_form')) {
       hide($node_build['field_detailed_question']);
     }
     
-    $content = drupal_render($node_build);
+    $content = \Drupal::service('renderer')->render($node_build);
 
     $content .= FaqViewer::initBackToTop();
 
@@ -123,7 +125,7 @@ class FaqViewer {
         'html' => TRUE,
         'fragment' => 'top',
       );
-      $back_to_top = \Drupal::l(new FormattableMarkup($back_to_top_text, []), Url::fromRoute('<current>'), $options);
+      $back_to_top = Link::fromTextAndUrl(new FormattableMarkup($back_to_top_text, []), Url::fromRoute('<current>'), $options);
     }
 
     return $back_to_top;

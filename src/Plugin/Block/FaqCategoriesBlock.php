@@ -47,7 +47,7 @@ class FaqCategoriesBlock extends BlockBase {
       }
       if (count($terms) > 0) {
         foreach ($terms as $name => $tid) {
-          $items[] = \Drupal::linkGenerator()->generate($name, URL::fromUserInput('/faq-page/' . $tid));
+          $items[] = \Drupal::linkGenerator()->generate($name, Url::fromUserInput('/faq-page/' . $tid));
         }
       }
     }

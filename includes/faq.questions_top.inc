@@ -6,6 +6,7 @@
  */
 
 use Drupal\Core\Url;
+use Drupal\Core\Link;
 use Drupal\faq\FaqHelper;
 use Drupal\faq\FaqViewer;
 
@@ -41,7 +42,7 @@ function template_preprocess_faq_questions_top(&$variables) {
   foreach ($data as $node) {
     $anchor = 'n' . $node->id();
     $this_page->setOptions(array('fragment' => $anchor));
-    $questions[$key] = \Drupal::l($node->getTitle(), $this_page);
+    $questions[$key] = Link::fromTextAndUrl($node->getTitle(), $this_page);
     FaqViewer::viewQuestion($answers[$key], $node, NULL, $anchor);
     FaqViewer::viewAnswer($answers[$key], $node, $teaser);
     $key++;
@@ -99,7 +100,7 @@ function template_preprocess_faq_category_questions_top(&$variables) {
   if ($default_sorting != 'DESC') {
     $default_weight = 1000000;
   }
-  $this_page = URL::fromRoute('<current>');
+  $this_page = Url::fromRoute('<current>');
   $get_child_terms = 0;
   // Check if we're on a faq page.
   if ($id = FaqHelper::searchInArgs('faq-page')) {
@@ -136,8 +137,8 @@ function template_preprocess_faq_category_questions_top(&$variables) {
   $variables['category_depth'] = $term->depth;
   $variables['category_name'] = $term->getName();
   if ($category_display == 'hide_qa') {
-    $url = URL::fromUserInput('/faq/' . $term_id);
-    $variables['header_title'] = \Drupal::l($term->getName(), $url);
+    $url = Url::fromUserInput('/faq/' . $term_id);
+    $variables['header_title'] = Link::fromTextAndUrl($term->getName(), $url);
   }
   else {
     $variables['header_title'] = $term->getName();
@@ -186,7 +187,7 @@ function template_preprocess_faq_category_questions_top(&$variables) {
     $node_var = array();
     $anchor = 't' . $term->id() . 'n' . $node->id();
     $this_page->setOptions(array('fragment' => $anchor));
-    $questions[] = \Drupal::l($node->getTitle(), $this_page);
+    $questions[] = Link::fromTextAndUrl($node->getTitle(), $this_page);
     FaqViewer::viewQuestion($node_var, $node, NULL, $anchor);
     if ($group_questions_top || $category_display == 'hide_qa') {
       FaqViewer::viewAnswer($node_var, $node, $teaser);
@@ -250,7 +251,7 @@ function template_preprocess_faq_category_questions_top_answers(&$variables) {
   }
   $variables['display_answers'] = TRUE;
 
-  $this_page = URL::fromRoute('<current>');
+  $this_page = Url::fromRoute('<current>');
   $get_child_terms = 0;
   // Check if we're on a faq page.
   if ($id = FaqHelper::searchInArgs('faq-page')) {

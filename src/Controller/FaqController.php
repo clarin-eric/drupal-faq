@@ -336,7 +336,7 @@ class FaqController extends ControllerBase {
     $build['#attached']['drupalSettings']['faqSettings']['category_hide_qa_accordion'] = $faq_settings->get('category_hide_qa_accordion');
 
     if (!$this->moduleHandler()->moduleExists('taxonomy')) {
-      drupal_set_message(t('Categorization of questions will not work without the "taxonomy" module being enabled.'), 'error');
+      $this->messenger()->addError(t('Categorization of questions will not work without the "taxonomy" module being enabled.'));
     }
 
     $build['faq_categories_settings_form'] = $this->formBuilder()->getForm('Drupal\faq\Form\CategoriesForm');
@@ -347,24 +347,16 @@ class FaqController extends ControllerBase {
   /* ****************************************************************
    * PRIVATE HELPER FUCTIONS
    * *************************************************************** */
-
   /**
    * Display FAQ questions and answers filtered by category.
    *
-   * @param $faq_display
-   *   Define the way the FAQ is being shown; can have the values:
+   * @param $faq_display   Define the way the FAQ is being shown; can have the values:
    *   'questions top',hide answers','questions inline','new page'.
-   * @param $category_display
-   *   The layout of categories which should be used.
-   * @param $term
-   *   The category / term to display FAQs for.
-   * @param $display_header
-   *   Set if the header will be shown or not.
-   * @param &$output
-   *   Reference which holds the content of the page, HTML formatted.
-   * @param &$output_answer
-   *   Reference which holds the answers from the FAQ, when showing questions
-   *   on top.
+   * @param $category_display   The layout of categories which should be used.
+   * @param $term   The category / term to display FAQs for.
+   * @param $display_header   Set if the header will be shown or not.
+   * @param &$output   Reference which holds the content of the page, HTML formatted.
+   * @param &$output_answer   Reference which holds the answers from the FAQ, when showing questions   on top.
    */
   private function _displayFaqByCategory($faq_display, $category_display, $term, $display_header, &$output, &$output_answers) {
     $langcode = $this->languageManager->getCurrentLanguage()->getId();
@@ -515,7 +507,7 @@ class FaqController extends ControllerBase {
           ->fetchField();
 
         if ($term_node_count > 0) {
-          $path = URL::fromUserInput('/faq-page/' . $term_id);
+          $path = Url::fromUserInput('/faq-page/' . $term_id);
 
           // Pathauto is not exists in D8 yet
           // if (!\Drupal::service('path.alias_manager.cached')->getPathAlias(arg(0) . '/' . $tid) && $this->moduleHandler()->moduleExists('pathauto')) {

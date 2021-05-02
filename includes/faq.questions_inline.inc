@@ -6,6 +6,7 @@
  */
 
 use Drupal\Core\Url;
+use Drupal\Core\Link;
 use Drupal\faq\FaqHelper;
 use Drupal\faq\FaqViewer;
 use Drupal\Component\Utility\SafeMarkup;
@@ -26,7 +27,7 @@ function template_preprocess_faq_questions_inline(&$variables) {
   $links = $faq_settings->get('show_node_links');
 
   // Configure "back to top" link.
-  $this_page = URL::fromRoute('<current>');
+  $this_page = Url::fromRoute('<current>');
   $back_to_top = FaqViewer::initBackToTop($this_page);
 
   // Configure labels.
@@ -77,7 +78,7 @@ function template_preprocess_faq_category_questions_inline(&$variables) {
   if ($default_sorting != 'DESC') {
     $default_weight = 1000000;
   }
-  $this_page = URL::fromRoute('<current>');
+  $this_page = Url::fromRoute('<current>');
   $get_child_terms = 0;
   // Check if we're on a faq page.
   if ($id = FaqHelper::searchInArgs('faq-page')) {
@@ -119,7 +120,7 @@ function template_preprocess_faq_category_questions_inline(&$variables) {
   $variables['category_depth'] = $term->depth;
   if ($category_display == 'hide_qa') {
 
-    $variables['header_title'] = \Drupal::l($term->getName(), URL::fromUserInput('/faq/' . $term_id));
+    $variables['header_title'] = Link::fromTextAndUrl($term->getName(), Url::fromUserInput('/faq/' . $term_id));
   }
   else {
     $variables['header_title'] = $term->getName();

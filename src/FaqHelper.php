@@ -26,15 +26,15 @@ class FaqHelper {
     $breadcrumb = array();
     if ($faq_settings->get('custom_breadcrumbs')) {
       if (\Drupal::moduleHandler()->moduleExists('taxonomy') && $term) {
-        $breadcrumb[] = Link::fromTextAndUrl(t($term->getName()), URL::fromUserInput('/faq-page/' . $term->id()));
-        $breadcrumb[] = Link::fromTextAndUrl(t($term->getName()), URL::fromUserInput('/faq-page/' . $term->id()));
+        $breadcrumb[] = Link::fromTextAndUrl(t($term->getName()), Url::fromUserInput('/faq-page/' . $term->id()));
+        $breadcrumb[] = Link::fromTextAndUrl(t($term->getName()), Url::fromUserInput('/faq-page/' . $term->id()));
         while ($parents = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadParents($term->id())) {
           $term = array_shift($parents);
-          $breadcrumb[] = Link::fromTextAndUrl(t($term->getName()), URL::fromUserInput('/faq-page/' . $term->id()));
+          $breadcrumb[] = Link::fromTextAndUrl(t($term->getName()), Url::fromUserInput('/faq-page/' . $term->id()));
         }
       }
-      $breadcrumb[] = Link::fromTextAndUrl($faq_settings->get('title'), URL::fromUserInput('/faq-page'));
-      $breadcrumb[] = Link::fromTextAndUrl(t('Home'), URL::fromRoute('<front>')->setOptions(array('attributes' => array('title' => $site_settings->get('name')))));
+      $breadcrumb[] = Link::fromTextAndUrl($faq_settings->get('title'), Url::fromUserInput('/faq-page'));
+      $breadcrumb[] = Link::fromTextAndUrl(t('Home'), Url::fromRoute('<front>')->setOptions(array('attributes' => array('title' => $site_settings->get('name')))));
       $breadcrumb = array_reverse($breadcrumb);
     }
     return $breadcrumb;
@@ -190,7 +190,7 @@ class FaqHelper {
         //  $term_image = taxonomy_image_display($child_term->tid, array('class' => 'faq-tax-image'));
         // }.
         $child_term_id = $child_term->id();
-        $term_vars['link'] = Link::fromTextAndUrl(t($child_term->getName()), URL::fromUserInput('/faq-page/' . $child_term_id));
+        $term_vars['link'] = Link::fromTextAndUrl(t($child_term->getName()), Url::fromUserInput('/faq-page/' . $child_term_id));
         $term_vars['description'] = ($child_term->getDescription()) ? t($child_term->getDescription()) : '';
         $term_vars['count'] = $term_node_count;
         $term_vars['term_image'] = $term_image;
