@@ -58,5 +58,6 @@ div.faq-detailed-question {
 }
 .faq #faq-expand-all a.faq-expand-all-link,
 .faq #faq-expand-all a.faq-collapse-all-link {
+  cursor: pointer;
   display: none;
 }

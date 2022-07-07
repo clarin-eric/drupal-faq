@@ -6,3 +6,8 @@ package: FAQ
 dependencies:
   - drupal:node
 configure: faq.faq-admin
+
+# Information added by Drupal.org packaging script on 2021-05-03
+version: '8.x-1.1'
+project: 'faq'
+datestamp: 1620028171

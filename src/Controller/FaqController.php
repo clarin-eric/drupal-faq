@@ -402,16 +402,18 @@ class FaqController extends ControllerBase {
     }
 
     // Handle indenting of categories.
-    $depth = 0;
-    if (!isset($term->depth)) {
-      $children = $this->entityTypeManager->getStorage('taxonomy_term')->loadChildren($term->id());
-      $term->depth = count($children);
-    }
-    while ($depth < $term->depth) {
-      $display_header = 1;
-      $indent = '<div class="faq-category-indent">';
-      $output .= $indent;
-      $depth++;
+    if ($display_header) {
+      $depth = 0;
+      if (!isset($term->depth)) {
+        $children = $this->entityTypeManager->getStorage('taxonomy_term')->loadChildren($term->id());
+        $term->depth = count($children);
+      }
+      while ($depth < $term->depth) {
+        $display_header = 1;
+        $indent = '<div class="faq-category-indent">';
+        $output .= $indent;
+        $depth++;
+      }
     }
 
     // Set up the class name for hiding the q/a for a category if required.
@@ -453,7 +455,7 @@ class FaqController extends ControllerBase {
         break;
     }
     // Handle indenting of categories.
-    while ($depth > 0) {
+    while (isset($depth) && $depth > 0) {
       $output .= '</div>';
       $depth--;
     }
@@ -506,7 +508,7 @@ class FaqController extends ControllerBase {
           ->execute()
           ->fetchField();
 
-        if ($term_node_count > 0) {
+        if ($tree_count > 0) {
           $path = Url::fromUserInput('/faq-page/' . $term_id);
 
           // Pathauto is not exists in D8 yet
@@ -517,7 +519,11 @@ class FaqController extends ControllerBase {
             if ($hide_child_terms) {
               $count = $tree_count;
             }
-            $cur_item = $this->linkGenerator->generate($this->t($term->getName()), $path) . " ($count) " . $desc;
+            if ($count > 0) {
+              $cur_item = $this->linkGenerator->generate($this->t($term->getName()), $path) . " ($count) " . $desc;
+            } else {
+              $cur_item = $this->linkGenerator->generate($this->t($term->getName()), $path) . $desc;
+            }
           }
           else {
             $cur_item = $this->linkGenerator->generate($this->t($term->getName()), $path) . $desc;

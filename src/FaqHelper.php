@@ -19,22 +19,28 @@ class FaqHelper {
    *
    * @return array
    */
-  public static function setFaqBreadcrumb($term = NULL) {
+  public static function setFaqBreadcrumb($term = NULL, $node = NULL) {
     $faq_settings = \Drupal::config('faq.settings');
     $site_settings = \Drupal::config('system.site');
 
     $breadcrumb = array();
     if ($faq_settings->get('custom_breadcrumbs')) {
       if (\Drupal::moduleHandler()->moduleExists('taxonomy') && $term) {
-        $breadcrumb[] = Link::fromTextAndUrl(t($term->getName()), Url::fromUserInput('/faq-page/' . $term->id()));
-        $breadcrumb[] = Link::fromTextAndUrl(t($term->getName()), Url::fromUserInput('/faq-page/' . $term->id()));
+        if(!$node) {
+          $breadcrumb[] = [
+            'text' => t($term->getName()),
+          ];
+        } else {
+           $breadcrumb[] = [
+            'text' => t($node->getTitle()),
+          ];
+          $breadcrumb[] = Link::fromTextAndUrl(t($term->getName()), URL::fromUserInput('/faq-page/' . $term->id()));
+        }
         while ($parents = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadParents($term->id())) {
           $term = array_shift($parents);
-          $breadcrumb[] = Link::fromTextAndUrl(t($term->getName()), Url::fromUserInput('/faq-page/' . $term->id()));
+          $breadcrumb[] = Link::fromTextAndUrl(t($term->getName()), URL::fromUserInput('/faq-page/' . $term->id()));
         }
       }
-      $breadcrumb[] = Link::fromTextAndUrl($faq_settings->get('title'), Url::fromUserInput('/faq-page'));
-      $breadcrumb[] = Link::fromTextAndUrl(t('Home'), Url::fromRoute('<front>')->setOptions(array('attributes' => array('title' => $site_settings->get('name')))));
       $breadcrumb = array_reverse($breadcrumb);
     }
     return $breadcrumb;

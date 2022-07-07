@@ -1,0 +1,467 @@
+--- a/css/faq.css
++++ b/css/faq.css
+@@ -58,5 +58,6 @@
+ }
+ .faq #faq-expand-all a.faq-expand-all-link,
+ .faq #faq-expand-all a.faq-collapse-all-link {
++  cursor: pointer;
+   display: none;
+ }
+--- a/faq.info.yml
++++ b/faq.info.yml
+@@ -6,3 +6,8 @@
+ dependencies:
+   - drupal:node
+ configure: faq.faq-admin
++
++# Information added by Drupal.org packaging script on 2021-05-03
++version: '8.x-1.1'
++project: 'faq'
++datestamp: 1620028171
+--- a/faq.module
++++ b/faq.module
+@@ -10,8 +10,10 @@
+  * displayed in different styles, according to the settings.
+  */
+ 
++use Drupal\Core\Url;
+ use Drupal\Core\Access\AccessResult;
+ use Drupal\Core\Render\Element;
++use Drupal\Core\Routing\RouteMatch;
+ use Drupal\taxonomy\Entity\Term;
+ use Drupal\faq\FaqHelper;
+ 
+@@ -184,18 +186,61 @@
+  * 
+  * Overrider breadcrumbs for faq pages.
+  */
+-function faq_preprocess_page(&$variables){
++function faq_preprocess_breadcrumb(&$variables){
+   $faq_settings = \Drupal::config('faq.settings');
+   $use_categories = $faq_settings->get('use_categories');
+-  
++  $custom_breadcrumbs = $faq_settings->get('custom_breadcrumbs');
++
+   $route_match = \Drupal::service('current_route_match');
+   $tid = $route_match->getRawParameter('tid');
+ 
+-  if (FaqHelper::searchInArgs('faq-page') && $use_categories && is_numeric($tid) && $current_term = Term::load($tid)) {
+-    $breadcrumb = FaqHelper::setFaqBreadcrumb($current_term);
++  if (!$tid) {
++    $node = \Drupal::routeMatch()->getParameter('node');
++    if ($node && $node instanceof \Drupal\node\NodeInterface && $node->hasField('field_faq_section'))
++      $tid = $node->get('field_faq_section')->getString();
++  }
++
++  if ((FaqHelper::searchInArgs('faq-page') || FaqHelper::searchInArgs('faq')) && $custom_breadcrumbs && $use_categories && is_numeric($tid) && $current_term = Term::load($tid)) {
++    if (\Drupal::service('module_handler')->moduleExists('menu_breadcrumb')) {
++      $breadcrumb_menu_settings = \Drupal::config('menu_breadcrumb.settings');
++
++      if ($breadcrumb_menu_settings->get('determine_menu')) {
++        // Get the breadcrumb trail from menu_breadcrumb for the base FAQ page /faq-page
++        $breadcrumbManager = \Drupal::service('menu_breadcrumb.breadcrumb.default');
++        $route_name = \Drupal::service('path.validator')->getUrlIfValid('/faq-page')->getRouteName();
++        $route = Drupal::service('router.route_provider')->getRouteByName($route_name);
++        $routematch = new RouteMatch($route_name, $route);
++        if ($breadcrumbManager->applies($routematch)) {
++          $faq_root_breadcrumbs = $breadcrumbManager->build($routematch)->getLinks();
++        }
++        // When menu breadcrumb module is configured to display the current page in a non-link form
++        // we have to override the URL of the current page link as it is normally set to Url(<none>)
++        // which is the current page
++        if (!empty($faq_root_breadcrumbs) && $breadcrumb_menu_settings->get('append_current_page') && !$breadcrumb_menu_settings->get('current_page_as_link') ) {
++          $trail_length = count($faq_root_breadcrumbs) - 1;
++          $faq_root_breadcrumbs[$trail_length]->setUrl(Url::fromRouteMatch($routematch));
++
++          // Remove link style from breadcrumbs without URL
++          for ($i = 0; $i < $trail_length; $i++) {
++            if ($faq_root_breadcrumbs[$i]->getUrl()->toString() == '') {
++              $faq_root_breadcrumbs[$i] = [
++                'text' => $faq_root_breadcrumbs[$i]->getText()
++              ];
++            }
++          }
++        }
++      }
++    }
++    $breadcrumb = FaqHelper::setFaqBreadcrumb($current_term, $node);
++
+     if (!empty($breadcrumb)) {
+-      $variables['breadcrumb']['#breadcrumb'] = $breadcrumb;
++      if (!empty($faq_root_breadcrumbs)) {
++        $variables['breadcrumb'] = array_merge($faq_root_breadcrumbs, $breadcrumb);
++      } else {
++        $variables['breadcrumb'] = array_merge($variables['breadcrumb'], $breadcrumb);
++      }
+     }
++  $variables['#cache']['contexts'][] = 'url';
+   }
+ }
+ 
+--- a/includes/faq.hide_answer.inc
++++ b/includes/faq.hide_answer.inc
+@@ -9,7 +9,6 @@
+ use Drupal\Core\Link;
+ use Drupal\faq\FaqHelper;
+ use Drupal\faq\FaqViewer;
+-use Drupal\Component\Utility\SafeMarkup;
+ 
+ /**
+  * Create FAQ page if set to show/hide answer when question is clicked.
+@@ -33,6 +32,12 @@
+   }
+   $variables['use_teaser'] = $teaser;
+   $variables['nodes'] = $nodes;
++
++  if($faq_settings->get('show_expand_all')) {
++    $variables['faq_expand'] = true;
++  } else {
++    $variables['faq_expand'] = false;
++  }
+ }
+ 
+ /**
+@@ -105,7 +110,7 @@
+   }
+ 
+   // Configure category description.
+-  $variables['description'] = SafeMarkup::checkPlain($term->getDescription());
++  $variables['description'] = $term->getDescription();
+ 
+   // Get list of sub-categories if necessary.
+   $child_categories = array();
+@@ -148,4 +153,11 @@
+   }
+   $variables['nodes'] = $nodes;
+   $variables['question_count'] = $count;
++
++  if($faq_settings->get('show_expand_all')) {
++    $variables['faq_expand'] = true;
++  } else {
++    $variables['faq_expand'] = false;
++  }
++
+ }
+--- a/includes/faq.new_page.inc
++++ b/includes/faq.new_page.inc
+@@ -9,7 +9,6 @@
+ use Drupal\Core\Url;
+ use Drupal\Core\Link;
+ use Drupal\faq\FaqHelper;
+-use Drupal\Component\Utility\SafeMarkup;
+ 
+ /**
+  * Create FAQ page if set to show the answer in a new page.
+@@ -108,7 +107,7 @@
+   }
+ 
+   // Configure category description.
+-  $variables['description'] = SafeMarkup::checkPlain($term->getDescription());
++  $variables['description'] = $term->getDescription();
+ 
+   // Get list of sub-categories if necessary.
+   $child_categories = array();
+--- a/includes/faq.questions_inline.inc
++++ b/includes/faq.questions_inline.inc
+@@ -9,7 +9,6 @@
+ use Drupal\Core\Link;
+ use Drupal\faq\FaqHelper;
+ use Drupal\faq\FaqViewer;
+-use Drupal\Component\Utility\SafeMarkup;
+ 
+ /**
+  * Create the FAQ page if set to show the questions inline.
+@@ -127,7 +126,7 @@
+   }
+ 
+   // Configure category description.
+-  $variables['description'] = SafeMarkup::checkPlain($term->getDescription());
++  $variables['description'] = $term->getDescription();
+ 
+   // Get list of sub-categories if necessary.
+   $child_categories = array();
+--- a/js/faq.js
++++ b/js/faq.js
+@@ -119,45 +119,44 @@
+ 
+   Drupal.behaviors.initFaqModule = {
+     attach: function (context, settings) {
++      if (context !== document) {
++        return;
++      }
++
+       // Hide/show answer for a question.
+       var faq_hide_qa_accordion = settings.faqSettings.hide_qa_accordion;
+       $('div.faq-dd-hide-answer', context).addClass('collapsible collapsed');
+-
+-      if (!faq_hide_qa_accordion) {
+-        $('div.faq-dd-hide-answer:not(.faq-processed)', context).addClass('faq-processed').hide();
+-      }
++      $('div.faq-dd-hide-answer:not(.faq-processed)', context).addClass('faq-processed').hide();
+       $('div.faq-dt-hide-answer:not(.faq-processed)', context).addClass('faq-processed').click(function () {
+         if (faq_hide_qa_accordion) {
+-          $('div.faq-dt-hide-answer').not($(this)).removeClass('faq-qa-visible');
++          $('div.expanded div.faq-dd-hide-answer').not('.expanded').not($(this).next('div.faq-dd-hide-answer')).slideToggle('fast', function () {
++            $(this).parent().toggleClass('expanded');
++            $(this).prev('div.faq-dt-hide-answer').removeClass('faq-qa-visible')
++          });
+         }
+         $(this).toggleClass('faq-qa-visible');
+         $(this).parent().addClass('faq-viewed');
+         $('div.faq-dd-hide-answer').not($(this).next('div.faq-dd-hide-answer')).addClass('collapsed');
+-        if (!faq_hide_qa_accordion) {
+-          $(this).next('div.faq-dd-hide-answer').slideToggle('fast', function () {
+-            $(this).parent().toggleClass('expanded');
+-          });
+-        }
++        $(this).next('div.faq-dd-hide-answer').slideToggle('fast', function () {
++          $(this).parent().toggleClass('expanded');
++        });
+         $(this).next('div.faq-dd-hide-answer').toggleClass('collapsed');
+ 
+         // Change the fragment, too, for permalink/bookmark.
+         // To keep the current page from scrolling, refs
+         // http://stackoverflow.com/questions/1489624/modifying-document-location-hash-without-page-scrolling/1489802#1489802
+         var hash = $(this).find('a').attr('id');
+-        var fx;
+-        var node = $('#' + hash);
+-        if (node.length) {
+-          fx = $('<div></div>')
+-                .css({position: 'absolute', visibility: 'hidden', top: $(window).scrollTop() + 'px'})
+-                .attr('id', hash)
+-                .appendTo(document.body);
+-          node.attr('id', '');
++
++        if ("pushState" in history) {
++          var newHash = $(this).filter(".faq-qa-visible").length > 0 ? ("#" + hash) : "";
++          history.pushState("", document.title, document.location.pathname + document.location.search + newHash);
++        } else {
++          var scrollY = $(window).scrollTop();
++          var scrollX = $(window).scrollLeft();
++          document.location.hash = ($(this).filter(".faq-qa-visible").length > 0) ? hash : "";
++          $(document).scrollTop(scrollY);
++          $(document).scrollLeft(scrollX);
+         }
+-        document.location.hash = hash;
+-        if (node.length) {
+-          fx.remove();
+-          node.attr('id', hash);
+-        }
+ 
+         // Scroll the page if the collapsed FAQ is not visible.
+         // If we have the toolbar so the title may be hidden by the bar.
+@@ -177,7 +176,7 @@
+         $('div.faq-dt-hide-answer ' + document.location.hash).parents('.faq-dt-hide-answer').triggerHandler('click');
+       }
+ 
+-        // Hide/show q/a for a category.
++      // Hide/show q/a for a category.
+       var faq_category_hide_qa_accordion = settings.faqSettings.category_hide_qa_accordion;
+       $('div.faq-qa-hide', context).addClass('collapsible collapsed');
+       if (!faq_category_hide_qa_accordion) {
+@@ -211,7 +210,7 @@
+ 
+ 
+       // Show expand all link.
+-      if (!faq_hide_qa_accordion && !faq_category_hide_qa_accordion) {
++      if (!faq_category_hide_qa_accordion) {
+         $('#faq-expand-all', context).show();
+         $('#faq-expand-all a.faq-expand-all-link', context).show();
+ 
+@@ -225,6 +224,16 @@
+           $('div.faq-dd-hide-answer').slideUp('slow', function () {
+             $(this).removeClass('expanded');
+           });
++          $('div.faq-dt-hide-answer').removeClass('faq-qa-visible').parent().removeClass('expanded');
++          if ("pushState" in history) {
++            history.pushState("", document.title, document.location.pathname + document.location.search);
++          } else {
++            var scrollY = $(window).scrollTop();
++            var scrollX = $(window).scrollLeft();
++            document.location.hash = "";
++            $(document).scrollTop(scrollY);
++            $(document).scrollLeft(scrollX);
++          }
+         });
+ 
+         // Add expand link click event.
+@@ -237,7 +246,13 @@
+           $('div.faq-dd-hide-answer').slideDown('slow', function () {
+             $(this).addClass('expanded');
+           });
++          $('div.faq-dt-hide-answer').addClass('faq-qa-visible').parent().addClass('expanded');
+         });
++      }
++
++      // Show all questions if identified by right fragment
++      if (/^#faq-expand-all-link$/.test(document.location.hash)) {
++        $('#faq-expand-all a.faq-expand-all-link', context).triggerHandler('click');
+       }
+ 
+       // Handle faq_category_settings_form.
+--- a/src/Controller/FaqController.php
++++ b/src/Controller/FaqController.php
+@@ -402,17 +402,19 @@
+     }
+ 
+     // Handle indenting of categories.
+-    $depth = 0;
+-    if (!isset($term->depth)) {
+-      $children = $this->entityTypeManager->getStorage('taxonomy_term')->loadChildren($term->id());
+-      $term->depth = count($children);
++    if ($display_header) {
++      $depth = 0;
++      if (!isset($term->depth)) {
++        $children = $this->entityTypeManager->getStorage('taxonomy_term')->loadChildren($term->id());
++        $term->depth = count($children);
++      }
++      while ($depth < $term->depth) {
++        $display_header = 1;
++        $indent = '<div class="faq-category-indent">';
++        $output .= $indent;
++        $depth++;
++      }
+     }
+-    while ($depth < $term->depth) {
+-      $display_header = 1;
+-      $indent = '<div class="faq-category-indent">';
+-      $output .= $indent;
+-      $depth++;
+-    }
+ 
+     // Set up the class name for hiding the q/a for a category if required.
+     $faq_class = "faq-qa";
+@@ -453,7 +455,7 @@
+         break;
+     }
+     // Handle indenting of categories.
+-    while ($depth > 0) {
++    while (isset($depth) && $depth > 0) {
+       $output .= '</div>';
+       $depth--;
+     }
+@@ -506,7 +508,7 @@
+           ->execute()
+           ->fetchField();
+ 
+-        if ($term_node_count > 0) {
++        if ($tree_count > 0) {
+           $path = Url::fromUserInput('/faq-page/' . $term_id);
+ 
+           // Pathauto is not exists in D8 yet
+@@ -517,7 +519,11 @@
+             if ($hide_child_terms) {
+               $count = $tree_count;
+             }
+-            $cur_item = $this->linkGenerator->generate($this->t($term->getName()), $path) . " ($count) " . $desc;
++            if ($count > 0) {
++              $cur_item = $this->linkGenerator->generate($this->t($term->getName()), $path) . " ($count) " . $desc;
++            } else {
++              $cur_item = $this->linkGenerator->generate($this->t($term->getName()), $path) . $desc;
++            }
+           }
+           else {
+             $cur_item = $this->linkGenerator->generate($this->t($term->getName()), $path) . $desc;
+--- a/src/FaqHelper.php
++++ b/src/FaqHelper.php
+@@ -19,22 +19,28 @@
+    *
+    * @return array
+    */
+-  public static function setFaqBreadcrumb($term = NULL) {
++  public static function setFaqBreadcrumb($term = NULL, $node = NULL) {
+     $faq_settings = \Drupal::config('faq.settings');
+     $site_settings = \Drupal::config('system.site');
+ 
+     $breadcrumb = array();
+     if ($faq_settings->get('custom_breadcrumbs')) {
+       if (\Drupal::moduleHandler()->moduleExists('taxonomy') && $term) {
+-        $breadcrumb[] = Link::fromTextAndUrl(t($term->getName()), Url::fromUserInput('/faq-page/' . $term->id()));
+-        $breadcrumb[] = Link::fromTextAndUrl(t($term->getName()), Url::fromUserInput('/faq-page/' . $term->id()));
++        if(!$node) {
++          $breadcrumb[] = [
++            'text' => t($term->getName()),
++          ];
++        } else {
++           $breadcrumb[] = [
++            'text' => t($node->getTitle()),
++          ];
++          $breadcrumb[] = Link::fromTextAndUrl(t($term->getName()), URL::fromUserInput('/faq-page/' . $term->id()));
++        }
+         while ($parents = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadParents($term->id())) {
+           $term = array_shift($parents);
+-          $breadcrumb[] = Link::fromTextAndUrl(t($term->getName()), Url::fromUserInput('/faq-page/' . $term->id()));
++          $breadcrumb[] = Link::fromTextAndUrl(t($term->getName()), URL::fromUserInput('/faq-page/' . $term->id()));
+         }
+       }
+-      $breadcrumb[] = Link::fromTextAndUrl($faq_settings->get('title'), Url::fromUserInput('/faq-page'));
+-      $breadcrumb[] = Link::fromTextAndUrl(t('Home'), Url::fromRoute('<front>')->setOptions(array('attributes' => array('title' => $site_settings->get('name')))));
+       $breadcrumb = array_reverse($breadcrumb);
+     }
+     return $breadcrumb;
+--- a/src/FaqViewer.php
++++ b/src/FaqViewer.php
+@@ -86,19 +86,26 @@
+   public static function viewAnswer(&$data, NodeInterface $node, $teaser) {
+     $faq_settings = \Drupal::config('faq.settings');
+ 
+-    // TODO: hide 'submitted by ... on ...'
++    // hide 'submitted by ... on ...'
+     $view_mode = $teaser ? 'teaser' : 'full';
+ 
+-    $node_build = \Drupal::entityTypeManager()->getViewBuilder('node')->view($node, $view_mode);
++    $faq_display = $faq_settings->get('display');
++    if ($faq_display == 'hide_answer') {
++      $node_build = $node->body->view($view_mode);
++    } else {
++      $node_build = \Drupal::entityTypeManager()->getViewBuilder('node')->view($node, $view_mode);
+ 
+-    hide($node_build['title']);
+-    if (!$faq_settings->get('question_long_form')) {
+-      hide($node_build['field_detailed_question']);
++      hide($node_build['title']);
++      if (!$faq_settings->get('question_long_form')) {
++        hide($node_build['field_detailed_question']);
++      }
+     }
+     
+     $content = \Drupal::service('renderer')->render($node_build);
+ 
+-    $content .= FaqViewer::initBackToTop();
++    if ($faq_display != 'hide_answer') {
++      $content .= FaqViewer::initBackToTop();
++    }
+ 
+     $data['body'] = new FormattableMarkup($content, []);
+   }
+--- a/templates/faq-category-hide-answer.html.twig
++++ b/templates/faq-category-hide-answer.html.twig
+@@ -38,6 +38,13 @@
+  */
+ #}
+ 
++{% if faq_expand %}
++<div id="faq-expand-all">
++  <a class="faq-expand-all-link" href="#faq-expand-all-link">[{{ 'expand all'|t }}]</a>
++  <a class="faq-collapse-all-link">[{{ 'collapse all'|t }}]</a>
++</div>
++{% endif %}
++
+ {% if category_depth > 0 %}
+     {% set hdr = 'h4' %}
+ {% else %}
+--- a/templates/faq-page.html.twig
++++ b/templates/faq-page.html.twig
+@@ -23,12 +23,6 @@
+                 {{ description }}
+             </div>
+         {% endif %}
+-        {% if faq_expand %}
+-            <div id="faq-expand-all">
+-                <a class="faq-expand-all-link" href="#faq-expand-all-link">[{{ 'expand all'|t }}]</a>
+-                <a class="faq-collapse-all-link" href="#faq-collapse-all-link">[{{ 'collapse all'|t }}]</a>
+-            </div>
+-        {% endif %}
+         {{ content }}
+         {{ answers }}
+     </div>

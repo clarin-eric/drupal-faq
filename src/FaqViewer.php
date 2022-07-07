@@ -86,19 +86,26 @@ class FaqViewer {
   public static function viewAnswer(&$data, NodeInterface $node, $teaser) {
     $faq_settings = \Drupal::config('faq.settings');
 
-    // TODO: hide 'submitted by ... on ...'
+    // hide 'submitted by ... on ...'
     $view_mode = $teaser ? 'teaser' : 'full';
 
-    $node_build = \Drupal::entityTypeManager()->getViewBuilder('node')->view($node, $view_mode);
+    $faq_display = $faq_settings->get('display');
+    if ($faq_display == 'hide_answer') {
+      $node_build = $node->body->view($view_mode);
+    } else {
+      $node_build = \Drupal::entityTypeManager()->getViewBuilder('node')->view($node, $view_mode);
 
-    hide($node_build['title']);
-    if (!$faq_settings->get('question_long_form')) {
-      hide($node_build['field_detailed_question']);
+      hide($node_build['title']);
+      if (!$faq_settings->get('question_long_form')) {
+        hide($node_build['field_detailed_question']);
+      }
     }
     
     $content = \Drupal::service('renderer')->render($node_build);
 
-    $content .= FaqViewer::initBackToTop();
+    if ($faq_display != 'hide_answer') {
+      $content .= FaqViewer::initBackToTop();
+    }
 
     $data['body'] = new FormattableMarkup($content, []);
   }

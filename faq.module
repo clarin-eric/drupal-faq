@@ -10,8 +10,10 @@ use Drupal\Core\Form\FormStateInterface;
  * displayed in different styles, according to the settings.
  */
 
+use Drupal\Core\Url;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Render\Element;
+use Drupal\Core\Routing\RouteMatch;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\faq\FaqHelper;
 
@@ -184,18 +186,61 @@ function faq_order_settings_choose_cat_form_submit($form, &$form_state) {
  * 
  * Overrider breadcrumbs for faq pages.
  */
-function faq_preprocess_page(&$variables){
+function faq_preprocess_breadcrumb(&$variables){
   $faq_settings = \Drupal::config('faq.settings');
   $use_categories = $faq_settings->get('use_categories');
-  
+  $custom_breadcrumbs = $faq_settings->get('custom_breadcrumbs');
+
   $route_match = \Drupal::service('current_route_match');
   $tid = $route_match->getRawParameter('tid');
 
-  if (FaqHelper::searchInArgs('faq-page') && $use_categories && is_numeric($tid) && $current_term = Term::load($tid)) {
-    $breadcrumb = FaqHelper::setFaqBreadcrumb($current_term);
-    if (!empty($breadcrumb)) {
-      $variables['breadcrumb']['#breadcrumb'] = $breadcrumb;
+  if (!$tid) {
+    $node = \Drupal::routeMatch()->getParameter('node');
+    if ($node && $node instanceof \Drupal\node\NodeInterface && $node->hasField('field_faq_section'))
+      $tid = $node->get('field_faq_section')->getString();
+  }
+
+  if ((FaqHelper::searchInArgs('faq-page') || FaqHelper::searchInArgs('faq')) && $custom_breadcrumbs && $use_categories && is_numeric($tid) && $current_term = Term::load($tid)) {
+    if (\Drupal::service('module_handler')->moduleExists('menu_breadcrumb')) {
+      $breadcrumb_menu_settings = \Drupal::config('menu_breadcrumb.settings');
+
+      if ($breadcrumb_menu_settings->get('determine_menu')) {
+        // Get the breadcrumb trail from menu_breadcrumb for the base FAQ page /faq-page
+        $breadcrumbManager = \Drupal::service('menu_breadcrumb.breadcrumb.default');
+        $route_name = \Drupal::service('path.validator')->getUrlIfValid('/faq-page')->getRouteName();
+        $route = Drupal::service('router.route_provider')->getRouteByName($route_name);
+        $routematch = new RouteMatch($route_name, $route);
+        if ($breadcrumbManager->applies($routematch)) {
+          $faq_root_breadcrumbs = $breadcrumbManager->build($routematch)->getLinks();
+        }
+        // When menu breadcrumb module is configured to display the current page in a non-link form
+        // we have to override the URL of the current page link as it is normally set to Url(<none>)
+        // which is the current page
+        if (!empty($faq_root_breadcrumbs) && $breadcrumb_menu_settings->get('append_current_page') && !$breadcrumb_menu_settings->get('current_page_as_link') ) {
+          $trail_length = count($faq_root_breadcrumbs) - 1;
+          $faq_root_breadcrumbs[$trail_length]->setUrl(Url::fromRouteMatch($routematch));
+
+          // Remove link style from breadcrumbs without URL
+          for ($i = 0; $i < $trail_length; $i++) {
+            if ($faq_root_breadcrumbs[$i]->getUrl()->toString() == '') {
+              $faq_root_breadcrumbs[$i] = [
+                'text' => $faq_root_breadcrumbs[$i]->getText()
+              ];
+            }
+          }
+        }
+      }
     }
+    $breadcrumb = FaqHelper::setFaqBreadcrumb($current_term, $node);
+
+    if (!empty($breadcrumb)) {
+      if (!empty($faq_root_breadcrumbs)) {
+        $variables['breadcrumb'] = array_merge($faq_root_breadcrumbs, $breadcrumb);
+      } else {
+        $variables['breadcrumb'] = array_merge($variables['breadcrumb'], $breadcrumb);
+      }
+    }
+  $variables['#cache']['contexts'][] = 'url';
   }
 }
 

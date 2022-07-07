@@ -119,44 +119,43 @@
 
   Drupal.behaviors.initFaqModule = {
     attach: function (context, settings) {
+      if (context !== document) {
+        return;
+      }
+
       // Hide/show answer for a question.
       var faq_hide_qa_accordion = settings.faqSettings.hide_qa_accordion;
       $('div.faq-dd-hide-answer', context).addClass('collapsible collapsed');
-
-      if (!faq_hide_qa_accordion) {
-        $('div.faq-dd-hide-answer:not(.faq-processed)', context).addClass('faq-processed').hide();
-      }
+      $('div.faq-dd-hide-answer:not(.faq-processed)', context).addClass('faq-processed').hide();
       $('div.faq-dt-hide-answer:not(.faq-processed)', context).addClass('faq-processed').click(function () {
         if (faq_hide_qa_accordion) {
-          $('div.faq-dt-hide-answer').not($(this)).removeClass('faq-qa-visible');
+          $('div.expanded div.faq-dd-hide-answer').not('.expanded').not($(this).next('div.faq-dd-hide-answer')).slideToggle('fast', function () {
+            $(this).parent().toggleClass('expanded');
+            $(this).prev('div.faq-dt-hide-answer').removeClass('faq-qa-visible')
+          });
         }
         $(this).toggleClass('faq-qa-visible');
         $(this).parent().addClass('faq-viewed');
         $('div.faq-dd-hide-answer').not($(this).next('div.faq-dd-hide-answer')).addClass('collapsed');
-        if (!faq_hide_qa_accordion) {
-          $(this).next('div.faq-dd-hide-answer').slideToggle('fast', function () {
-            $(this).parent().toggleClass('expanded');
-          });
-        }
+        $(this).next('div.faq-dd-hide-answer').slideToggle('fast', function () {
+          $(this).parent().toggleClass('expanded');
+        });
         $(this).next('div.faq-dd-hide-answer').toggleClass('collapsed');
 
         // Change the fragment, too, for permalink/bookmark.
         // To keep the current page from scrolling, refs
         // http://stackoverflow.com/questions/1489624/modifying-document-location-hash-without-page-scrolling/1489802#1489802
         var hash = $(this).find('a').attr('id');
-        var fx;
-        var node = $('#' + hash);
-        if (node.length) {
-          fx = $('<div></div>')
-                .css({position: 'absolute', visibility: 'hidden', top: $(window).scrollTop() + 'px'})
-                .attr('id', hash)
-                .appendTo(document.body);
-          node.attr('id', '');
-        }
-        document.location.hash = hash;
-        if (node.length) {
-          fx.remove();
-          node.attr('id', hash);
+
+        if ("pushState" in history) {
+          var newHash = $(this).filter(".faq-qa-visible").length > 0 ? ("#" + hash) : "";
+          history.pushState("", document.title, document.location.pathname + document.location.search + newHash);
+        } else {
+          var scrollY = $(window).scrollTop();
+          var scrollX = $(window).scrollLeft();
+          document.location.hash = ($(this).filter(".faq-qa-visible").length > 0) ? hash : "";
+          $(document).scrollTop(scrollY);
+          $(document).scrollLeft(scrollX);
         }
 
         // Scroll the page if the collapsed FAQ is not visible.
@@ -177,7 +176,7 @@
         $('div.faq-dt-hide-answer ' + document.location.hash).parents('.faq-dt-hide-answer').triggerHandler('click');
       }
 
-        // Hide/show q/a for a category.
+      // Hide/show q/a for a category.
       var faq_category_hide_qa_accordion = settings.faqSettings.category_hide_qa_accordion;
       $('div.faq-qa-hide', context).addClass('collapsible collapsed');
       if (!faq_category_hide_qa_accordion) {
@@ -211,7 +210,7 @@
 
 
       // Show expand all link.
-      if (!faq_hide_qa_accordion && !faq_category_hide_qa_accordion) {
+      if (!faq_category_hide_qa_accordion) {
         $('#faq-expand-all', context).show();
         $('#faq-expand-all a.faq-expand-all-link', context).show();
 
@@ -225,6 +224,16 @@
           $('div.faq-dd-hide-answer').slideUp('slow', function () {
             $(this).removeClass('expanded');
           });
+          $('div.faq-dt-hide-answer').removeClass('faq-qa-visible').parent().removeClass('expanded');
+          if ("pushState" in history) {
+            history.pushState("", document.title, document.location.pathname + document.location.search);
+          } else {
+            var scrollY = $(window).scrollTop();
+            var scrollX = $(window).scrollLeft();
+            document.location.hash = "";
+            $(document).scrollTop(scrollY);
+            $(document).scrollLeft(scrollX);
+          }
         });
 
         // Add expand link click event.
@@ -237,7 +246,13 @@
           $('div.faq-dd-hide-answer').slideDown('slow', function () {
             $(this).addClass('expanded');
           });
+          $('div.faq-dt-hide-answer').addClass('faq-qa-visible').parent().addClass('expanded');
         });
+      }
+
+      // Show all questions if identified by right fragment
+      if (/^#faq-expand-all-link$/.test(document.location.hash)) {
+        $('#faq-expand-all a.faq-expand-all-link', context).triggerHandler('click');
       }
 
       // Handle faq_category_settings_form.

@@ -9,7 +9,6 @@ use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Url;
 use Drupal\Core\Link;
 use Drupal\faq\FaqHelper;
-use Drupal\Component\Utility\SafeMarkup;
 
 /**
  * Create FAQ page if set to show the answer in a new page.
@@ -108,7 +107,7 @@ function template_preprocess_faq_category_new_page(&$variables) {
   }
 
   // Configure category description.
-  $variables['description'] = SafeMarkup::checkPlain($term->getDescription());
+  $variables['description'] = $term->getDescription();
 
   // Get list of sub-categories if necessary.
   $child_categories = array();

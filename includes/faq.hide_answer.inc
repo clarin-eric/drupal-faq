@@ -9,7 +9,6 @@ use Drupal\Core\Url;
 use Drupal\Core\Link;
 use Drupal\faq\FaqHelper;
 use Drupal\faq\FaqViewer;
-use Drupal\Component\Utility\SafeMarkup;
 
 /**
  * Create FAQ page if set to show/hide answer when question is clicked.
@@ -33,6 +32,12 @@ function template_preprocess_faq_hide_answer(&$variables) {
   }
   $variables['use_teaser'] = $teaser;
   $variables['nodes'] = $nodes;
+
+  if($faq_settings->get('show_expand_all')) {
+    $variables['faq_expand'] = true;
+  } else {
+    $variables['faq_expand'] = false;
+  }
 }
 
 /**
@@ -105,7 +110,7 @@ function template_preprocess_faq_category_hide_answer(&$variables) {
   }
 
   // Configure category description.
-  $variables['description'] = SafeMarkup::checkPlain($term->getDescription());
+  $variables['description'] = $term->getDescription();
 
   // Get list of sub-categories if necessary.
   $child_categories = array();
@@ -148,4 +153,11 @@ function template_preprocess_faq_category_hide_answer(&$variables) {
   }
   $variables['nodes'] = $nodes;
   $variables['question_count'] = $count;
+
+  if($faq_settings->get('show_expand_all')) {
+    $variables['faq_expand'] = true;
+  } else {
+    $variables['faq_expand'] = false;
+  }
+
 }

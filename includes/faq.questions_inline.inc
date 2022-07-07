@@ -9,7 +9,6 @@ use Drupal\Core\Url;
 use Drupal\Core\Link;
 use Drupal\faq\FaqHelper;
 use Drupal\faq\FaqViewer;
-use Drupal\Component\Utility\SafeMarkup;
 
 /**
  * Create the FAQ page if set to show the questions inline.
@@ -127,7 +126,7 @@ function template_preprocess_faq_category_questions_inline(&$variables) {
   }
 
   // Configure category description.
-  $variables['description'] = SafeMarkup::checkPlain($term->getDescription());
+  $variables['description'] = $term->getDescription();
 
   // Get list of sub-categories if necessary.
   $child_categories = array();
