@@ -38,13 +38,6 @@
  */
 #}
 
-{% if faq_expand %}
-<div id="faq-expand-all">
-  <a class="faq-expand-all-link" href="#faq-expand-all-link">[{{ 'expand all'|t }}]</a>
-  <a class="faq-collapse-all-link">[{{ 'collapse all'|t }}]</a>
-</div>
-{% endif %}
-
 {% if category_depth > 0 %}
     {% set hdr = 'h4' %}
 {% else %}
@@ -106,6 +99,7 @@
 
 <!-- show questions together with answers in a box -->
 {% if nodes|length > 0 %}
+<p>&nbsp;</p>
 <div class="container">
     <section class="bg-light py-5">
         <div class="row">
