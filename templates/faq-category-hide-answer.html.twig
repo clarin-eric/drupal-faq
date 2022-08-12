@@ -69,22 +69,43 @@
     
     {% if subcat_list is not empty %}
         <!-- list subcategories, with title, link, description, count -->
-        <div class="item-list">
-            <{{ subcat_list_style }} class="faq-category-list">
-            {% for subcat in subcat_list %}
-                <li>
-                    {{ subcat.link }}
-                    {% if display_faq_count %}
-                        ({{ subcat.count }})
-                    {% endif %}
-                    {% if subcat.description is not empty %}
-                        <div class="faq-qa-description">{{ subcat.description }}</div>
-                    {% endif %}
-                    <div class="clear-block"></div>
-                </li>
-            {% endfor %}
-            </{{ subcat_list_style }}>
-        </div><!-- Close div: item-list -->
+        <div class="container">
+            <section class="bg-light py-5">
+                <div class="row">
+                    {% for subcat in subcat_list %}
+                        <div class="col-sm-5 col-md-6">
+                            <div class="faq-box faq-box--shadowed white-bg style-2 mb-4">
+                                <div class="body">
+                                    <h5 class="font-weight-bold my-2">{{ subcat.link }}
+                                        {% if display_faq_count %}
+                                            ({{ subcat.count }})
+                                        {% endif %}
+                                    </h5>
+                                    {% if subcat.description is not empty %}
+                                        <div class="faq-qa-description">{{ subcat.description }}</div>
+                                    {% endif %}
+                                    <p class="small">
+                                      Question 1 - Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
+                                  </p>
+                                  <p class="small">
+                                      Question 2 - Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
+                                  </p>
+                                  <p class="small">
+                                      Question 3 - Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
+                                  </p>
+                                  <p class="small">
+                                      Question 4 - Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
+                                  </p>
+                                  <p class="small">
+                                      Question 5 - Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
+                                  </p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </section>
+        </div>
     {% endif %}
     
     <div class="{{ container_class }}">
