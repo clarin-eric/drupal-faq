@@ -101,27 +101,32 @@
             <div class="faq-category-indent">{{ subcat_html }}</div>
         {% endfor %}
         {% endif %}
-        
-        <!-- list questions (in title link) and answers (in body) -->
-        <div class="faq-dl-hide-answer">
-            {% if nodes|length > 0 %}
-            {% for node in nodes %}
-                <div class="faq-question-answer">
-                    <div class="faq-question faq-dt-hide-answer">
-                        {{ node.question }}
-                    </div><!-- Close div: faq-question faq-dt-hide-answer -->
-                    <div class="faq-answer faq-dd-hide-answer">
-                        {{ node.body }}
-                        {% if node.links is defined %}
-                            {{ node.links }}
-                        {% endif %}
-                    </div><!-- Close div: faq-answer faq-dd-hide-answer -->
-                </div><!-- Close div: faq-question-answer -->
-            {% endfor %}
-            {% endif %}
-        </div><!-- Close div: faq-dl-hide-answer -->
     </div><!-- Close div: faq-qa / faq-qa-hide -->
 </div><!-- Close div: faq-category-group -->
+
+<!-- show questions together with answers in a box -->
+{% if nodes|length > 0 %}
+<div class="container">
+    <section class="bg-light py-5">
+        <div class="row">
+            {% for node in nodes %}
+                <div class="col-sm-5 col-md-6">
+                    <div class="faq-box faq-box--shadowed white-bg style-2 mb-4">
+                        <div class="body">
+                            <h5 class="font-weight-bold my-2">{{ node.question }}</h5>
+                            <p class="small">{{ node.body }}
+                            {% if node.links is defined %}
+                                {{ node.links }}
+                            {% endif %}</p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+            </div>
+        </div>
+    </section>
+</div>
+{% endif %}
 
 <style>
     /* Faq box
