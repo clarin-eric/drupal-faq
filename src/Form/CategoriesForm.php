@@ -48,6 +48,7 @@ class CategoriesForm extends ConfigFormBase {
     $category_options['categories_inline'] = $this->t('Categories inline');
     $category_options['hide_qa'] = $this->t('Clicking on category opens/hides questions and answers under category');
     $category_options['new_page'] = $this->t('Clicking on category opens the questions/answers in a new page');
+    $category_options['squares'] = $this->t('Squares: show (sub)categories and their questions in squares');
 
     $form['faq_category_display'] = array(
       '#type' => 'radios',
