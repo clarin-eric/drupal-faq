@@ -235,6 +235,7 @@ class FaqController extends ControllerBase {
             switch ($category_display) {
               case 'hide_qa':
               case 'categories_inline':
+              case 'squares':
                 if (FaqHelper::taxonomyTermCountNodes($term->id())) {
                   $this->_displayFaqByCategory($faq_display, $category_display, $term, 1, $output, $output_answers);
                 }
