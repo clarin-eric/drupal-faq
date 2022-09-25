@@ -1,7 +1,7 @@
 {#
 /**
  * @file
- * Template file for the FAQ page if set to show categorized questions inline.
+ * Template file for the FAQ page if set to show categorized questions in squares.
  * 
  * Available variables:
  * - display_header: Boolean value controlling whether a header should be displayed.
@@ -32,7 +32,7 @@
  * - subcat_list_style: The style of the sub-category list, either ol or ul (ordered or unordered).
  * - subcat_body_list: The sub-categories faqs, recursively themed (by this template).
  * 
- * @see template_preprocess_faq_category_questions_inline()
+ * @see template_preprocess_faq_category_questions_squares()
  * 
  * @ingroup themable
  */
@@ -96,32 +96,91 @@
             {% endfor %}
         {% endif %}
         
-        <!-- list questions (in title link) and answers (in body) -->
+        <!-- list questions and answer pairs in a square -->
         <div>
             {% if nodes|length > 0 %}
-            {% for node in nodes %}
-                <div class="faq-question">
-                    {% if question_label is not empty %}
-                        <strong class="faq-question-label">
-                            {{ question_label }}
-                        </strong>
-                    {% endif %}
-                    {{ node.question }}
-                </div><!-- Close div: faq-question -->
-                <div class="faq-answer">
-                    {% if asnwer_label is not empty %}
-                        <strong class="faq-answer-label">
-                            {{ answer_label }}
-                        </strong>
-                    {% endif %}
-                    {{ node.body }}
-                    {% if node.links is defined %}
-                        {{ node.links }}
-                    {% endif %}
-                </div><!-- Close div: faq-answer -->
-            {% endfor %}
+            <div class="container">
+                <section class="bg-light py-5">
+                    <div class="row">
+                        {% for node in nodes %}
+                            <div class="col-sm-5 col-md-6">
+                                <div class="faq-box faq-box--shadowed white-bg style-2 mb-4">
+                                    <div class="body">
+                                        <h5 class="font-weight-bold my-2">{{ node.question }}</h5>
+                                        <p class="small">{{ node.body }}
+                                        {% if node.links is defined %}
+                                            {{ node.links }}
+                                        {% endif %}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                        </div>
+                    </div>
+                </section>
+            </div>
             {% endif %}
         </div><!-- Close div -->
         
     </div><!-- Close div: faq-qa / faq-qa-hide -->
 </div><!-- Close div: faq-category-group -->
+
+<style>
+    /* Faq box
+---------------------------------- */
+.row {
+    padding: 15px;
+  }
+
+  .faq-box .body {
+    padding: 15px;
+  }
+  
+  .faq-box .body p:last-child {
+    margin-bottom: 0;
+  }
+  
+  .faq-box.style-4 {
+    border: none;
+  }
+  
+  .faq-box.style-3-b {
+    display: block;
+    margin-bottom: 40px;
+  }
+  
+  .faq-box.style-3-b .body {
+    padding: 10px 0;
+  }
+  
+  .faq-box--shadowed {
+    -webkit-box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    -webkit-transition: all 0.25s ease-in-out;
+    -o-transition: all 0.25s ease-in-out;
+    transition: all 0.25s ease-in-out;
+  }
+  
+  .faq-box--shadowed:hover {
+    -webkit-box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+  }
+  
+  /* Medium devices (tablets, laptops, smartphones 768px and up) */
+  @media (min-width: 768px) {
+    .faq-box.style-3-b .body {
+      padding: 0;
+    }
+  }
+  
+  /* Medium devices (desktops, tablets less than 991px) */
+  @media (max-width: 991px) {
+    .faq-box.style-4 {
+      margin-bottom: 30px;
+    }
+  }
+  
+  .white-bg {
+    background-color: #ffffff;
+  }
+</style>

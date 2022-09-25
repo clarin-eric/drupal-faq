@@ -2,7 +2,7 @@
 
 /**
  * @file
- * FAQ page callbacks for the "questions inline" layouts.
+ * FAQ page callbacks for the "questions squares" layouts.
  */
 
 use Drupal\Core\Url;
@@ -11,7 +11,7 @@ use Drupal\faq\FaqHelper;
 use Drupal\faq\FaqViewer;
 
 /**
- * Create the FAQ page if set to show the questions inline.
+ * Create the FAQ page if set to show the questions in squares.
  *
  * @param &$variables
  *   Array reference of arguments given to the theme() function.
@@ -50,7 +50,7 @@ function template_preprocess_faq_questions_squares(&$variables) {
 }
 
 /**
- * Create categorized FAQ page if set to show/hide the questions inline.
+ * Create categorized FAQ page if set to show the questions in squares.
  *
  * @param &$variables
  *   Array reference of arguments given to the theme() function.
