@@ -8,32 +8,37 @@ use Drupal\Core\Form\FormStateInterface;
 /**
  * Form for the FAQ settings page - questions tab.
  */
-class QuestionsForm extends ConfigFormBase {
+class QuestionsForm extends ConfigFormBase
+{
 
   /**
    * {@inheritdoc}
    */
-  public function getFormId() {
+  public function getFormId()
+  {
     return 'faq_questions_settings_form';
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function getEditableConfigNames() {
+  protected function getEditableConfigNames()
+  {
     return [];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state) {
+  public function buildForm(array $form, FormStateInterface $form_state)
+  {
     $faq_settings = $this->config('faq.settings');
 
     $display_options['questions_inline'] = $this->t('Questions inline');
     $display_options['questions_top'] = $this->t('Clicking on question takes user to answer further down the page');
     $display_options['hide_answer'] = $this->t('Clicking on question opens/hides answer under question');
     $display_options['new_page'] = $this->t('Clicking on question opens the answer in a new page');
+    $display_options['questions_squares'] = $this->t('Squares: show question with answer in a square');
 
     $form['faq_display'] = array(
       '#type' => 'radios',
@@ -159,7 +164,8 @@ class QuestionsForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state)
+  {
     // Remove unnecessary values.
     $form_state->cleanValues();
 
@@ -181,5 +187,4 @@ class QuestionsForm extends ConfigFormBase {
 
     parent::submitForm($form, $form_state);
   }
-
 }

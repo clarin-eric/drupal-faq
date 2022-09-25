@@ -22,7 +22,8 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 /**
  * Controller routines for FAQ routes.
  */
-class FaqController extends ControllerBase {
+class FaqController extends ControllerBase
+{
 
   protected  $database;
   protected  $config;
@@ -59,9 +60,10 @@ class FaqController extends ControllerBase {
    * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
    * @return static
    */
-  public static function create(ContainerInterface $container) {
+  public static function create(ContainerInterface $container)
+  {
     return new static(
-    // Load the service required to construct this class.
+      // Load the service required to construct this class.
       $container->get('database'),
       $container->get('config.factory'),
       $container->get('renderer'),
@@ -87,7 +89,8 @@ class FaqController extends ControllerBase {
    *
    * @throws NotFoundHttpException
    */
-  public function faqPage($tid = 0, $faq_display = '', $category_display = '') {
+  public function faqPage($tid = 0, $faq_display = '', $category_display = '')
+  {
     $faq_settings = $this->config->get('faq.settings');
 
     $output = $output_answers = '';
@@ -149,8 +152,7 @@ class FaqController extends ControllerBase {
         ->orderBy('d.sticky', 'DESC');
       if ($default_sorting == 'ASC') {
         $query->orderBy('d.created', 'ASC');
-      }
-      else {
+      } else {
         $query->orderBy('d.created', 'DESC');
       }
 
@@ -175,6 +177,10 @@ class FaqController extends ControllerBase {
 
         case 'questions_inline':
           $questions_to_render['#theme'] = 'faq_questions_inline';
+          break;
+
+        case 'questions_squares':
+          $questions_to_render['#theme'] = 'faq_questions_squares';
           break;
 
         case 'new_page':
@@ -203,8 +209,7 @@ class FaqController extends ControllerBase {
           );
           $build['#markup'] = $this->renderer->render($to_render);
           return $build;
-        }
-        else {
+        } else {
           throw new NotFoundHttpException();
         }
       }
@@ -219,7 +224,7 @@ class FaqController extends ControllerBase {
           continue;
         }
 
-        if ($category_display == "new_page") {
+        if ($category_display == "new_page" || $category_display == "categories_squares") {
           $vocab_items = $this->_getIndentedFaqTerms($vid, 0);
           $items = array_merge($items, $vocab_items);
         }
@@ -227,15 +232,13 @@ class FaqController extends ControllerBase {
         else {
           if ($hide_child_terms && $category_display == 'hide_qa') {
             $tree = $this->entityTypeManager->getStorage('taxonomy_term')->loadTree($vid, 0, 1, TRUE);
-          }
-          else {
+          } else {
             $tree = $this->entityTypeManager->getStorage('taxonomy_term')->loadTree($vid, 0, NULL, TRUE);
           }
           foreach ($tree as $term) {
             switch ($category_display) {
               case 'hide_qa':
               case 'categories_inline':
-              case 'squares':
                 if (FaqHelper::taxonomyTermCountNodes($term->id())) {
                   $this->_displayFaqByCategory($faq_display, $category_display, $term, 1, $output, $output_answers);
                 }
@@ -245,7 +248,7 @@ class FaqController extends ControllerBase {
         }
       }
 
-      if ($category_display == "new_page") {
+      if ($category_display == "new_page" || $category_display == "categories_squares") {
         $output = $this->_renderCategoriesToList($items, $list_style);
       }
     }
@@ -272,7 +275,8 @@ class FaqController extends ControllerBase {
    * @return
    *   The form code, before being converted to HTML format.
    */
-  public function orderPage($tid = NULL) {
+  public function orderPage($tid = NULL)
+  {
 
     $faq_settings = $this->config->get('faq.settings');
     $build = array();
@@ -293,7 +297,8 @@ class FaqController extends ControllerBase {
    * @return
    *   The form code inside the $build array.
    */
-  public function generalSettings() {
+  public function generalSettings()
+  {
     $build = array();
 
     $build['faq_general_settings_form'] = $this->formBuilder()->getForm('Drupal\faq\Form\GeneralForm');
@@ -307,7 +312,8 @@ class FaqController extends ControllerBase {
    * @return
    *   The form code inside the $build array.
    */
-  public function questionsSettings() {
+  public function questionsSettings()
+  {
     $faq_settings = $this->config->get('faq.settings');
 
     $build = array();
@@ -327,7 +333,8 @@ class FaqController extends ControllerBase {
    * @return
    *   The form code inside the $build array.
    */
-  public function categoriesSettings() {
+  public function categoriesSettings()
+  {
     $faq_settings = $this->config->get('faq.settings');
 
     $build = array();
@@ -359,7 +366,8 @@ class FaqController extends ControllerBase {
    * @param &$output   Reference which holds the content of the page, HTML formatted.
    * @param &$output_answer   Reference which holds the answers from the FAQ, when showing questions   on top.
    */
-  private function _displayFaqByCategory($faq_display, $category_display, $term, $display_header, &$output, &$output_answers) {
+  private function _displayFaqByCategory($faq_display, $category_display, $term, $display_header, &$output, &$output_answers)
+  {
     $langcode = $this->languageManager->getCurrentLanguage()->getId();
     $default_sorting = $this->config->get('faq.settings')->get('default_sorting');
 
@@ -389,8 +397,7 @@ class FaqController extends ControllerBase {
       ->orderBy('d.sticky', 'DESC');
     if ($default_sorting == 'ASC') {
       $query->orderBy('d.created', 'ASC');
-    }
-    else {
+    } else {
       $query->orderBy('d.created', 'DESC');
     }
 
@@ -431,7 +438,6 @@ class FaqController extends ControllerBase {
       '#class' => $faq_class,
       '#parent_term' => $term,
     );
-
     switch ($faq_display) {
       case 'questions_top':
         $output_render['#theme'] = 'faq_category_questions_top';
@@ -447,6 +453,11 @@ class FaqController extends ControllerBase {
 
       case 'questions_inline':
         $output_render['#theme'] = 'faq_category_questions_inline';
+        $output .= $this->renderer->render($output_render);
+        break;
+
+      case 'questions_squares':
+        $output_render['#theme'] = 'faq_category_questions_squares';
         $output .= $this->renderer->render($output_render);
         break;
 
@@ -473,7 +484,8 @@ class FaqController extends ControllerBase {
    * @return
    *   Return an array of a list of terms indented according to the term depth.
    */
-  private function _getIndentedFaqTerms($vid, $tid) {
+  private function _getIndentedFaqTerms($vid, $tid)
+  {
     // If ($this->moduleHandler()->moduleExists('pathauto')) {
     // pathauto does't exists in D8 yet
     // }.
@@ -525,12 +537,10 @@ class FaqController extends ControllerBase {
             } else {
               $cur_item = $this->linkGenerator->generate($this->t($term->getName()), $path) . $desc;
             }
-          }
-          else {
+          } else {
             $cur_item = $this->linkGenerator->generate($this->t($term->getName()), $path) . $desc;
           }
-        }
-        else {
+        } else {
           $cur_item = $this->t($term->getName()) . $desc;
         }
         if (!empty($term_image)) {
@@ -562,7 +572,8 @@ class FaqController extends ControllerBase {
    * @return string
    *   HTML formatted output.
    */
-  private function _renderCategoriesToList($items, $list_style) {
+  private function _renderCategoriesToList($items, $list_style)
+  {
 
     $list = array();
 
@@ -582,5 +593,4 @@ class FaqController extends ControllerBase {
 
     return $this->renderer->render($render);
   }
-
 }

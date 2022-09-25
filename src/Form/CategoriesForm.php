@@ -9,26 +9,30 @@ use Drupal\Core\Form\FormStateInterface;
 /**
  * Form for the FAQ settings page - categories tab.
  */
-class CategoriesForm extends ConfigFormBase {
+class CategoriesForm extends ConfigFormBase
+{
 
   /**
    * {@inheritdoc}
    */
-  public function getFormId() {
+  public function getFormId()
+  {
     return 'faq_categories_settings_form';
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function getEditableConfigNames() {
+  protected function getEditableConfigNames()
+  {
     return [];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state) {
+  public function buildForm(array $form, FormStateInterface $form_state)
+  {
     $faq_settings = $this->config('faq.settings');
 
     // Set up a hidden variable.
@@ -48,7 +52,7 @@ class CategoriesForm extends ConfigFormBase {
     $category_options['categories_inline'] = $this->t('Categories inline');
     $category_options['hide_qa'] = $this->t('Clicking on category opens/hides questions and answers under category');
     $category_options['new_page'] = $this->t('Clicking on category opens the questions/answers in a new page');
-    $category_options['squares'] = $this->t('Squares: show (sub)categories and their questions in squares');
+    $category_options['categories_squares'] = $this->t('Squares: show subcategories with their questions in squares');
 
     $form['faq_category_display'] = array(
       '#type' => 'radios',
@@ -147,7 +151,8 @@ class CategoriesForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state)
+  {
     // Remove unnecessary values.
     $form_state->cleanValues();
 
@@ -166,5 +171,4 @@ class CategoriesForm extends ConfigFormBase {
 
     parent::submitForm($form, $form_state);
   }
-
 }

@@ -107,6 +107,16 @@ function faq_theme() {
       'template' => 'faq-category-new-page',
       'variables' => array('data' => NULL, 'display_header' => 0, 'category_display' => NULL, 'term' => NULL, 'class' => NULL, 'parent_term' => NULL),
     ),
+    'faq_questions_squares' => array(
+      'file' => '/includes/faq.questions_squares.inc',
+      'template' => 'faq-questions-squares',
+      'variables' => array('data' => NULL),
+    ),
+    'faq_category_questions_squares' => array(
+      'file' => '/includes/faq.questions_squares.inc',
+      'template' => 'faq-category-questions-squares',
+      'variables' => array('data' => NULL, 'display_header' => 0, 'category_display' => NULL, 'term' => NULL, 'class' => NULL, 'parent_term' => NULL),
+    ),
     'faq_page' => array(
       'variables' => array('content' => '', 'answers' => '', 'description' => NULL),
       'template' => 'faq-page',
