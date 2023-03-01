@@ -48,18 +48,6 @@
 <div class="faq-category-group">
     <!-- category header with title, link, image, description, and count of questions inside -->
     <div class="faq-qa-header">
-        {% if display_header %}
-            <{{ hdr }} class="faq-header">
-                {{ term_image }}
-                {{ header_title }}
-                {% if display_faq_count %}
-                    ({{ question_count }})
-                {% endif %}
-            </{{ hdr }}>
-        {% else %}
-            {{ term_image }}
-        {% endif %}
-        
         {% if description is not empty %}
             <div class="faq-qa-description">{{ description }}</div>
         {% endif %}
@@ -97,33 +85,60 @@
         <!-- list questions and answer pairs in a square -->
         <div>
             {% if nodes|length > 0 %}
-            <div class="container">
-                <section class="bg-light py-5">
-                    <div class="row">
-                        {% for node in nodes %}
-                            <div class="col-sm-5 col-md-6">
-                                <div class="faq-box faq-box--shadowed white-bg style-2 mb-4">
-                                    <div class="body">
-                                        <h5 class="font-weight-bold my-2">{{ node.question }}</h5>
-                                        <p class="small">{{ node.body }}
-                                        {% if node.links is defined %}
-                                            {{ node.links }}
-                                        {% endif %}</p>
+                <div class="container">
+                    <section class="bg-light rounded py-5">
+                        {% if display_header %}
+                            <{{ hdr }} class="faq-header text-center">
+                                {{ term_image }}
+                                {{ header_title }}
+                            {% if display_faq_count %}
+                                ({{ question_count }})
+                            {% endif %}
+                            </{{ hdr }}>
+                        {% else %}
+                            {{ term_image }}
+                        {% endif %}
+                        <div class="card-columns p-4"> 
+                            {% for node in nodes %}
+                                <div class="card">
+                                    <div class="faq-box faq-box--shadowed white-bg style-2">
+                                        <div class="card-body">
+                                            <h5 class="font-weight-bold my-2">{{ node.question }}</h5>
+                                            <div class="small pl-2">{{ node.body }}
+                                                {% if node.links is defined %}
+                                                    {{ node.links }}
+                                                {% endif %}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        {% endfor %}
+                            {% endfor %}
                         </div>
-                    </div>
-                </section>
-            </div>
+                    </section>
+                </div>
             {% endif %}
-        </div><!-- Close div -->
-        
+        </div><!-- Close div -->   
     </div><!-- Close div: faq-qa / faq-qa-hide -->
 </div><!-- Close div: faq-category-group -->
-
+<div class="mt-4"></div>
 <style>
+
+@media (min-width: 34em) {
+    .card-columns {
+        -webkit-column-count: 1 !important;
+        -moz-column-count: 1 !important;
+        column-count: 1 !important;
+    }
+}
+
+@media (min-width: 48em) {
+    .card-columns {
+        -webkit-column-count: 2 !important;
+        -moz-column-count: 2 !important;
+        column-count: 2 !important;
+    }
+}
+
     /* Faq box
 ---------------------------------- */
 .row {
