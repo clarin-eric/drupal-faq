@@ -45,7 +45,6 @@
     {% set hdr = 'h3' %}
 {% endif %}
 
-<a id="top"></a>
 <div class="faq-category-group">
     <!-- category header with title, link, image, description, and count of questions inside -->
     <div class="faq-qa-header">
@@ -88,6 +87,7 @@
             {% if nodes|length > 0 %}
                 <div class="container">
                     <section class="bg-light rounded py-5" id="{{ header_a_id }}">
+                        <p class="text-right"><a href="#header">To top</a>&nbsp;&nbsp;&nbsp;</p>
                         {% if display_header %}
                             <{{ hdr }} class="faq-header text-center">
                                 {{ term_image }}
