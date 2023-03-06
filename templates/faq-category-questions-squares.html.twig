@@ -6,6 +6,7 @@
  * Available variables:
  * - display_header: Boolean value controlling whether a header should be displayed.
  * - header_title: The category title.
+ * - header_a_id: The id of the subcategory used for the internal link
  * - category_depth: The term or category depth.
  * - description: The current page's description.
  * - term_image: The HTML for the category image. This is empty if the taxonomy image module
@@ -86,7 +87,7 @@
         <div>
             {% if nodes|length > 0 %}
                 <div class="container">
-                    <section class="bg-light rounded py-5">
+                    <section class="bg-light rounded py-5" id="{{ header_a_id }}">
                         {% if display_header %}
                             <{{ hdr }} class="faq-header text-center">
                                 {{ term_image }}

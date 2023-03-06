@@ -180,7 +180,7 @@ class FaqHelper {
    * @return
    *   An array of sub-categories.
    */
-  public static function viewChildCategoryHeaders($term) {
+  public static function viewChildCategoryHeaders($term, $category_display = NULL) {
 
     $child_categories = array();
     $list = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadChildren($term->id());
@@ -196,7 +196,11 @@ class FaqHelper {
         //  $term_image = taxonomy_image_display($child_term->tid, array('class' => 'faq-tax-image'));
         // }.
         $child_term_id = $child_term->id();
-        $term_vars['link'] = Link::fromTextAndUrl(t($child_term->getName()), Url::fromUserInput('/faq-page/' . $child_term_id));
+        if($category_display == 'categories_squares') {
+          $term_vars['link'] = Link::fromTextAndUrl(t($child_term->getName()), Url::fromUserInput('#' . $child_term_id));
+        } else {
+          $term_vars['link'] = Link::fromTextAndUrl(t($child_term->getName()), Url::fromUserInput('/faq-page/' . $child_term_id));
+        }
         $term_vars['description'] = ($child_term->getDescription()) ? t($child_term->getDescription()) : '';
         $term_vars['count'] = $term_node_count;
         $term_vars['term_image'] = $term_image;
