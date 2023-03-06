@@ -10,7 +10,8 @@ use \Drupal\Core\Link;
 /**
  * Contains static helper functions for FAQ module.
  */
-class FaqHelper {
+class FaqHelper
+{
 
   /**
    * Function to set up the FAQ breadcrumbs for a given taxonomy term.
@@ -19,19 +20,20 @@ class FaqHelper {
    *
    * @return array
    */
-  public static function setFaqBreadcrumb($term = NULL, $node = NULL) {
+  public static function setFaqBreadcrumb($term = NULL, $node = NULL)
+  {
     $faq_settings = \Drupal::config('faq.settings');
     $site_settings = \Drupal::config('system.site');
 
     $breadcrumb = array();
     if ($faq_settings->get('custom_breadcrumbs')) {
       if (\Drupal::moduleHandler()->moduleExists('taxonomy') && $term) {
-        if(!$node) {
+        if (!$node) {
           $breadcrumb[] = [
             'text' => t($term->getName()),
           ];
         } else {
-           $breadcrumb[] = [
+          $breadcrumb[] = [
             'text' => t($node->getTitle()),
           ];
           $breadcrumb[] = Link::fromTextAndUrl(t($term->getName()), URL::fromUserInput('/faq-page/' . $term->id()));
@@ -55,7 +57,8 @@ class FaqHelper {
    * @return int
    *   Returns the count of the nodes in the given term.
    */
-  public static function taxonomyTermCountNodes($tid) {
+  public static function taxonomyTermCountNodes($tid)
+  {
     static $count;
 
     if (!isset($count) || !isset($count[$tid])) {
@@ -81,7 +84,8 @@ class FaqHelper {
   /**
    * Helper function to taxonomyTermCountNodes() to return list of child terms.
    */
-  public static function taxonomyTermChildren($tid) {
+  public static function taxonomyTermChildren($tid)
+  {
     static $children;
 
     if (!isset($children)) {
@@ -109,7 +113,8 @@ class FaqHelper {
    *
    * @return array
    */
-  public static function getChildCategoriesFaqs($term, $theme_function, $default_weight, $default_sorting, $category_display, $class, $parent_term = NULL) {
+  public static function getChildCategoriesFaqs($term, $theme_function, $default_weight, $default_sorting, $category_display, $class, $parent_term = NULL)
+  {
     $output = array();
 
     $list = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadChildren($term->id());
@@ -145,8 +150,7 @@ class FaqHelper {
           ->orderBy('d.sticky', 'DESC');
         if ($default_sorting == 'ASC') {
           $query->orderBy('d.created', 'ASC');
-        }
-        else {
+        } else {
           $query->orderBy('d.created', 'DESC');
         }
 
@@ -180,7 +184,8 @@ class FaqHelper {
    * @return
    *   An array of sub-categories.
    */
-  public static function viewChildCategoryHeaders($term, $category_display = NULL) {
+  public static function viewChildCategoryHeaders($term, $category_display = NULL)
+  {
 
     $child_categories = array();
     $list = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadChildren($term->id());
@@ -196,7 +201,7 @@ class FaqHelper {
         //  $term_image = taxonomy_image_display($child_term->tid, array('class' => 'faq-tax-image'));
         // }.
         $child_term_id = $child_term->id();
-        if($category_display == 'categories_squares') {
+        if ($category_display == 'categories_squares') {
           $term_vars['link'] = Link::fromTextAndUrl(t($child_term->getName()), Url::fromUserInput('#' . $child_term_id));
         } else {
           $term_vars['link'] = Link::fromTextAndUrl(t($child_term->getName()), Url::fromUserInput('/faq-page/' . $child_term_id));
@@ -216,7 +221,8 @@ class FaqHelper {
    *
    * @return array Array containing the FAQ related vocabularies.
    */
-  public static function faqRelatedVocabularies() {
+  public static function faqRelatedVocabularies()
+  {
     $vids = array();
     foreach (\Drupal::entityTypeManager()->getStorage('node')->getFieldDefinitions('node', 'faq') as $field_definition) {
       if ($field_definition->getType() == 'taxonomy_term_reference') {
@@ -239,12 +245,12 @@ class FaqHelper {
    * @return string
    *   The part of the path which indexed by the given id.
    */
-  public static function arg($id) {
+  public static function arg($id)
+  {
     $url_comp = explode('/', \Drupal::request()->getRequestUri());
     if (isset($url_comp[$id])) {
       return $url_comp[$id];
-    }
-    else {
+    } else {
       return NULL;
     }
   }
@@ -258,14 +264,13 @@ class FaqHelper {
    * @return string
    *   The id of the path which indexed by the given path.
    */
-  public static function searchInArgs($path) {
+  public static function searchInArgs($path)
+  {
     $url_comp = explode('/', \Drupal::request()->getRequestUri());
     if ($key = array_search($path, $url_comp)) {
       return $key;
-    }
-    else {
+    } else {
       return NULL;
     }
   }
-
 }
