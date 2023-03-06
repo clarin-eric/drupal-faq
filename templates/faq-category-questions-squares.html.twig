@@ -61,7 +61,8 @@
         <div class="container">
             <ul>
                 {% for subcat in subcat_list %}
-                    <li>{{ subcat.link }}
+                    <li>
+                        {{ subcat.link }}
                         {% if display_faq_count %}
                             ({{ subcat.count }})
                         {% endif %}
@@ -122,6 +123,7 @@
     </div><!-- Close div: faq-qa / faq-qa-hide -->
 </div><!-- Close div: faq-category-group -->
 <div class="mt-4" style="height: 50px;"></div>
+<script src="https://kit.fontawesome.com/8a6bb4f6ce.js" crossorigin="anonymous"></script>
 <style>
 
 .card-body {
