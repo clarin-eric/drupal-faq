@@ -59,9 +59,10 @@
     <!-- list subcategories, with title, link, description, count in squares -->
     {% if subcat_list is not empty %}
         <div class="container">
-            <ul>
+            <ul style="list-style-type: none">
                 {% for subcat in subcat_list %}
                     <li>
+                        <i class="fa-solid fa-check"></i>
                         {{ subcat.link }}
                         {% if display_faq_count %}
                             ({{ subcat.count }})
