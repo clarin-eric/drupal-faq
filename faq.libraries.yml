@@ -12,3 +12,11 @@ faq-css:
   css:
     theme:
       css/faq.css: {}
+
+clarin_toc:
+  js:
+    js/bootstrap-toc.js: { }
+    js/toc.js: {}
+  css:
+    component:
+      css/bootstrap-toc.css: { }

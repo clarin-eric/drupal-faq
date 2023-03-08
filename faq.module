@@ -175,6 +175,10 @@ function template_preprocess_faq_page(&$variables) {
   } else {
     $variables['faq_expand'] = false;
   }
+  if ($faq_settings->get('show_subcategory_toc')) {
+      $variables['show_toc'] = true;
+      $variables['#attached']['library'][] = 'faq/clarin_toc';
+  }
 }
 
 /**

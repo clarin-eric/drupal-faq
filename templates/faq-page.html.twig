@@ -15,9 +15,17 @@
  * @ingroup themable
  */
 #}
+{%
+  set classes = [
+  'faq',
+  'px-0',
+  show_toc ? 'col-md-9',
+]
+%}
 
-<div class="faq-content">
-    <div class="faq">
+
+<div class="faq-content row px-0">
+    <div{{ show_toc ? attributes.addClass(classes) }}>
         {% if description is not empty %}
             <div class="faq-description">
                 {{ description }}
@@ -26,4 +34,11 @@
         {{ content }}
         {{ answers }}
     </div>
+    {% if show_toc %}
+        <div class="col-md-3">
+          <nav id="toc">
+            <h2>Table of Contents</h2>
+          </nav>
+        </div> 
+    {% endif %}
 </div>

@@ -76,20 +76,20 @@
         </div>
     {% endif %}
     
-    <div class="{{ container_class }}">
+    <div id="tocscope" class="{{ container_class }}">
         <!-- include subcategories -->
         {% if subcat_body_list|length > 0 %}
             {% for subcat_html in subcat_body_list %}
-                <div class="faq-category-indent">{{ subcat_html }}</div>
+                <div>{{ subcat_html }}</div>
             {% endfor %}
         {% endif %}
         
         <!-- list questions and answer pairs in a square -->
         <div>
             {% if nodes|length > 0 %}
-                <div class="container">
+                <div class="container px-0">
                     <section class="bg-light rounded py-5" id="{{ header_a_id }}">
-                        <p class="text-right">
+                        <p class="float-right">
                             <a href="#header">To top</a>&nbsp;&nbsp;
                             <a href="#header"><i class="fas fa-angle-up"></i></a>&nbsp;&nbsp;&nbsp;
                         </p>
@@ -106,16 +106,16 @@
                                 <div class="card">
                                     <div class="faq-box faq-box--shadowed white-bg style-2">
                                         <div class="card-body">
-                                            <h5 class="font-weight-bold my-2 text-center">{{ node.question }}</h5>
-                                            <div class="small pl-2">{{ node.body }}
+                                            <h6 class="font-weight-bold my-2 text-center">{{ node.question }}</h6>
+                                            <div class="small pl-2 text-muted">{{ node.body | replace({'<h1': '<h7', '<h2': '<h7', '<h3': '<h7', '<h4': '<h7', '<h5': '<h7', '<h6': '<h7', '</h1': '</h7', '</h2': '</h7', '</h3': '</h7', '</h4': '</h7', '</h5': '</h7', '</6': '</h7'}) | raw }}
                                                 {% if node.links is defined %}
                                                     {{ node.links }}
                                                 {% endif %}
                                             </div>
                                         </div>
-                                        <div class="card-footer border-top-0 text-right bg-white text-muted">
-                                            <a class="stretched-link text-muted" title="Read more" href="#"><i class="far fa-eye"></i></a>
-                                            <span>Read more</span>
+                                        <div class="card-footer border-top-0 text-right bg-white">
+                                            <a class="stretched-link" title="See whole question" href="#"><i class="far fa-eye"></i></a>
+                                            <span>See whole question</span>
                                         </div>
                                     </div>
                                 </div>

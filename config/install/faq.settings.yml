@@ -25,4 +25,5 @@ answer_category_name: FALSE
 group_questions_top: FALSE
 hide_child_terms: FALSE
 show_term_page_children: FALSE
+show_subcategory_toc: FALSE
 omit_vocabulary: []

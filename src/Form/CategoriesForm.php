@@ -116,9 +116,16 @@ class CategoriesForm extends ConfigFormBase
 
     $form['faq_category_misc']['faq_show_term_page_children'] = array(
       '#type' => 'checkbox',
-      '#title' => $this->t('Show sub-categories on FAQ category pages'),
+      '#title' => $this->t('Show sub-categories on top of FAQ category pages'),
       '#description' => t("Sub-categories with 'faq' nodes will be displayed on the per category FAQ page.  This will also happen if 'Only show sub-categories when parent category is selected' is set."),
       '#default_value' => $faq_settings->get('show_term_page_children')
+    );
+
+    $form['faq_category_misc']['faq_show_subcategory_toc'] = array(
+      '#type' => 'checkbox',
+      '#title' => $this->t('Show sub-categories on FAQ category pages as a Bootstrap table of contents'),
+      '#description' => t("Sub-categories with 'faq' nodes will be displayed on the per category FAQ page as a Bootstrap table of contents."),
+      '#default_value' => $faq_settings->get('show_subcategory_toc')
     );
 
     $moduleHandler = \Drupal::moduleHandler();
@@ -166,6 +173,7 @@ class CategoriesForm extends ConfigFormBase
       ->set('group_questions_top', $form_state->getValue('faq_group_questions_top'))
       ->set('hide_child_terms', $form_state->getValue('faq_hide_child_terms'))
       ->set('show_term_page_children', $form_state->getValue('faq_show_term_page_children'))
+      ->set('show_subcategory_toc', $form_state->getValue('faq_show_subcategory_toc'))
       ->set('omit_vocabulary', $form_state->getValue('faq_omit_vocabulary'))
       ->save();
 
