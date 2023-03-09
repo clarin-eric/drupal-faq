@@ -106,8 +106,8 @@
                                 <div class="card">
                                     <div class="faq-box faq-box--shadowed white-bg style-2">
                                         <div class="card-body">
-                                            <h6 class="font-weight-bold my-2 text-center">{{ node.question }}</h6>
-                                            <div class="small pl-2 text-muted">{{ node.body | replace({'<h1': '<h7', '<h2': '<h7', '<h3': '<h7', '<h4': '<h7', '<h5': '<h7', '<h6': '<h7', '</h1': '</h7', '</h2': '</h7', '</h3': '</h7', '</h4': '</h7', '</h5': '</h7', '</6': '</h7'}) | raw }}
+                                            <h6 class="font-weight-bold my-2">{{ node.question }}</h6>
+                                            <div class="small text-muted">{{ node.body | replace({'<h1': '<h7', '<h2': '<h7', '<h3': '<h7', '<h4': '<h7', '<h5': '<h7', '<h6': '<h7', '</h1': '</h7', '</h2': '</h7', '</h3': '</h7', '</h4': '</h7', '</h5': '</h7', '</6': '</h7'}) | raw }}
                                                 {% if node.links is defined %}
                                                     {{ node.links }}
                                                 {% endif %}
