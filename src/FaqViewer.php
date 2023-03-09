@@ -52,13 +52,17 @@ class FaqViewer {
     // Link to faq node.
     else {
       $node_id = $node->id();
-      if (empty($anchor)) {
-        $question = Link::fromTextAndUrl($node->getTitle(), "node/$node_id)")->toString();
+      
+      $options = array();
+      if ($faq_settings->get('category_display') == 'categories_squares') {
+        $options['attributes'] = array('class' => 'stretched-link', 'title' => 'See this question');
       }
-      else {
-        $url = $node->toUrl()->setOptions(array("attributes" => array("id" => "$anchor")));
-        $question = Link::fromTextAndUrl($node->getTitle(), $url)->toString();
+
+      if (!empty($anchor)) {
+        $options['attributes']['id'] = $anchor;
       }
+      $url = $node->toUrl()->setOptions($options);
+      $question = Link::fromTextAndUrl($node->getTitle(), $url)->toString();
     }
     $question = '<span datatype="" property="dc:title">' . $question . '</span>';
 
