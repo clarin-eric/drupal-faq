@@ -147,8 +147,6 @@ function template_preprocess_faq_category_questions_squares(&$variables)
         $variables['container_class'] = $class;
     }
 
-    $variables['list_subcats'] = $faq_settings->get('show_term_page_children');
-
     // Configure sub-category bodies (theme recursively).
     $variables['subcat_body_list'] = array();
     if (($category_display == 'categories_squares') || ($get_child_terms && $category_display == 'categories_inline') || ((($show_term_page_children && $this_page != 'faq-page') || $hide_child_terms) && $category_display == 'hide_qa')) {
