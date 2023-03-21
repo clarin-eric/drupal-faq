@@ -97,7 +97,7 @@
                             <{{ hdr }} class="faq-header text-center">
                                 {{ term_image }}
                                 {{ header_title }}
-                            {% if display_faq_count %}
+                            {% if display_faq_count and (not list_subcats) %}
                                 ({{ question_count }})
                             {% endif %}
                             </{{ hdr }}>

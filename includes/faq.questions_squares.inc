@@ -146,6 +146,7 @@ function template_preprocess_faq_category_questions_squares(&$variables)
     } else {
         $variables['container_class'] = $class;
     }
+    $variables['list_subcats'] = $faq_settings->get('show_term_page_children');
 
     // Configure sub-category bodies (theme recursively).
     $variables['subcat_body_list'] = array();
