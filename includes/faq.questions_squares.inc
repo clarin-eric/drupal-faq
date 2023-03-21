@@ -134,8 +134,8 @@ function template_preprocess_faq_category_questions_squares(&$variables)
 
     // Get list of sub-categories if necessary.
     $child_categories = array();
-    if ($category_display == 'new_page' || $category_display == 'categories_squares') {
-        $child_categories = FaqHelper::viewChildCategoryHeaders($term, $category_display);
+    if (($show_term_page_children || $hide_child_terms) && ($category_display == 'new_page' || $category_display == 'categories_squares')) {
+        $child_categories = FaqHelper::viewChildCategoryHeaders($term);
     }
     $variables['subcat_list'] = $child_categories;
     $variables['subcat_list_style'] = $faq_settings->get('category_listing');
