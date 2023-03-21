@@ -97,6 +97,9 @@
                             <{{ hdr }} class="faq-header text-center">
                                 {{ term_image }}
                                 {{ header_title }}
+                            {% if display_faq_count %}
+                                ({{ question_count }})
+                            {% endif %}
                             </{{ hdr }}>
                         {% else %}
                             {{ term_image }}
